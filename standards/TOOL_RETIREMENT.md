@@ -4,13 +4,10 @@
 
 First decide whether the work is worth preserving beyond ordinary Git history. Reusable automation, verification methods, substantial prototypes and useful implementation patterns are good candidates. A tool does not qualify merely because it once existed. One-off repair scripts, generated status documents, duplicate snapshots and obsolete process scaffolding normally remain only in Git history.
 
-When archiving useful work:
+Archival is lightweight storage, not a maintained product or a separate delivery process. Put selected files and essential support in a descriptive directory under `archive/<source-project>/`. A brief README or commit message identifying the source repository/path/ref and what the files do is sufficient; retain existing licensing. Reuse existing copies and keep archived workflows outside `.github/workflows/`.
 
-1. State its likely future use and why the active project no longer needs it.
-2. Copy the recoverable source and only the supporting files needed to understand or reuse it. Reuse an existing archive copy rather than adding duplicates.
-3. Include original repository/revision/paths, purpose, retirement reason, recovery or adaptation notes and license. Verify and commit the copy before removing the selected tool from its active repository. A source link alone does not complete an archive entry.
-4. Keep archived workflows inert under the archive tree. Disclose dependencies that are not bundled.
+For routine additions, commit and push directly to the archive's default branch, batching related files where convenient. No per-deposit PR, independent review, CI run, checksum manifest, detailed provenance report, index maintenance or modernization is required. Confirm the intended files were included and pushed before removing their active copies. If repository protection requires a PR, use the smallest required process without adding gates or weakening protection.
 
-Work with no plausible reuse value can be removed without an archive package; normal commits preserve its history. This is an ordinary engineering judgment, not a new approval gate. Retain useful technical checks before removing obsolete process rules, regardless of archive eligibility.
+Work with no plausible reuse value can be removed normally; Git preserves its history. Selection is ordinary engineering judgment, not a new approval gate. Retain useful technical checks before removing obsolete process rules, regardless of archive eligibility.
 
 Preserve unrelated contributors' archive entries. An archived snapshot does not make an active tool obsolete. Scientific results and baselines use their own result store. Never copy secrets or credentials; preserve source licensing and the approved destination's visibility boundary.
