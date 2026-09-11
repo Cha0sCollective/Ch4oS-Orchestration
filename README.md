@@ -53,7 +53,7 @@ standards/
   EXPERIMENTAL_ASSURANCE.md       scientific experiment rigor without over-proving the game
   PUBLICATION_BOUNDARY.md         private development vs public publication repos
   CONFIG_DISTRIBUTION.md          reviewed manual distribution to target projects
-  TOOL_RETIREMENT.md              archive recoverable tools before removal
+  TOOL_RETIREMENT.md              curate retired work with future organizational value
 agents/
   README.md                       reusable agent catalog conventions
   documentation-steward.md        dedicated documentation role design
@@ -72,7 +72,7 @@ docs/
 
 The initial architecture is approved and adoption is underway. The first roster is a production parent, a repository explorer and a fresh independent reviewer. The parent owns documentation. Experiment methodology receives specialist help when needed; other roles remain optional designs.
 
-Follow `docs/ROADMAP.md` for the adoption sequence. Contraption Lab's unified roadmap owns the complete application work, including modernization, organization migration and the laboratory features. Replaced tools are copied to Bits-of-Ch4oS before active removal.
+Follow `docs/ROADMAP.md` for the adoption sequence. Contraption Lab's unified roadmap owns the complete application work, including modernization, organization migration and the laboratory features. Retired work with plausible future organizational value is copied to Bits-of-Ch4oS before active removal; ordinary one-off material stays in Git history.
 
 Nothing in this repo is considered deployed to another project until that project gets an explicit config change.
 

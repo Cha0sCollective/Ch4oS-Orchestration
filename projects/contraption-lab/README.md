@@ -2,7 +2,7 @@
 
 Canonical application: [Cha0sCollective/contraption-lab](https://github.com/Cha0sCollective/contraption-lab), private. Retired tooling: [Cha0sCollective/Bits-of-Ch4oS](https://github.com/Cha0sCollective/Bits-of-Ch4oS). Reusable orchestration source: this repository.
 
-The owner approved the unified modernization and full application roadmap, including orchestration adoption, archive-before-removal and organization transfer. Phase 3 is accepted at `0d20803f8bc00f9fbda35c934f5b64c01d84c7e2`; prior instructions to wait for PR #16 are historical. The transfer preserves repository ID 1317429651 and private visibility. Package progress belongs in Lab's `docs/ROADMAP.md`.
+The owner approved the unified modernization and full application roadmap, including orchestration adoption, selective archival of reusable work and organization transfer. Phase 3 is accepted at `0d20803f8bc00f9fbda35c934f5b64c01d84c7e2`; prior instructions to wait for PR #16 are historical. The transfer preserves repository ID 1317429651 and private visibility. Package progress belongs in Lab's `docs/ROADMAP.md`.
 
 ## Effective configuration
 

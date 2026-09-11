@@ -96,7 +96,7 @@ Use reviewed manual copying for initial adoption. Automatic distribution and dri
 
 The production parent owns affected documentation. Start with an explorer and fresh independent reviewer; delegate other useful separable work as bounded assignments, without requiring a standing role fleet.
 
-Archive replaced or retired tools before removal under `standards/TOOL_RETIREMENT.md`.
+Archive retired work with plausible future organizational value under `standards/TOOL_RETIREMENT.md`.
 
 ## Owner gates
 

@@ -15,7 +15,7 @@ Use Astra/medium for the parent, escalating when needed; Terra/medium for explor
 3. Define the two initial custom agents using supported configuration. Check discovery, selected model/effort and effective permissions in the installed client. A read-only TOML default is not proof of runtime enforcement: parent overrides can supersede it.
 4. Review the configuration and project instructions independently. Copy effective files manually into a configuration-only Lab change; record source revision, target base, file set, tests and exceptions in a short adoption record.
 5. Review and validate the bounded Windows catalog startup fix as the first product change. Keep this separate from configuration adoption.
-6. Continue Lab's approved packages, keeping the archive-before-removal rule throughout.
+6. Continue Lab's approved packages, applying the future-value filter and archiving selected reusable work before removal.
 
 Only claim each step complete when its behavior is established. A design file is not a deployed agent. A local effective copy is not an accepted mainline adoption until its reviewed change is merged.
 

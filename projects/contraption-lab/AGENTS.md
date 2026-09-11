@@ -24,7 +24,9 @@ Current baseline is Minecraft 1.21.1, NeoForge 21.1.233 and Java 21. Use Gradle 
 
 ## Retire instead of accumulating
 
-Before removing or replacing tools we built, copy recoverable source and supporting files to [Bits-of-Ch4oS](https://github.com/Cha0sCollective/Bits-of-Ch4oS). Include source repository/revision/paths, purpose, retirement reason, replacement/recovery notes and license. Verify and commit that copy before removal, then reference its revision. A link to old source alone is insufficient. Keep archived workflows inert. Retain still-useful technical checks when retiring their old process.
+Archive retired work in [Bits-of-Ch4oS](https://github.com/Cha0sCollective/Bits-of-Ch4oS) only when it has plausible future organizational value, such as reusable automation, verification methods or useful implementation patterns. One-off repairs, generated status documents, duplicates and obsolete process scaffolding normally stay in Git history.
+
+For work selected for archival, copy recoverable source and necessary supporting files, record likely future use plus source repository/revision/paths, retirement reason, adaptation notes and license, and verify/commit that copy before removal. Reuse existing archive copies. Keep archived workflows inert. Work without plausible reuse value can be removed normally without an archive package or extra approval. Preserve useful technical checks when retiring their old process.
 
 ## Durable context
 
