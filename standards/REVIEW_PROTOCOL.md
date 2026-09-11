@@ -1,78 +1,82 @@
 # Review Protocol
 
-## Purpose
+Independent review is its own lane. The reviewer is there to challenge the candidate, not to keep building it under a different prompt.
 
-Independent review is a separate execution lane. Its job is to evaluate a candidate, not to continue production work with a different prompt.
+## Start fresh
 
-## Fresh-context requirement
+Review begins in a fresh parent chat/session at an exact candidate revision.
 
-Start review in a fresh parent chat/session. The reviewer may read prior GitHub findings, but must reconstruct the candidate from durable state rather than relying on production-chat memory.
+The reviewer can read previous GitHub findings, but it should reconstruct the candidate from durable state instead of depending on production-chat memory.
 
-The minimum review identity is:
+At minimum, review should know:
 
-- repository;
+- the repository;
 - base revision;
 - exact candidate revision;
 - linked issue/PR;
-- applicable project instructions and design records;
+- applicable project instructions and accepted design records;
 - validation/evidence attached to that candidate.
 
-## Read-only default
+## Read-only by default
 
-Review orchestrators and their subagents should operate read-only unless a separately authorized review tool requires write access to post the final review. They do not implement fixes in the candidate worktree.
+Review orchestrators and review subagents should be read-only unless a narrowly authorized tool needs write access to post the final review.
 
-If review discovers a defect, describe it precisely and return control to production.
+If review finds a bug, describe it clearly and return control to production. Do not "helpfully" fix the candidate in the review worktree.
 
-## Review invalidation
+## A review belongs to one SHA
 
-A review decision belongs to the exact candidate revision it names. Any code or configuration change produces a new candidate requiring a fresh review decision.
+If code or configuration changes, review the new candidate again.
 
-Previous review findings remain useful historical evidence. They are not automatically approval of descendants.
+Old findings are still useful history. They are not approval of the descendant.
 
-## Quality floor
+## Quality is the reason review exists
 
-Review is an error-catching layer and is not the place to trade away meaningful quality for speed or usage savings. Use cheaper specialists for mechanical inventory only when their output remains reliable and verifiable. Escalate architecture, evidence, adversarial, or acceptance reasoning whenever the lower-cost path introduces material uncertainty.
+Review is not the place to save usage by accepting a weaker answer.
 
-## Recommended specialist decomposition
+Use cheaper agents for mechanical inventory when their work is easy to verify. Escalate architecture, evidence, adversarial, security, acceptance, or other high-consequence reasoning when uncertainty matters.
 
-A project may customize the roster, but a complex software candidate commonly benefits from:
+## Useful specialist views
+
+Not every candidate needs every reviewer. Spawn the ones that match the risk.
 
 ### Architecture reviewer
 
-Trace changed execution paths and check architectural invariants, boundaries, authority, lifecycle, and coupling.
+Trace the real execution path and look for changes that work locally but damage authority boundaries, lifecycle, coupling, compatibility, or the shape of the system.
 
-### Evidence/provenance reviewer
+### Evidence reviewer
 
-Check whether claimed validation actually proves the exact candidate and whether evidence identity, provenance, artifact handling, and acceptance statements are sound.
+Check whether the claimed validation actually proves this exact candidate. Look closely at provenance, artifact identity, proof boundaries, and acceptance language.
 
 ### Adversarial test reviewer
 
-Look for false-pass paths, missing negative cases, incomplete cleanup/failure handling, races, ambiguity, and tests that share assumptions with the implementation.
+Try to find false-pass paths, weak negative cases, incomplete failure handling, races, cleanup holes, or tests that accidentally share the implementation's assumptions.
 
-### Contract/documentation reviewer
+### Contract reviewer
 
-Check public contracts, schemas, user/operator guidance, limitations, and status claims against actual behavior and proof.
+Check public contracts, schemas, compatibility promises, status claims, and externally meaningful behavior against the implementation.
 
-Additional specialists should be spawned only when the candidate warrants them.
+### Documentation steward
 
-## Review method
+Check whether existing durable docs remain true. It should not preserve chat context or brainstorm new project history just because it learned something useful during review.
 
-Review the actual diff and affected execution paths. Do not accept a production summary as proof.
+## Review the code, not the sales pitch
 
-Where relevant:
+Production summaries are navigation aids, not proof.
 
-1. identify the base/head relation;
-2. inventory changed files and claims;
-3. trace behavior beyond changed lines when necessary;
+When relevant:
+
+1. establish base/head;
+2. inventory the changed files and claims;
+3. trace behavior outside the diff when needed;
 4. inspect tests and independent validators;
-5. inspect current CI/artifacts for the exact candidate;
-6. compare implementation with documented invariants;
-7. synthesize duplicate or conflicting specialist findings;
-8. state the remaining proof boundary.
+5. inspect current CI/artifacts for this candidate;
+6. compare behavior against accepted project invariants;
+7. reconcile duplicate or conflicting specialist findings;
+8. say clearly what remains unproven.
 
-## Review handoff
+## Handoff
 
-Recommended format:
+A review handoff should be structured enough to find the important facts but still read like a developer explaining the result.
 
 ```text
 [review-agent] REVIEW
@@ -82,38 +86,40 @@ PR: #<pr>
 Base: <exact revision>
 Head reviewed: <exact candidate revision>
 
-Blocking findings:
+Blocking:
 - ...
 
-Significant non-blocking findings:
+Worth fixing / watching:
 - ...
 
-Evidence / acceptance gaps:
+Evidence or acceptance still missing:
 - ...
 
-Reviewer disagreements or uncertainty:
+Uncertainty / reviewer disagreement:
 - ...
 
 Decision:
 - CHANGES REQUESTED | REVIEW PASS | OWNER GATE
 
-Next action:
+Next step:
 - ...
 ```
 
-An empty findings section is not sufficient by itself; the reviewer must still state what was inspected and what remains unproven.
+If there are no findings, still say what was inspected and what remains outside the review's proof boundary.
 
 ## CI and evidence
 
-CI is inspected by reference. Do not rely on copied status snapshots when current workflow state is available.
+Inspect CI by reference when current state is available. Do not rely on stale copied snapshots.
 
 Never:
 
-- treat cancelled work as successful validation;
-- combine successful checks from different candidate revisions without an explicit project rule permitting it;
-- substitute headless/synthetic proof for live proof when the claim requires live behavior;
-- infer current proof merely because an ancestor was accepted.
+- count cancelled work as successful validation;
+- combine passing checks from different candidate revisions unless the project explicitly allows it;
+- substitute headless or synthetic proof for live proof when the claim requires live behavior;
+- assume a current candidate is proven because an ancestor was accepted.
 
-## Passing review
+## What REVIEW PASS means
 
-`REVIEW PASS` means no blocking review finding remains for the exact candidate under the requested review scope. It does not silently grant owner-only merge/promotion authority or establish manual/live evidence that has not occurred.
+`REVIEW PASS` means review found no blocking issue in the exact candidate under the requested scope.
+
+It does not grant owner-only merge/promotion authority and it does not invent manual/live evidence that has not happened.

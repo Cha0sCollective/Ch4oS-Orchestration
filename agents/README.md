@@ -1,37 +1,36 @@
 # Reusable Agent Catalog
 
-This directory will contain canonical organization-level custom-agent designs for Codex Desktop.
+This directory is where we design the reusable specialists that Codex Desktop can load across Cha0sCollective projects.
 
-The initial foundation intentionally does **not** publish executable agent TOML files yet. We first define role boundaries, model-routing policy, review behavior, and project overlays, then add agents one at a time with tests and observed behavior.
+We are intentionally not dumping a pile of executable TOML into the repo yet. Each agent should earn its place by solving a real recurring problem and behaving well in dry runs.
 
-## Design goals
+## What makes a good reusable agent
 
-Reusable agents should be:
+A useful specialist should have:
 
-- narrow enough that the parent orchestrator knows when to delegate to them;
-- explicit about what they may and may not decide;
-- configured with least privilege;
-- clear about whether they are production or review roles;
-- quality-first in model/effort selection;
-- reusable across projects where the underlying responsibility is genuinely shared;
-- able to return concise, source-linked findings rather than dumping their entire exploration into the parent context.
+- a narrow job the orchestrator can recognize;
+- clear non-responsibilities;
+- the least privilege it actually needs;
+- a sensible default model/effort level;
+- an escalation path when the task outgrows it;
+- concise, source-linked output;
+- behavior that survives across projects where the job is genuinely the same.
 
-## Planned production catalog
+Avoid broad personas like "senior engineer" when what we actually need is "trace this execution path and look for authority-boundary damage."
 
-Likely initial reusable roles:
+## Planned production-side roles
 
 ```text
 repo-explorer
+documentation-steward
 implementation-engineer
 ci-investigator
 api-researcher
 ```
 
-These names are provisional until each role contract is designed.
+The documentation steward appears early on purpose. Good documentation hygiene is part of keeping context small and preventing conversation history from leaking into project memory.
 
-## Planned review catalog
-
-Likely initial reusable roles:
+## Planned review-side roles
 
 ```text
 architecture-reviewer
@@ -40,41 +39,69 @@ adversarial-test-reviewer
 contract-reviewer
 ```
 
-Review roles should default to read-only sandbox behavior. Project overlays supply project-specific invariants and proof boundaries.
+Review specialists should be read-only by default.
 
-## Generic role + project policy
+The documentation steward may also be asked to inspect a candidate from the review lane, but its job is different from contract review: it asks whether durable docs remain accurate and whether new prose actually deserves to exist.
 
-Avoid cloning a separate reviewer for every project when the responsibility is shared.
+## Planned publication-side role
+
+```text
+publication-steward
+```
+
+This role becomes useful for projects that separate a private development repo from a public release/documentation repo.
+
+Its job is to prepare and verify the deliberate public surface, not to sanitize the private workspace. It should prefer explicit allowlists/manifests, produce a reviewable public diff, and stop when it is unclear whether something is intended for publication.
+
+## Generic specialist + project knowledge
+
+Do not clone a new agent for every repo unless the job really changes.
 
 Prefer:
 
 ```text
 generic architecture reviewer
         +
-project-specific architecture/invariant policy
+project-specific invariants
         =
 project architecture review
 ```
 
-Create a project-specific custom agent only when the role truly requires different tools, expertise, permissions, or decision logic.
+Create a project-specific agent only when it truly needs different tools, permissions, expertise, or decision logic.
 
-## Agent design record
+## Before an agent becomes executable
 
-Before an agent becomes executable, define:
+Write down:
 
-- purpose;
-- when the orchestrator should invoke it;
-- inputs it needs;
-- outputs it must return;
-- explicit non-responsibilities;
-- sandbox/tool permissions;
-- model class and reasoning effort;
-- escalation conditions;
-- expected failure/uncertainty behavior;
-- validation or dry-run scenario.
+- what problem it solves;
+- when the orchestrator should call it;
+- what information it needs;
+- what a useful answer looks like;
+- what it must not decide or change;
+- permissions/tools;
+- starting model class and reasoning effort;
+- when it should escalate;
+- how it should report uncertainty;
+- at least one dry-run scenario.
+
+Then test it.
 
 ## Quality and escalation
 
-A lower-cost agent must never hide uncertainty to avoid escalation. If a task exceeds the role's reliable capability, the correct output is a bounded finding plus an escalation recommendation.
+A cheaper specialist should never hide uncertainty to avoid escalation.
 
-The orchestration system optimizes usage by routing routine work appropriately, not by forcing complex reasoning through underpowered agents.
+We save usage by routing routine work intelligently, not by forcing hard reasoning through a model that is clearly struggling.
+
+If an agent design consistently needs a stronger model than expected, fix the routing assumption. Do not train the agent to sound confident enough that nobody notices.
+
+## Documentation is not a dumping ground
+
+Any agent may discover useful context. That does not give it permission to preserve everything it learned.
+
+The documentation steward exists partly to protect this boundary. See `documentation-steward.md` and `../standards/CONTEXT_AND_DOCUMENTATION.md`.
+
+## Private work is not public work
+
+A private repo may intentionally keep useful internal continuity that would never belong in an end-user repository.
+
+Do not make every agent police the private workspace as though it were public. Publication is a separate, deliberate step with its own specialist and review boundary. See `../standards/PUBLICATION_BOUNDARY.md`.

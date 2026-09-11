@@ -1,49 +1,75 @@
 # Ch4oS Orchestration
 
-`Ch4oS-Orchestration` is the canonical design and configuration-management repository for Codex-assisted development across Cha0sCollective projects.
+This repo is where Cha0sCollective designs and maintains the Codex setup we use across projects.
 
-The repository separates reusable agent design from project-specific policy. Target projects continue to carry the effective `AGENTS.md` and `.codex/` files that Codex consumes for the exact revision being worked on; this repository is the source from which those files are designed, reviewed, and eventually synchronized.
+The goal is not to build a giant policy system. It is to give our agents the same kind of clear working environment we would want for a strong developer joining the team: enough context to do good work, clear boundaries where mistakes are expensive, and a clean way to hand work off without depending on a giant chat history.
+
+## How we want this to feel
+
+This is a software and modding workspace, not a policy manual.
+
+Write like a capable developer talking to other capable developers. Be direct, practical, and specific. Use normal engineering and modding language when it helps. Explain why something matters instead of hiding the reasoning behind formal wording.
+
+Our standards can be strict without sounding bureaucratic.
+
+Prefer:
+
+> Don't mix evidence from different SHAs. If the candidate changes, review the new revision again.
+
+instead of:
+
+> Validation artifacts must maintain revision-level provenance consistency.
+
+That does not mean being casual about correctness. Exact revisions, evidence boundaries, compatibility rules, owner gates, and acceptance criteria are real constraints and should be stated clearly.
 
 ## Core principles
 
-1. **Quality and correctness come first.** Efficiency means avoiding waste, unnecessary duplication, and misuse of expensive models; it never means knowingly accepting a meaningful reduction in reasoning, implementation, validation, or review quality.
-2. **Git is durable memory.** Agent chats are disposable; repository state, issues, pull requests, commits, evidence, and policy files are authoritative.
-3. **Production and review are separate lanes.** A write-capable production session does not review its own candidate. Review starts from a fresh context at an exact revision.
-4. **One bounded packet at a time.** A production assignment should have a clear objective, non-goals, validation boundary, and handoff condition.
-5. **A review belongs to one exact revision.** Any code change invalidates the previous review decision for the candidate.
-6. **Subagents are specialists, not durable identities.** Roles are encoded in configuration and policy rather than represented by extra GitHub users.
-7. **Use the least expensive model that preserves quality.** Strong orchestrators decide, delegate, and synthesize; cheaper specialists perform high-volume work only where doing so does not materially reduce result quality. When adequacy is uncertain, escalate.
-8. **Human authority is explicit.** Repository promotion, live acceptance, destructive operations, and other owner-only gates remain owner decisions unless explicitly delegated.
-9. **Configuration is one-way.** Canonical designs live here; target-project effective copies are generated or synchronized deliberately. Target drift is detected rather than silently absorbed.
+- **Quality and correctness come first.** Efficiency means avoiding waste. If saving time or usage would meaningfully reduce quality, choose quality.
+- **Context is not content.** Something said in a chat to help an agent understand the work does not automatically belong in the repo.
+- **Git is project memory. Chats are working memory.** Durable decisions, accepted architecture, code, tests, issues, PRs, and evidence survive. Conversation history does not need to.
+- **Private continuity and public presentation are different concerns.** A private development repo may preserve useful internal project memory; a public repo is a deliberate publication surface, not a reason to sanitize the workspace continuously.
+- **Production and review are separate lanes.** A write-capable production session does not approve its own candidate. Review starts fresh at an exact revision.
+- **Work in bounded packets.** A roadmap can be huge. A production assignment should not be.
+- **A review belongs to one exact revision.** Change the candidate and the old review becomes history.
+- **Subagents are specialists, not personalities.** Give them a narrow job, the tools they need, and a clear way to escalate when the task outgrows them.
+- **Model routing is quality-first.** Use cheaper models when they are good enough, not because cheaper is automatically better.
+- **Call out expensive decisions.** If a change materially alters the development path, maintenance cost, validation burden, compatibility surface, operating burden, or implementation resources, say so before we quietly build around it.
+- **Human authority stays explicit.** Some decisions still belong to the project owner.
+- **Canonical config lives here; effective config lives with the project that uses it.** Distribution is deliberate, not magical.
 
 ## Repository layout
 
 ```text
-AGENTS.md                         instructions for Codex working on this repo
+AGENTS.md                         how Codex should work in this repo
 standards/
-  OPERATING_MODEL.md              roles, lanes, context boundaries, owner gates
-  MODEL_ROUTING.md                quality-first model/effort routing and escalation
-  WORK_PACKET_PROTOCOL.md         bounded production assignment contract
-  REVIEW_PROTOCOL.md              fresh-context independent review contract
-  CONFIG_DISTRIBUTION.md          canonical-to-project configuration flow
+  OPERATING_MODEL.md              production, review, handoffs, owner gates
+  MODEL_ROUTING.md                how we choose models and reasoning effort
+  WORK_PACKET_PROTOCOL.md         how production work stays bounded
+  REVIEW_PROTOCOL.md              how independent review works
+  CONTEXT_AND_DOCUMENTATION.md    what belongs in project memory and what does not
+  PUBLICATION_BOUNDARY.md         private development vs public publication repos
+  CONFIG_DISTRIBUTION.md          how canonical config reaches target projects
 agents/
   README.md                       reusable agent catalog conventions
+  documentation-steward.md        first dedicated documentation role design
 projects/
   README.md                       project overlay conventions
   contraption-lab/
     README.md                     Contraption Lab adoption staging area
 docs/
-  ROADMAP.md                      incremental rollout plan
+  ROADMAP.md                      rollout plan
 ```
 
 ## Current phase
 
-This repository is in **foundation design**. The initial goal is to make the operating rules reviewable before creating executable custom-agent TOML files or synchronization scripts.
+We are still designing the foundation. That is intentional.
 
-No target repository is modified merely because policy exists here. Adoption is a separate, explicit project change.
+We want the working style, authority boundaries, context rules, publication boundary, and review model to feel right before we turn them into executable custom-agent TOML or deployment tooling.
 
-## Intended local workflow
+Nothing in this repo is considered deployed to another project until that project gets an explicit config change.
 
-Cha0sCollective development is expected to run from Codex Desktop on Windows using local repository checkouts and, where useful, separate Git worktrees. This repository can itself be opened as a Codex project to maintain agent designs, routing policy, project overlays, and synchronization tooling.
+## Local workflow
 
-See `standards/OPERATING_MODEL.md` first.
+The expected working environment is Codex Desktop on Windows with local Git checkouts and worktrees where they make sense. This repo should eventually manage its own agent catalog and project overlays using the same orchestration system it defines.
+
+Start with `standards/OPERATING_MODEL.md`, `standards/CONTEXT_AND_DOCUMENTATION.md`, and `standards/PUBLICATION_BOUNDARY.md`.

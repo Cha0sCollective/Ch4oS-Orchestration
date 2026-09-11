@@ -1,94 +1,103 @@
 # Orchestration Rollout Roadmap
 
-## Objective
+We are building this in layers because orchestration mistakes scale just as well as good orchestration does.
 
-Build a quality-first, locally operated Codex orchestration system for Cha0sCollective that scales across repositories without depending on long-lived chat context or separate GitHub identities for logical agents.
+The target is a quality-first local Codex setup that can move across Cha0sCollective projects without depending on long-lived chats or fake GitHub identities.
 
-Rollout is deliberately incremental. The system should prove each layer before adding automation that makes mistakes easier to propagate.
-
-## Phase 0 — Foundation standards
+## Phase 0 — Get the foundation right
 
 Status: **in progress**
 
-Define and review:
+Agree on:
 
-- operating model;
-- production/review separation;
-- exact-revision review rule;
-- work-packet contract;
+- production vs review;
+- fresh-context and exact-revision rules;
+- bounded work packets;
 - owner gates;
-- quality-first model-routing policy;
-- canonical versus effective configuration boundary;
-- project-overlay convention.
+- quality-first model routing;
+- context-is-not-content;
+- documentation stewardship;
+- private-development vs public-publication boundaries;
+- canonical vs effective config;
+- project overlays;
+- how we talk to each other: direct, technical, natural, and not bureaucratic.
 
-No executable reusable agent catalog is required to complete this phase.
+No executable agent TOML is required to finish this phase.
 
-## Phase 1 — First reusable agents
+## Phase 1 — Build the first reusable agents
 
-Build agents one at a time and test them from Codex Desktop before expanding the catalog.
+Add specialists one at a time and test them from Codex Desktop before expanding the catalog.
 
-Recommended order:
+Suggested order:
 
-1. `repo-explorer` — read-heavy repository mapping and source-linked summaries;
-2. `architecture-reviewer` — read-only architectural reasoning;
-3. `ci-investigator` — command/test/log analysis with exact revision awareness;
-4. `evidence-reviewer` — read-only proof/provenance analysis;
-5. `implementation-engineer` — bounded write-capable implementation specialist;
-6. `adversarial-test-reviewer` — read-only false-pass and failure-path analysis;
-7. `contract-reviewer` — contracts/docs/claims consistency;
-8. `api-researcher` — version-specific API research where external/current reference material is required.
+1. `repo-explorer` — read-heavy mapping with source-linked findings;
+2. `documentation-steward` — keep durable docs accurate without preserving chat history;
+3. `architecture-reviewer` — read-only architecture reasoning;
+4. `ci-investigator` — test/log analysis tied to the exact revision;
+5. `evidence-reviewer` — read-only proof/provenance analysis;
+6. `implementation-engineer` — bounded write-capable implementation specialist;
+7. `adversarial-test-reviewer` — read-only false-pass and failure-path analysis;
+8. `contract-reviewer` — public contracts/compatibility/claims;
+9. `api-researcher` — current/version-specific API research when external references matter;
+10. `publication-steward` — prepare/check deliberate private-to-public publication flows when a project needs them.
 
-Each agent should have a documented role contract, model/effort rationale, permissions, escalation conditions, and a dry-run scenario.
+Each agent gets a role design, model/effort rationale, permissions, escalation conditions, and at least one dry run before executable TOML is considered stable.
 
-## Phase 2 — Local orchestration pilot
+## Phase 2 — Use this repo as the local pilot
 
-Use this repository itself as the safe Codex Desktop project for exercising orchestration behavior.
+Open Ch4oS-Orchestration in Codex Desktop and exercise the system here first.
 
-Validate:
+Test:
 
-- orchestrator delegation to multiple specialists;
-- subagent output quality and concision;
+- Astra-class orchestration across several specialists;
+- useful subagent outputs without context dumps;
 - model routing and escalation;
+- documentation context boundaries;
 - read-only review behavior;
-- fresh production/review parent contexts;
-- separate worktrees where useful;
-- failure and uncertainty reporting.
+- fresh production/review parent chats;
+- worktrees where they actually help;
+- uncertainty reporting;
+- at least one ambiguous task where the correct behavior is escalation, not confident completion.
 
-The pilot should include at least one intentionally ambiguous task that requires escalation rather than low-confidence completion.
+## Phase 3 — Prepare Contraption Lab while its current Phase 3 finishes
 
-## Phase 3 — Contraption Lab project overlay
+Contraption Lab's existing process stays in charge until the current promotion reaches a clean accepted `main`.
 
-While Contraption Lab finishes its existing in-flight process, derive but do not deploy:
+PR #16 is close enough to completion that we should use the remaining time to prepare here, not change the active target workflow.
 
-- project-specific `AGENTS.md` source;
+Prepare:
+
+- candidate project `AGENTS.md` source;
 - selected reusable agent roster;
 - build/test commands;
 - architecture/evidence invariants;
 - owner gates;
+- documentation boundaries;
 - model-routing overrides if needed;
-- initial project manifest design.
+- first project-manifest design;
+- repo topology/publication rules if Contraption Lab or related projects later split private development from public release surfaces.
 
-Reconcile the overlay against the accepted mainline documentation at the actual cutover point.
+At actual cutover, reconcile all of this against accepted `main`, not against chat memory or an old in-flight branch.
 
 ## Phase 4 — First target deployment
 
-After Contraption Lab reaches an accepted clean mainline baseline:
+Once Contraption Lab has the clean baseline:
 
-1. render/copy the approved effective configuration;
+1. render/copy the approved effective config;
 2. open a configuration-only target change;
-3. validate Codex discovery and custom-agent loading from a clean local checkout/worktree;
-4. independently review the configuration change;
-5. merge only after owner approval if the target's governance requires it.
+3. verify Codex discovers the instructions and agents from a clean local checkout/worktree;
+4. review that config independently;
+5. merge only after the project's normal owner/governance gate.
 
-Do not combine the first orchestration deployment with unrelated product behavior.
+Do not mix the first orchestration deployment with product behavior.
 
 ## Phase 5 — First real production/review cycle
 
-Run one bounded post-cutover work packet using:
+Run one bounded post-cutover packet:
 
 ```text
 fresh production context
-  -> specialist delegation
+  -> useful specialist delegation
   -> exact candidate revision
   -> production handoff
   -> fresh review context
@@ -96,40 +105,64 @@ fresh production context
   -> review decision / owner gate
 ```
 
-Record what worked, what created unnecessary context or usage, where model routing was too weak/strong, and any review escape.
+Record what worked, what created unnecessary context, where routing was too weak or wasteful, and anything review missed.
 
-Quality is the acceptance criterion. Usage reduction is evaluated only after quality is established.
+Quality is the acceptance criterion. Usage optimization happens after we know the workflow is good.
 
 ## Phase 6 — Distribution tooling
 
-Only after the manual canonical/effective-copy process is stable, add tools such as:
+Once manual canonical/effective-copy handling is boring and predictable, add tooling for:
 
 - project manifest validation;
 - deterministic rendering/copying;
 - drift detection;
 - dry-run deployment;
-- project configuration diff reports;
-- PowerShell support suitable for Windows/Codex Desktop workflows.
+- project config diff reports;
+- PowerShell workflows that fit Windows/Codex Desktop.
 
-Initial tooling should be read-only/dry-run by default. Write/deployment modes must be explicit.
+Read-only/dry-run should come first. Write/deploy modes should be explicit.
 
-## Phase 7 — Organization reuse
+## Phase 7 — Publication pilot when a project needs one
 
-Adopt the model in additional Cha0sCollective repositories where useful, such as Create-Ch4oS, World-Wide-Power-Grid, documentation/manual projects, or installer tooling.
+Do not force every project into a private/public split.
 
-Do not assume every repository needs the same agent roster or governance. Reuse generic agents where responsibilities match; keep project-specific proof boundaries in project overlays.
+When a real project benefits from it, pilot the two-repo model deliberately:
 
-## Phase 8 — Measurement and refinement
+```text
+private development repo
+       |
+       | reviewed publication task
+       v
+public release/docs repo
+```
 
-Once real workflows exist, evaluate:
+Define the allowed public surface, authoring source for end-user docs, release artifacts, community-contribution flow (if any), and owner gate before automating publication.
 
-- defect/review escape rate;
-- rework caused by underpowered model routing;
-- unnecessary use of premium models;
-- context growth in parent orchestrators;
-- subagent usefulness versus noise;
+Test `publication-steward` against realistic leakage/ambiguity cases before giving it write access.
+
+The goal is to keep private development continuity useful while making publication intentional and reviewable.
+
+## Phase 8 — Reuse across the organization
+
+Adopt the model in other Cha0sCollective repositories where it helps.
+
+Do not assume every repo needs the same agents, the same proof boundary, or even the same repo topology.
+
+Reuse generic specialists where the job is genuinely shared. Keep project-specific constraints in the project overlay.
+
+## Phase 9 — Measure and refine
+
+Once real workflows exist, pay attention to:
+
+- defects/review escapes;
+- rework caused by weak model routing;
+- unnecessary premium-model use;
+- parent-context growth;
+- specialist usefulness vs noise;
 - validation completeness;
+- documentation drift/pollution;
+- publication mistakes or over-sanitization pressure;
 - owner-gate quality;
-- synchronization drift.
+- configuration drift.
 
-Optimize efficiency only where observed results show quality is preserved or improved.
+Optimize efficiency only where the observed results show quality stays the same or gets better.

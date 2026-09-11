@@ -1,90 +1,108 @@
 # Model Routing
 
-## Governing rule
+## The rule that matters
 
-**Quality and correctness are primary. Efficiency is secondary.**
+**Quality and correctness come first. Efficiency is secondary.**
 
-Use the least expensive model and reasoning effort only when there is good reason to believe they will preserve the required quality. If adequacy is uncertain, the task is high-consequence, or a weaker pass leaves material ambiguity, escalate to the stronger model or higher reasoning effort.
+Use a cheaper model or lower reasoning effort when there is good reason to believe it will do the job just as well. Do not downgrade because saving usage feels virtuous.
 
-The goal is not to minimize usage. The goal is to avoid wasting premium reasoning on work that a cheaper model can perform equally well, while protecting the quality of decisions, implementation, validation, and review.
+If the task is ambiguous, high-consequence, architecture-sensitive, or a weaker pass leaves material uncertainty, escalate.
 
-## Routing principles
+The goal is not to spend as little as possible. The goal is to avoid wasting premium reasoning on work that does not need it while protecting the quality of the work that does.
 
-1. **Do not downgrade through optimism.** A cheaper model should be selected because the task is demonstrably routine or bounded, not because saving usage is desirable.
-2. **Collect cheaply, decide strongly.** High-volume scanning, extraction, and routine inspection can be delegated downward when the results remain verifiable. Architecture, acceptance, ambiguous debugging, and synthesis stay with stronger models.
-3. **Escalate on uncertainty.** If a specialist cannot resolve an issue cleanly, return the uncertainty and escalate rather than forcing a low-confidence answer.
-4. **Protect reviewer quality.** Independent review is an error-catching layer; it should not be weakened simply to reduce usage.
-5. **Prefer one strong pass over repeated weak passes.** Rework caused by underpowered reasoning is both lower quality and less efficient.
+## How to think about routing
+
+### Collect cheaply, decide strongly
+
+Large searches, file inventories, log extraction, and routine comparisons are good candidates for cheaper specialists when their output is easy to verify.
+
+Architecture, acceptance, ambiguous debugging, cross-system design, and final synthesis deserve stronger reasoning.
+
+### Don't downgrade through optimism
+
+A cheaper model should get a task because the work is genuinely routine or tightly bounded, not because we hope it will probably be fine.
+
+### Escalate uncertainty instead of hiding it
+
+A specialist that reaches the edge of its reliable capability should say so. A bounded uncertain answer plus an escalation is better than a confident guess.
+
+### Protect review quality
+
+Review exists to catch what production missed. Do not weaken that layer just to save usage.
+
+### Prefer one good pass over repeated weak passes
+
+Rework caused by an underpowered model is worse for both quality and efficiency.
 
 ## Current role classes
 
-The intended hierarchy is:
+These are starting points, not ceilings.
 
-| Role class | Preferred capability tier | Typical effort | Typical work |
+| Role | Starting capability | Typical effort | Good fit |
 | --- | --- | --- | --- |
-| Orchestrator | Astra-class | Medium by default; High when warranted | Decompose, delegate, reconcile, decide, integrate |
+| Orchestrator | Astra-class | Medium, High when warranted | Decompose, delegate, reconcile, decide, integrate |
 | Deep specialist | Sol-class | Medium/High | Architecture, evidence reasoning, difficult implementation, adversarial analysis |
-| High-volume analyst | Terra-class | Medium | Repository exploration, CI/log analysis, documentation/contract comparison |
+| High-volume analyst | Terra-class | Medium | Repo exploration, CI/log analysis, broad docs/contract comparison |
 | Mechanical worker | Luna-class | Low/Medium | Search, extraction, cataloguing, straightforward repetitive edits |
 
-These are starting policies, not hard ceilings. A Terra-class task that becomes architecture-sensitive should escalate; a Luna-class extraction that requires interpretation should escalate rather than guess.
+If a Terra-class investigation turns into an architecture decision, escalate it. If a Luna-class extraction starts requiring interpretation, escalate rather than guess.
 
-Exact executable model identifiers must be verified against the current Codex installation before they are placed in TOML configuration.
+Verify exact executable model identifiers against the current Codex installation before putting them in TOML.
 
-## Production routing
+## Production
 
-The production orchestrator should normally use the strongest orchestration-capable model available and delegate high-volume work where quality is preserved.
+The production orchestrator should normally use the strongest practical orchestration model and delegate the noisy parts.
 
-Typical pattern:
+A healthy pattern looks like:
 
 ```text
 orchestrator
-  -> repo explorer: map affected files and symbols
-  -> specialist: design or implement the difficult portion
-  -> CI investigator: run/inspect validation and summarize failures
-  -> orchestrator: verify important claims, integrate findings, decide next action
+  -> repo explorer maps the affected area
+  -> specialist handles the hard implementation or design question
+  -> CI investigator works through validation noise
+  -> documentation steward checks whether durable docs actually need to change
+  -> orchestrator verifies important claims and decides what happens next
 ```
 
-Do not spawn specialists merely to maximize parallelism. Delegate when the task is separable, noisy, independently verifiable, or benefits from a second reasoning perspective.
+Do not spawn agents just to make the graph look busy. Delegate when the work is separable, noisy, independently verifiable, or genuinely benefits from a second reasoning perspective.
 
-## Review routing
+## Review
 
-The review orchestrator should be strong enough to resolve disagreements between reviewers and maintain the exact proof boundary.
+The review orchestrator must be strong enough to reconcile disagreement and protect the exact proof boundary.
 
-Suggested starting policy:
+Useful starting points:
 
 - architecture review: Sol-class, High for cross-system changes;
 - evidence/provenance review: Sol-class, High when acceptance claims are subtle;
-- adversarial testing review: Sol-class, Medium/High;
-- contracts/documentation review: Terra-class, Medium by default, escalating when contract implications are ambiguous;
-- mechanical diff inventory: Terra/Luna-class before deeper review, with source references preserved.
+- adversarial testing: Sol-class, Medium/High;
+- contract review: Terra-class by default, escalating when contract implications are ambiguous;
+- mechanical diff inventory: Terra/Luna-class with source references preserved;
+- documentation review: use the documentation steward or a reviewer with equivalent project context when the change affects durable docs.
 
-For release, promotion, evidence, security, safety, destructive behavior, or other high-consequence gates, prefer stronger review over usage savings.
+For release, promotion, evidence, security, destructive behavior, or other high-consequence gates, choose stronger review over usage savings.
 
-Review children should default to read-only operation.
+## When to raise reasoning effort
 
-## Reasoning-effort escalation
+Escalate when:
 
-Start at an effort level appropriate to the task, not reflexively at minimum or maximum. Escalate when one or more of these are true:
-
-- the task spans multiple subsystems with hidden coupling;
+- several subsystems interact in ways that are easy to miss;
 - evidence or acceptance boundaries are ambiguous;
-- independent specialists disagree materially;
+- specialists materially disagree;
 - a failure is nondeterministic or resists ordinary debugging;
-- the change affects security, data integrity, destructive behavior, or project governance;
-- a reviewer is deciding whether a milestone or release claim is justified;
+- the change affects security, data integrity, destructive behavior, or governance;
+- a reviewer is deciding whether a milestone/release claim is justified;
 - the cost of a false positive or false negative is high.
 
-Do not use maximum reasoning merely because a task is important. Prefer a bounded higher-effort pass on the difficult decision after appropriate specialists collect the relevant facts.
+Do not use maximum reasoning just because something is important. Collect the facts efficiently, then spend the deeper reasoning on the part that actually needs it.
 
-## Context-efficiency rule
+## Context efficiency
 
-The strongest model should consume distilled outputs where practical, but important decisions must remain traceable to primary sources. Large logs, generated files, broad searches, and mechanical inventories may be processed by an appropriate specialist, with file paths, commands, revisions, and evidence references preserved so the orchestrator can verify material claims.
+Strong models should receive distilled findings when practical, but important decisions must stay traceable to primary sources.
 
-Compression must not erase uncertainty, contradictory evidence, failed checks, or proof-boundary details.
+Compression is useful. Hiding uncertainty, failed checks, contradictory evidence, or proof-boundary details is not.
 
-## Evaluation and tuning
+## Tune from real outcomes
 
-Future revisions may record per-role usage, escalation frequency, reviewer escapes, regressions, rework, and acceptance quality. Model assignments should be tuned from observed outcomes.
+As we get real usage data, track things like reviewer escapes, rework from weak routing, unnecessary premium-model use, escalation frequency, and validation quality.
 
-A routing change is successful only if it maintains or improves quality. Reduced usage alone is not a sufficient success criterion.
+A routing change is successful only if quality is maintained or improved. Lower usage by itself is not a win.

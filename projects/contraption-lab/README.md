@@ -1,67 +1,84 @@
 # Contraption Lab orchestration staging
 
-Contraption Lab is the first planned project to adopt the Cha0sCollective Codex orchestration model.
+Contraption Lab is the first project we expect to move onto this orchestration model.
 
-## Current adoption state
+It is also exactly the kind of repo where changing process halfway through a proof-heavy milestone can cause more harm than good, so the cutover stays deliberate.
 
-**MIGRATION BLOCKED BY EXISTING IN-FLIGHT DEVELOPMENT PROCESS**
+## Current state
 
-The project currently has an established Phase 3 branch/PR/acceptance topology. This orchestration repository must not be used to change that process mid-stream merely to accelerate migration.
+**Do not migrate the active Phase 3 stack mid-flight.**
 
-The intended cutover point is an accepted, reviewed mainline baseline after the existing Phase 3 process has completed its own promotion sequence.
+Contraption Lab already has a branch/PR/acceptance process that produced the current work. Let that process finish the Phase 3 promotion cleanly.
 
-## Pre-cutover rule
+PR #16 is now close to completion, so we can prepare the orchestration overlay here without pushing it into the target repo yet.
 
-Before the cutover:
+The clean cutover point is an accepted, reviewed `main` baseline after the existing Phase 3 promotion sequence finishes.
 
-- design and test reusable agents here;
-- design the Contraption Lab project overlay here;
-- do not deploy `AGENTS.md`, `.codex/`, workflow-state changes, or new governance rules into the active Phase 3 PR stack solely for orchestration migration;
-- do not reinterpret historical acceptance records using the new workflow retroactively.
+## What we can prepare now
 
-Existing work continues under the process that created it.
+Before cutover, we can safely:
 
-## First deployment
+- design and dry-run reusable agents here;
+- build the Contraption Lab project overlay here;
+- derive candidate `AGENTS.md` guidance from accepted project docs;
+- identify build/test commands and project-specific owner gates;
+- decide which reusable specialists belong in production and review;
+- prepare the first config-only deployment change;
+- test how well fresh Codex sessions can reconstruct work from the repo/GitHub state.
 
-After a clean accepted mainline baseline exists, the first Contraption Lab orchestration deployment should be a configuration/governance-only change, separate from product behavior.
+We should **not** deploy new `AGENTS.md`, `.codex/`, workflow labels, or governance rules into the active Phase 3 PR stack just to get the migration started sooner.
 
-That deployment is expected eventually to install:
+Do not reinterpret old acceptance records under the new workflow retroactively.
+
+## First deployment after cutover
+
+The first target change should be configuration/governance only, separate from product behavior.
+
+Expected shape:
 
 ```text
 AGENTS.md
 .codex/
   config.toml
   agents/
-    <selected production and review agents>
+    <approved production/review specialists>
 ```
 
-Exact files will be produced only after the canonical agent catalog and project overlay are validated.
+The exact files should come from this repo only after the reusable agent designs and the Contraption Lab overlay are reviewed.
 
-## Initial production lane goals
+## Production lane
 
-Contraption Lab is expected to use a quality-first production orchestrator with specialists for:
+Contraption Lab will probably benefit from specialists for:
 
 - repository exploration and impact mapping;
 - difficult implementation;
 - CI/test investigation;
-- API/runtime research when version-specific mod behavior is involved.
+- API/runtime research for version-specific Minecraft/Create behavior;
+- documentation stewardship when behavior or accepted project knowledge actually changes.
 
-One bounded work packet should normally be active per production lane.
+One bounded packet should normally be active per production lane.
 
-## Initial review lane goals
+## Review lane
 
-A fresh review context should independently evaluate exact candidate revisions using at least these concerns when applicable:
+Fresh review should inspect the exact candidate revision and bring in specialist views when relevant:
 
 - architecture and authority boundaries;
 - evidence/provenance and exact-revision proof;
 - adversarial/failure-path testing and false-pass risk;
-- contracts, documentation, limitations, and acceptance claims.
+- public contracts and compatibility;
+- documentation accuracy and whether any new prose actually belongs in durable project memory.
 
-Review agents should be read-only by default and should not implement fixes during review.
+Review agents stay read-only by default and do not fix their own findings.
 
-## Project-specific invariants to encode later
+## Context discipline matters especially here
 
-The future project overlay should derive its rules from Contraption Lab's accepted architecture and development documents, including principles such as:
+Contraption Lab has accumulated a lot of thoughtful design discussion. That context is useful, but we do not want future agents turning every explanation, future idea, or debugging theory into another document.
+
+At cutover, derive the project overlay from accepted `main` documentation and current project state. Do not copy chat history or in-flight branch assumptions into the permanent config just because they were useful during development.
+
+## Project invariants to re-derive at cutover
+
+The future overlay should re-check the accepted project docs for things like:
 
 - authoritative server ownership of mutations, timing, assertions, and pass/fail;
 - media observing the same authoritative run rather than a reenactment;
@@ -70,10 +87,12 @@ The future project overlay should derive its rules from Contraption Lab's accept
 - safe cleanup/restoration boundaries;
 - client/server classloading isolation;
 - version-aware adapter boundaries;
-- explicit distinction between implementation, validation, acceptance, and merge/promotion authorization.
+- clear separation between implementation, validation, acceptance, and merge/promotion authorization.
 
-These must be re-derived from the accepted mainline documents at deployment time rather than copied blindly from an in-flight branch.
+Do not blindly copy these from an in-flight branch. Re-derive them from the accepted baseline we actually deploy against.
 
-## Candidate first real workflow test
+## First real workflow test
 
-The first substantial candidate reviewed under the new orchestration model should be a new revision created after cutover, not an unchanged historical candidate. A rebased/retargeted recovery or other bounded post-cutover PR may be suitable because it naturally creates a fresh revision that requires fresh validation and review.
+Use a new post-cutover candidate, not an unchanged historical revision.
+
+A rebased/retargeted recovery PR or another bounded post-cutover change is a good candidate because it naturally creates a new SHA that needs fresh validation and review.

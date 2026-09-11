@@ -1,100 +1,119 @@
 # Operating Model
 
-## Purpose
+This document describes how work moves between the project owner, production, review, GitHub, and specialist agents.
 
-This standard defines how Codex work is divided between production, review, GitHub, and the project owner. The goal is to keep agent context disposable while making project state reconstructable from repositories and durable work objects.
+The main idea is simple: **chat context should be disposable; project state should be reconstructable.**
 
-## Roles
+## The roles
 
 ### Project owner
 
-The owner sets priorities, resolves policy ambiguity, authorizes owner-gated actions, and decides whether a candidate is promoted when the project requires explicit approval.
+The owner sets priorities, resolves genuine ambiguity, handles owner-only gates, and decides when a project-level tradeoff is worth taking.
 
 ### Production orchestrator
 
-The production orchestrator owns one bounded work packet. It may delegate exploration, implementation, testing, or research to subagents, but it remains responsible for scope, integration, validation, and the final production handoff.
+Production owns one bounded work packet at a time.
 
-Production is write-capable only when the active packet requires it.
+It can delegate exploration, implementation, testing, research, or documentation work to specialists, but it still owns scope, integration, validation, and the final handoff.
+
+Production is write-capable when the packet requires it. It should not quietly pull future roadmap work into the current assignment.
 
 ### Review orchestrator
 
-The review orchestrator starts from a fresh context and an exact candidate revision. It may delegate specialized review to read-only subagents and synthesizes one review decision.
+Review starts fresh at an exact candidate revision.
 
-Review does not implement fixes. If changes are required, control returns to production.
+Its job is to decide whether the candidate holds up, not to continue production with a different prompt. It can delegate specialist review, but it should not implement fixes. If the candidate needs changes, control goes back to production.
 
 ### Specialist subagents
 
-Subagents are temporary workers. They perform narrowly scoped tasks such as repository exploration, architecture analysis, evidence inspection, adversarial test analysis, API research, or mechanical implementation.
+Specialists are temporary workers, not long-lived identities. Give them a narrow question and let them return a useful result.
 
-A subagent's output is evidence for its parent orchestrator; it is not durable project state until recorded in Git/GitHub.
+Typical jobs include repository exploration, architecture review, evidence inspection, failure-path analysis, API research, documentation maintenance, or focused implementation.
 
-## Two-lane model
+A specialist's scratch work is not project memory by default.
+
+## Two lanes, fresh contexts
 
 ```text
 work packet
-    |
-    v
-PRODUCTION lane
+   |
+   v
+PRODUCTION
   fresh bounded chat/worktree
-  -> implementation
-  -> validation
+  -> understand the packet
+  -> delegate where useful
+  -> implement
+  -> validate
   -> exact candidate revision
-  -> production handoff
-    |
-    v
-REVIEW lane
-  fresh chat/worktree at candidate revision
-  -> specialist reviews
-  -> synthesized decision
-    |
-    +--> changes required -> new production candidate -> fresh review
-    |
-    +--> human action required -> owner gate
-    |
-    +--> accepted -> next project state
+  -> handoff
+   |
+   v
+REVIEW
+  fresh chat/worktree at that candidate
+  -> inspect real diff/evidence
+  -> delegate specialist review
+  -> synthesize a decision
+   |
+   +--> changes needed -> production makes a new candidate -> fresh review
+   +--> human action needed -> owner gate
+   +--> accepted -> next project state
 ```
 
-Production and review are logical lanes, not permanent conversations. Long-lived chats are discouraged. Start a fresh parent context when a new bounded production packet begins and when a new candidate revision requires independent review.
+Production and review are lanes, not immortal conversations. Start fresh often enough that the repo, issue, PR, and exact revision remain the source of truth.
 
-## Context boundary
+## What a fresh session should be able to recover
 
-A new session should be able to reconstruct its assignment from durable state:
+A new production or review session should be able to orient itself from durable state:
 
-- repository instructions and project documentation;
+- repo instructions and accepted project docs;
 - the active issue/work packet;
-- linked pull request or branch;
+- linked PR or branch;
 - exact base and candidate revisions;
-- prior review findings when relevant;
-- current CI, artifacts, and evidence for the candidate.
+- relevant previous findings;
+- current CI, artifacts, and evidence;
+- owner-gate status when one exists.
 
-Prior chat memory may help convenience but must not be required for correctness.
+Prior chat memory can be convenient, but correctness must not depend on it.
+
+## Context is not project memory
+
+Background given in a chat does not automatically belong in the repo.
+
+Use conversational context to make better decisions, but preserve only information that actually became durable project knowledge: accepted decisions, contracts, architecture, workflows, or documentation that must stay true for future work.
+
+See `CONTEXT_AND_DOCUMENTATION.md` for the full boundary.
 
 ## Exact-revision rule
 
-A review decision applies only to the exact revision it names. If candidate code changes, the previous review remains historical evidence but does not approve the new revision.
+A review applies to the revision it names. If the candidate changes, the old review still matters historically, but it does not approve the new candidate.
 
-Validation evidence must likewise identify the revision it proves. Do not combine successful checks from different revisions into a synthetic all-green candidate unless the project explicitly defines such aggregation as valid.
+The same goes for validation. Do not build a synthetic all-green story out of checks that actually belong to different SHAs unless the project explicitly defines that as valid.
 
 ## Worktrees
 
-Separate local Git worktrees are preferred when production and review may overlap or when multiple bounded efforts must coexist. A review worktree should be clean and anchored to the candidate being reviewed.
+Use separate worktrees when production and review overlap or when multiple bounded efforts need to coexist safely.
 
-Worktree separation is a filesystem and Git-safety mechanism; it does not replace fresh conversational context.
+A review worktree should be clean and anchored to the candidate under review. Worktrees keep files separated; they do not replace fresh conversational context.
 
 ## Owner gates
 
-An owner gate is required when a task reaches an action reserved for the owner or depends on evidence only the owner/operator can produce. Examples include:
+Stop and ask for the owner when the work reaches something the project has intentionally kept human-controlled.
+
+Examples:
 
 - live graphical or hardware acceptance;
-- irreversible or destructive repository administration;
+- destructive repo administration;
 - promotion to a protected mainline when explicit approval is required;
 - secrets, credentials, billing, or permission expansion;
-- changing the project's accepted proof boundary.
+- changing the accepted proof boundary;
+- a design decision that materially changes the project's path, maintenance cost, validation burden, compatibility surface, or implementation resources.
 
-At an owner gate, agents stop unrelated implementation and provide the exact decision or procedure required.
+At an owner gate, explain the exact decision or procedure needed. Do not fill the waiting time by wandering into unrelated work.
 
-## GitHub as coordination layer
+## GitHub is the handoff layer
 
-GitHub issues, pull requests, commits, reviews, CI results, artifacts, and durable documentation form the shared message bus. Agent identity is carried by the work object and handoff format, not by creating one GitHub account per logical agent.
+Issues, PRs, commits, reviews, CI, artifacts, and accepted docs are the shared message bus.
 
-See `WORK_PACKET_PROTOCOL.md` and `REVIEW_PROTOCOL.md` for the concrete handoff contracts.
+The logical role of an agent comes from the work object and handoff, not from inventing a separate GitHub user for every role.
+
+See `WORK_PACKET_PROTOCOL.md` and `REVIEW_PROTOCOL.md` for the handoff flow.

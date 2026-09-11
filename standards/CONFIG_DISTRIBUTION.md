@@ -1,12 +1,10 @@
 # Configuration Distribution
 
-## Purpose
+`Ch4oS-Orchestration` is the canonical design source for reusable agent definitions and project-specific Codex policy.
 
-`Ch4oS-Orchestration` is the canonical design source for reusable agent definitions and project-specific Codex policy. Target repositories still need their effective configuration committed locally so Codex can consume it for the exact revision being worked on.
+The repositories where agents actually work still need their effective configuration committed locally so Codex can consume the right instructions for that exact revision.
 
-This standard defines the boundary between canonical configuration here and effective configuration in target projects.
-
-## Canonical versus effective configuration
+## Canonical versus effective config
 
 Canonical sources live here:
 
@@ -17,10 +15,10 @@ Ch4oS-Orchestration/
   projects/<project>/
 ```
 
-Effective target files live in the project they govern, for example:
+Effective files live in the repository they govern, for example:
 
 ```text
-contraption-lab/
+private-development-repo/
   AGENTS.md
   .codex/
     config.toml
@@ -28,11 +26,29 @@ contraption-lab/
       ...
 ```
 
-A target project does not automatically inherit configuration from this repository merely because both repositories are available on the same machine.
+A repo does not inherit config just because Ch4oS-Orchestration is checked out somewhere else on the same machine.
 
-## One-way authority
+## One project may have multiple target repos
 
-The intended flow is:
+A project overlay may describe more than one repository.
+
+For example:
+
+```text
+project
+  private development repo  -> full production/review config
+  public publication repo   -> no Codex config, or a smaller publication-specific config
+```
+
+Do not blindly deploy the same agent bundle to both.
+
+A public publication repo should only receive orchestration config when agents actually work there and the exposed instructions are appropriate for a public surface.
+
+See `PUBLICATION_BOUNDARY.md`.
+
+## One-way authority for orchestration config
+
+The intended config flow is:
 
 ```text
 canonical design
@@ -44,34 +60,30 @@ project overlay
 render / synchronize
       |
       v
-effective target files
+effective files in the repo they govern
 ```
 
-The orchestration repository is authoritative for shared designs and declared project overlays. Effective target copies are authoritative only for what Codex executes at that target revision.
+Do not silently reverse-sync target edits into canonical definitions. If a target-local improvement is worth keeping, propose it deliberately here, review it, then redistribute it.
 
-Do not silently reverse-sync target edits into canonical definitions. If a useful target-local change is discovered, propose it deliberately in this repository, review it, then redeploy.
+## Deployment should be reviewable
 
-## Deployment as a reviewable change
+Adopting or updating orchestration policy in a target repo should normally be its own bounded change, separate from unrelated product behavior.
 
-Adopting or updating orchestration policy in a target project should normally be its own bounded pull request or commit set, separate from unrelated product behavior.
-
-A deployment should identify:
+A deployment should make it possible to reconstruct:
 
 - orchestration source revision;
-- target base revision;
+- target repo and target base revision;
 - project overlay used;
 - files created/updated;
-- intended agent/policy behavior change;
+- intended behavior change;
 - validation performed;
-- any target-local exception.
-
-This preserves the ability to reconstruct which orchestration policy governed any target revision.
+- target-local exceptions.
 
 ## Drift detection
 
-Future tooling should compare canonical rendered output with the target project's effective files and report drift without modifying either side by default.
+Future tooling should compare canonical rendered output with target effective files and report drift without modifying anything by default.
 
-Expected states:
+Useful states:
 
 ```text
 IN SYNC
@@ -80,29 +92,35 @@ CANONICAL UPDATE AVAILABLE
 PROJECT OVERLAY INVALID
 ```
 
-A drift tool should be safe to run repeatedly and should not require credentials beyond ordinary repository access.
+A drift tool should be safe to run repeatedly.
 
 ## No implicit filesystem coupling
 
-Do not depend on sibling-repository relative paths at runtime. Avoid making target Codex behavior depend on the orchestration checkout being present at a particular Windows filesystem location.
+Do not make a target repo depend on Ch4oS-Orchestration being checked out at a particular Windows path.
 
-The effective target configuration should remain usable from a clean clone of the target repository by itself.
+A clean clone of the target should have the effective config it needs to operate.
 
-## Symlinks and submodules
+## No symlink/submodule dependency for initial distribution
 
-Do not use symlinks or Git submodules as the initial distribution mechanism for `.codex` configuration. They complicate Windows behavior, worktrees, clean-clone expectations, and exact-revision provenance.
+Avoid symlinks or Git submodules as the initial `.codex` distribution mechanism. They add friction around Windows, worktrees, clean clones, and exact-revision reasoning.
 
 Prefer deterministic rendered/copied files plus drift verification.
 
 ## Future project manifest
 
-Once the reusable agent catalog is stable, each project may define a manifest describing which shared agents and policies it consumes. Example shape only:
+Once the catalog stabilizes, a project manifest may describe both agent selection and repository topology.
+
+Conceptual example only:
 
 ```toml
-project = "contraption-lab"
+project = "example-project"
+
+development_repo = "Cha0sCollective/example-private"
+public_repo = "Cha0sCollective/example-public"
 
 production_agents = [
   "repo-explorer",
+  "documentation-steward",
   "implementation-engineer",
   "ci-investigator"
 ]
@@ -113,14 +131,18 @@ review_agents = [
   "adversarial-test-reviewer",
   "contract-reviewer"
 ]
+
+publication_agent = "publication-steward"
 ```
 
-The manifest format is not yet an executable contract. It will be designed and validated before synchronization tooling depends on it.
+This is not an executable schema yet.
 
-## Target-repository ownership
+## Target-specific rules still belong to the target
 
-A target repository may need project-specific `AGENTS.md` rules that are intentionally not reusable. Those rules belong in its project overlay here and its generated/effective copy there, not in a generic agent definition.
+A project may need `AGENTS.md` rules that are not reusable. Those belong in its overlay here and its effective copy in the repo they govern, not in a generic agent definition.
 
 ## Adoption gate
 
-No target project is considered migrated to this orchestration model until an explicit adoption change is reviewed and merged in that target project.
+No target repo is considered migrated until an explicit adoption change is reviewed and merged there.
+
+No public repo is considered a publication target until its publication boundary is explicitly defined and approved.

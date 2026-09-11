@@ -1,46 +1,81 @@
 # Project Overlays
 
-This directory contains project-specific orchestration policy, adoption state, and deployment intent.
+This directory holds the project-specific orchestration details that do not belong in generic reusable agents.
 
-A project overlay answers questions that should not be baked into generic reusable agents, such as:
+A project overlay should answer the practical questions an orchestrator needs to work safely in that project:
 
-- architectural invariants unique to the project;
+- architecture/invariants unique to the project;
 - accepted proof and validation boundaries;
+- build/test commands;
 - branch/promotion rules;
-- required specialist reviewers;
-- owner-only gates;
-- local build/test commands;
-- project-specific constraints on tools, dependencies, or destructive behavior;
-- which canonical reusable agents the project intends to consume.
+- owner gates;
+- specialist roster;
+- tool/dependency constraints;
+- documentation boundaries;
+- model-routing overrides when the generic defaults are not good enough;
+- which reusable agents/config the project intends to consume.
 
-## Target layout
+## One project may have more than one repository
 
-Each project may eventually contain:
+A project is not required to map one-to-one with a GitHub repo.
+
+Supported shapes include:
+
+```text
+project
+  -> one private development repo
+```
+
+or:
+
+```text
+project
+  -> private development repo
+  -> public publication repo
+```
+
+The overlay should identify each repository's role rather than assuming every repo is an equal development target.
+
+For a private/public pair, record things such as:
+
+- which repo is the development source of truth;
+- what categories are allowed to cross into the public repo;
+- where end-user documentation is authored;
+- whether the public repo accepts community contributions;
+- how any supported public-to-private reconciliation works;
+- whether the public repo needs Codex config at all;
+- publication owner gates and release validation.
+
+See `../standards/PUBLICATION_BOUNDARY.md`.
+
+## Desired overlay shape
+
+A project may eventually contain:
 
 ```text
 projects/<project>/
   README.md
   AGENTS.md              canonical project instruction source
-  config.toml            canonical project Codex configuration source
-  policy/                project-specific detailed standards if needed
-  manifest.toml          reusable-agent selection and deployment metadata
+  config.toml            canonical project Codex config source
+  policy/                project-specific standards when needed
+  manifest.toml          agent selection / repo topology / deployment metadata
 ```
 
-This is a desired structure, not yet a frozen schema.
+That is a direction, not a frozen schema yet.
 
 ## Separation of concerns
 
 Generic role behavior belongs in `agents/`.
 
-Organization-wide operating rules belong in `standards/`.
+Organization-wide working rules belong in `standards/`.
 
-Project-specific invariants and deployment intent belong here.
+Project-specific invariants, repository topology, and deployment intent belong here.
 
-The target project's committed `AGENTS.md` and `.codex/` files are effective copies created through an explicit adoption/synchronization change.
+The effective `AGENTS.md` and `.codex/` files still live in the repository they govern.
 
 ## Adoption states
 
-A project overlay should clearly identify its migration state. Suggested concepts:
+Useful concepts include:
 
 ```text
 DESIGNING
@@ -50,8 +85,10 @@ DRIFTED
 MIGRATION_BLOCKED
 ```
 
-These labels are conceptual until a manifest schema is adopted.
+These are conceptual until we adopt a real manifest schema.
 
-## No surprise deployment
+## No surprise deployment or publication
 
-Editing a project overlay here does not authorize changing that target repository. Deployment is always a separate explicit operation and should normally produce a reviewable target-repository change.
+Editing an overlay here does not authorize changing a target repository.
+
+Likewise, defining a public-repo topology does not authorize publishing anything. Deployment and publication remain explicit, reviewable operations.

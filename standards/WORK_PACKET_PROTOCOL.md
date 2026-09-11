@@ -1,50 +1,47 @@
 # Work Packet Protocol
 
-## Purpose
+A work packet is the amount of production work one orchestrator should be able to own without also carrying the whole roadmap in its head.
 
-A work packet is the unit of production execution. It should be small enough that one production orchestrator can hold its proof boundary and dependencies in working context without carrying an entire roadmap.
+A roadmap can describe months of work. A work packet should describe what we are actually doing now.
 
-A roadmap issue may describe many packets. It is not automatically an executable production assignment.
+## A good packet answers a few practical questions
 
-## Required packet fields
-
-Every production packet should establish:
-
-- objective;
-- explicit non-goals;
-- starting branch or base revision;
-- dependencies and prerequisites;
-- files/subsystems likely in scope when known;
-- validation required before handoff;
-- owner gates or stop conditions;
-- definition of done.
+- What are we trying to accomplish?
+- What is explicitly out of scope?
+- Where are we starting from?
+- What has to be true before we begin?
+- What should we validate before handing it off?
+- Where do we stop and ask the owner?
+- What does "done" mean for this packet?
 
 Prefer one issue to one bounded PR or one clearly defined acceptance result.
 
-## Active-work rule
+## One active packet per production lane
 
-Within a project, only one packet should normally be active for a single production lane. Additional queued issues may exist, but completing one packet does not authorize the production orchestrator to begin the next unless the workflow explicitly advances it.
+A production lane should normally have one active packet.
 
-Parallel production lanes may be introduced later for genuinely independent work, but each lane must have its own worktree, issue, branch boundary, and integration owner.
+Queued work can exist, but finishing the current issue does not mean the agent gets to pick the next interesting thing and keep going. The workflow or owner advances the lane.
 
-## Production lifecycle
+If we later run truly independent production lanes in parallel, each one needs its own worktree, issue, branch boundary, and integration owner.
+
+## Lifecycle
 
 ```text
 queued
   -> active
   -> implementation / validation
-  -> candidate revision
+  -> exact candidate revision
   -> production handoff
   -> ready for independent review
 ```
 
-If an owner-only action is required before production can finish, the packet moves to an owner gate with precise instructions rather than expanding into unrelated work.
+If the packet hits something only the owner can do, stop at the owner gate instead of expanding into unrelated work.
 
 ## Production handoff
 
-Use a compact durable handoff. Do not paste large CI logs or re-explain the whole project when GitHub contains the authoritative records.
+Keep the handoff compact. GitHub already has the diff, CI, artifacts, and history; do not paste the project back into the conversation.
 
-Recommended format:
+A useful handoff can look like:
 
 ```text
 [production-agent] HANDOFF
@@ -54,37 +51,57 @@ PR: #<pr or none>
 Base: <exact revision>
 Head: <exact candidate revision>
 
-Implemented:
+What changed:
 - ...
 
-Validation:
-- <check or workflow reference>
-- <check or workflow reference>
-
-Known limitations / unproven boundaries:
+What I validated:
+- <check/workflow reference>
 - ...
 
-Reviewer decision requested:
+What is still unproven or limited:
+- ...
+
+What I need review to decide:
 - ...
 ```
 
-The handoff must distinguish facts already established from claims awaiting review.
+Use normal language inside the structure. The point is to make the important facts easy to find, not to make every handoff sound identical.
 
-## Stop conditions
+## Context stays context
 
-Production stops and asks for direction when:
+The packet may include background about future goals, tradeoffs, or constraints. That helps production make better choices, but it is not permission to implement, document, or preserve everything mentioned.
 
-- required human/live acceptance is reached;
-- the candidate would require crossing an explicit non-goal;
-- a prerequisite is invalid or missing;
-- a necessary permission, secret, or destructive action requires owner authority;
-- the implementation exposes a material architecture decision not covered by the packet;
-- evidence for the claimed revision cannot be established reliably.
+If the owner says, "we may support another loader later, so don't paint us into a corner," that is context unless the packet actually includes multi-loader work.
 
-A blocked packet is not permission to pull the next roadmap item into scope.
+Do not create roadmap items, architecture docs, TODOs, compatibility layers, or comments just to preserve useful conversation context.
 
-## Roadmaps
+## Call out a change that makes the project meaningfully bigger
 
-Roadmaps describe dependency chains and destination state. Production reads them for context but executes only the active packet.
+Stop and surface the decision if the implementation starts to materially change:
 
-A good roadmap answers "what comes later?" A good work packet answers "what may I change now, what must I prove, and where must I stop?"
+- where the project is headed;
+- long-term maintenance complexity;
+- compatibility surface;
+- validation or acceptance burden;
+- operational burden;
+- implementation resources or expected effort.
+
+Explain the downstream tradeoff before quietly building around it. A significant path-changing decision is not a routine implementation detail.
+
+## Other stop conditions
+
+Production should also stop when:
+
+- required live/human acceptance is reached;
+- solving the problem would cross an explicit non-goal;
+- a prerequisite turns out to be wrong or missing;
+- a secret, permission, destructive action, or owner-only decision is required;
+- the claimed evidence cannot be tied reliably to the candidate.
+
+Being blocked is not permission to pull the next roadmap item into scope.
+
+## Roadmaps versus packets
+
+A roadmap answers: **where are we going?**
+
+A work packet answers: **what may I change now, what do I need to prove, and where do I stop?**

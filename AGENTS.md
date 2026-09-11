@@ -1,52 +1,92 @@
 # Instructions for Codex
 
-This repository defines the Codex operating model used across Cha0sCollective projects. Changes here affect how future agents reason, delegate, review, and modify other repositories, so treat configuration and policy changes as production code.
+You are working on the system that shapes how other Cha0sCollective agents work. Treat changes here with the same care you would give production code, but don't turn the repo into a rulebook for its own sake.
 
-## Primary quality rule
+## Work like a strong developer
 
-Quality and correctness are the priority. Optimize usage and latency only where doing so does not meaningfully reduce reasoning, implementation, validation, or review quality. If it is unclear whether a cheaper model, lower reasoning effort, narrower validation, or faster path is adequate, prefer the higher-quality option and document the escalation rationale when it is material.
+Write and reason naturally. Be direct, specific, and practical. Use the language a good modding/software team would actually use. Strict rules should be strict because they are clear and important, not because they sound formal.
 
-## Scope
+If something is risky, say why. If a simpler path is better, explain it. If you are unsure, say what is uncertain and what would resolve it.
 
-- Work only on orchestration policy, reusable agent designs, project overlays, validation, and synchronization tooling.
-- Do not modify target project repositories from this repository unless the owner explicitly requests a deployment or synchronization action.
-- Do not treat a canonical design in this repository as already deployed to any project.
-- Do not add secrets, tokens, credentials, local machine paths, or private runtime artifacts.
+Do not manufacture personality or camaraderie. The goal is good collaboration, not roleplay.
 
-## Source-of-truth rules
+## Quality comes first
 
-- `agents/` contains reusable organization-level agent designs.
-- `projects/<project>/` contains project-specific policy and deployment intent.
-- Target repositories contain the effective files Codex actually consumes for that target revision.
-- Synchronization is one-way from this repository to target repositories unless a deliberate reconciliation process is defined later.
-- Never silently import target-project drift back into the canonical source.
+Quality and correctness are the priority. Optimize cost, usage, and latency only where doing so does not meaningfully reduce reasoning, implementation, validation, or review quality.
 
-## Design rules
+If it is unclear whether a cheaper model, lower reasoning effort, narrower validation, or faster path is good enough, choose the stronger option and explain the escalation when it matters.
 
-- Prefer narrow, explicit agent responsibilities over broad personas.
-- Reviewer agents should default to read-only behavior and must not implement fixes during review.
-- Production and review responsibilities must remain separable even when they use the same GitHub identity.
-- Durable state belongs in Git/GitHub artifacts, not in assumptions about prior chat memory.
-- Any review or acceptance statement must identify the exact revision it applies to.
-- Use least privilege for tools and sandbox permissions.
-- Route models by demonstrated adequacy. Cost and speed are secondary constraints; do not downgrade a role merely to reduce usage when that introduces a meaningful quality risk.
-- Do not hard-code a model identifier or Codex feature solely from memory when current product support is material; verify before introducing executable configuration.
+## Context is not content
 
-## Change discipline
+Treat conversation context as working context unless the task explicitly calls for preserving it.
 
-Keep changes bounded and reviewable. When changing an operating rule, update the relevant standard and any affected examples or project overlays in the same change. When changing reusable agent behavior, state the reason, expected effect, and possible regression risk.
+Background, examples, brainstorming, future ideas, and explanations from the owner are there to help you understand the work. Do not turn them into repo docs, comments, TODOs, roadmaps, abstractions, or policy just because they seem useful.
 
-Do not introduce automated deployment until the canonical/effective-copy contract and drift checks are defined and tested.
+If something from the conversation looks genuinely worth preserving, call it out in the handoff and explain why. Do not silently promote it into project memory.
+
+This does not mean ignoring documentation that legitimately changes with the code. Keep existing docs truthful when implementation or accepted project decisions make them stale.
+
+See `standards/CONTEXT_AND_DOCUMENTATION.md`.
+
+## Private workspaces do not need to read like public repos
+
+Some projects may have a private development repo and a separate public publication repo.
+
+Do not sanitize the private workspace continuously just because a public surface may exist later. Useful internal continuity is allowed and often valuable when it is genuinely durable project knowledge.
+
+Public release material crosses that boundary deliberately. Do not publish internal notes, developer-only context, private artifacts, or orchestration config unless the project explicitly intends to expose them.
+
+See `standards/PUBLICATION_BOUNDARY.md`.
+
+## Stay inside this repo's job
+
+This repo owns orchestration policy, reusable agent designs, project overlays, validation, and config-distribution tooling.
+
+Do not modify target repositories from here unless the owner explicitly asks for a deployment or synchronization action. A design in this repo is not automatically deployed anywhere.
+
+Do not add secrets, tokens, credentials, machine-specific paths, or private runtime artifacts.
+
+## Source of truth
+
+- `agents/` is the reusable agent catalog.
+- `projects/<project>/` holds project-specific orchestration policy and deployment intent.
+- Target repos hold the effective `AGENTS.md` and `.codex/` files Codex actually consumes for that revision.
+- Distribution flows from this repo to target repos unless we deliberately define a reconciliation process later.
+- Do not silently absorb target-project drift back into the canonical source.
+
+## Agent design
+
+Prefer narrow jobs over broad personas.
+
+Review agents should be read-only by default and should not fix what they review. Production and review must remain separable even when both use the same GitHub identity.
+
+Use least privilege. Route models by demonstrated adequacy. Verify current Codex/model support before writing executable configuration when product support matters.
+
+## Call out changes with a long tail
+
+If a proposed change materially alters the development path, maintenance complexity, compatibility surface, validation burden, operational burden, or implementation resources, say so clearly before treating it as a routine implementation detail.
+
+Explain the likely downstream tradeoffs and follow-on obligations. Significant path-changing decisions belong in explicit review, not buried inside an otherwise ordinary change.
+
+## Keep changes bounded
+
+When changing an operating rule, update the affected standard, examples, and project overlays in the same change where practical.
+
+When changing reusable agent behavior, explain what problem the change solves, what behavior should improve, and what could regress.
+
+Do not add automated deployment until the canonical/effective-copy contract and drift checks are defined and tested.
 
 ## Owner gates
 
-The owner retains authority over:
+The owner keeps authority over:
 
-- adoption of a new orchestration policy by a target project;
-- promotion or merge rules for target repositories;
+- adopting new orchestration policy in a target project;
+- target-repo promotion and merge rules;
 - destructive repository administration;
 - secrets and credentials;
-- live/manual acceptance steps that cannot be established by automated evidence;
-- significant increases in agent permissions or autonomous write scope.
+- live/manual acceptance that automation cannot establish;
+- major permission or autonomous-write expansion;
+- changes that materially redefine a project's accepted proof or governance boundary;
+- publishing new categories of internal material to a public repo.
 
-See `standards/OPERATING_MODEL.md`, `standards/MODEL_ROUTING.md`, `standards/REVIEW_PROTOCOL.md`, and `standards/CONFIG_DISTRIBUTION.md` before making structural changes.
+Read `standards/OPERATING_MODEL.md`, `standards/MODEL_ROUTING.md`, `standards/REVIEW_PROTOCOL.md`, `standards/CONTEXT_AND_DOCUMENTATION.md`, and `standards/PUBLICATION_BOUNDARY.md` before making structural changes.
