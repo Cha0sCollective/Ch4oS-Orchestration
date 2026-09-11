@@ -10,6 +10,16 @@ Treat owner-provided background, examples, brainstorming, future ideas, preferen
 
 Do not write conversation context into the repo just because it seems valuable.
 
+## Continuity is still valuable
+
+This rule is not an argument for a sterile development repo.
+
+A private workspace can and should preserve internal knowledge that materially helps future development pick up where previous work stopped: accepted reasoning, architecture history, experiment results, developer guidance, known constraints, useful postmortems, and other context that has earned a durable place in the project.
+
+The question is not "would this be appropriate in a public README?" The question is "will future development genuinely benefit from this being maintained as project knowledge?"
+
+Public suitability is a separate publication decision. See `PUBLICATION_BOUNDARY.md`.
+
 ## Three useful buckets
 
 ### Working context
@@ -51,9 +61,11 @@ Examples:
 - public behavior and contracts;
 - accepted project workflow;
 - limitations future contributors need to know;
+- internal design history that materially explains current constraints;
+- accepted experiment/research results future work depends on;
 - decisions that materially constrain future implementation.
 
-This belongs in the appropriate durable artifact.
+This belongs in the appropriate durable artifact. In a private development repo, that artifact may intentionally contain more internal detail than anything we would publish externally.
 
 ## Don't record the conversation
 
@@ -84,9 +96,10 @@ Before adding a new doc, ask:
 
 - Does future work need this information?
 - Is there already a better home for it?
-- Is this a stable decision or temporary context?
+- Is this a stable decision/result or temporary context?
 - Will the document still make sense without this chat?
-- Who or what should keep it current?
+- Is the continuity value worth keeping it current?
+- Is this internal project knowledge, public documentation, or both?
 
 Prefer improving an existing authoritative document over creating a new overlapping one.
 
@@ -96,7 +109,7 @@ A dedicated documentation steward can help decide what actually belongs in proje
 
 Its job is not to generate more documentation. Its job is to keep durable docs useful, accurate, non-duplicative, and aligned with accepted project state.
 
-The steward should be especially suspicious of prose that exists mainly because an agent wanted to preserve its own context.
+The steward should be suspicious of prose that exists mainly because an agent wanted to preserve its own context, while still recognizing that internal continuity can be worth preserving deliberately.
 
 See `../agents/documentation-steward.md`.
 
