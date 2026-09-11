@@ -34,7 +34,7 @@ See `EXPERIMENTAL_ASSURANCE.md`.
 
 ### Review orchestrator
 
-Review starts fresh at an exact candidate revision.
+Initial review starts fresh at a named candidate revision. Follow-ups inspect the delta and affected behavior under `REVIEW_PROTOCOL.md`.
 
 Its job is to decide whether the candidate holds up, not to continue production with a different prompt. It can delegate specialist review, but it should not implement fixes. If the candidate needs changes, control goes back to production.
 
@@ -70,7 +70,7 @@ REVIEW
   -> delegate specialist review
   -> synthesize a decision
    |
-   +--> changes needed -> production makes a new candidate -> fresh review
+   +--> changes needed -> production fixes -> review the delta and affected behavior
    +--> human action needed -> owner gate
    +--> accepted -> next project state
 ```
@@ -119,13 +119,9 @@ Use conversational context to make better decisions, but preserve only informati
 
 See `CONTEXT_AND_DOCUMENTATION.md` for the full boundary.
 
-## Exact-revision rule
+## Review and validation scope
 
-A review applies to the revision it names. If the candidate changes, the old review still matters historically, but it does not approve the new candidate.
-
-The same goes for validation. Do not build a synthetic all-green story out of checks that actually belong to different SHAs unless the project explicitly defines that as valid.
-
-Experimental results should likewise retain enough run/version/configuration identity to support the claim being made. That does not mean every surrounding screenshot or video needs forensic provenance.
+Follow `REVIEW_PROTOCOL.md`: record what was reviewed or executed, reuse valid unchanged coverage, and check the consequences of subsequent edits. Do not present an older result as a new execution. Experimental results retain the run/configuration identity needed for their claims.
 
 ## Worktrees
 

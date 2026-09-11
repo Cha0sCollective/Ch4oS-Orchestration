@@ -24,7 +24,7 @@ Current baseline is Minecraft 1.21.1, NeoForge 21.1.233 and Java 21. Use Gradle 
 
 ## Retire instead of accumulating
 
-Store retired work with plausible future organizational value in [Bits-of-Ch4oS](https://github.com/Cha0sCollective/Bits-of-Ch4oS); ordinary one-offs and obsolete scaffolding stay in Git history. Use a descriptive folder, brief source note and direct commit/push before active removal, respecting existing protections. No separate review or maintenance process. Preserve useful tests and keep archived workflows inert. Details: [canonical retirement policy](https://github.com/Cha0sCollective/Ch4oS-Orchestration/blob/codex/minimal-studio-adoption/standards/TOOL_RETIREMENT.md).
+Store retired work with plausible future organizational value in [Bits-of-Ch4oS](https://github.com/Cha0sCollective/Bits-of-Ch4oS); ordinary one-offs and obsolete scaffolding stay in Git history. Use a descriptive folder, brief source note and direct commit/push before active removal, respecting existing protections. No separate review or maintenance process. Preserve useful tests and keep archived workflows inert. Details: [canonical retirement policy](https://github.com/Cha0sCollective/Ch4oS-Orchestration/blob/main/standards/TOOL_RETIREMENT.md).
 
 ## Durable context
 

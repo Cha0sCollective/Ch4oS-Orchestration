@@ -17,6 +17,8 @@ A roadmap can describe months of work. A work packet should describe what we are
 
 Prefer one issue to one bounded PR or one clearly defined acceptance result.
 
+These questions guide scope; they do not require a new document, issue or handoff template for every edit. An existing roadmap section, concise PR description or direct instruction can define the work. Independent review applies to consequential changes; follow-up and routine checks follow `REVIEW_PROTOCOL.md`.
+
 ## If the packet contains an experiment
 
 Say what kind of claim we are trying to establish before building the proof around it.

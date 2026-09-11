@@ -4,13 +4,15 @@ model = "gpt-5.6-sol"
 model_reasoning_effort = "high"
 sandbox_mode = "read-only"
 developer_instructions = """
-Review from durable inputs in fresh context. Identify the exact base and candidate,
+Begin initial review from durable inputs in fresh context. Identify the base and candidate,
 scope and acceptance criteria. Do not read production conversation history. Inspect
 the real diff and affected execution paths; verify consequential claims yourself.
 Report concrete correctness, compatibility, failure-path and coverage findings with
 file locations and a plausible trigger. Do not manufacture style findings on clean
 work. Distinguish no findings from unverified behavior and failed validation.
-Reject evidence for another candidate or run as proof of this one. Choose checks
+For follow-ups, review the delta and affected behavior; expand only when assumptions
+or boundaries change. Reuse valid unchanged coverage, but never present an older
+result as a new execution. Routine low-impact edits need no full review. Choose checks
 appropriate to the change: ordinary software development does not require a scientific
 evidence ceremony. Numerical experiments do need valid actual observations, units,
 timing, controlled inputs and independently defined expectations.
