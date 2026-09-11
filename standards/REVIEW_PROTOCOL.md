@@ -15,7 +15,8 @@ At minimum, review should know:
 - exact candidate revision;
 - linked issue/PR;
 - applicable project instructions and accepted design records;
-- validation/evidence attached to that candidate.
+- validation/evidence attached to that candidate;
+- any experimental claim and method the candidate relies on.
 
 ## Read-only by default
 
@@ -33,7 +34,7 @@ Old findings are still useful history. They are not approval of the descendant.
 
 Review is not the place to save usage by accepting a weaker answer.
 
-Use cheaper agents for mechanical inventory when their work is easy to verify. Escalate architecture, evidence, adversarial, security, acceptance, or other high-consequence reasoning when uncertainty matters.
+Use cheaper agents for mechanical inventory when their work is easy to verify. Escalate architecture, experimental methodology, evidence, adversarial, security, acceptance, or other high-consequence reasoning when uncertainty matters.
 
 ## Useful specialist views
 
@@ -43,9 +44,26 @@ Not every candidate needs every reviewer. Spawn the ones that match the risk.
 
 Trace the real execution path and look for changes that work locally but damage authority boundaries, lifecycle, coupling, compatibility, or the shape of the system.
 
+### Experimental-method reviewer
+
+Use this when the candidate makes a scientific/numerical claim.
+
+Challenge the experiment independently:
+
+- are the controlled variables actually controlled?
+- are the measurements/units/sampling meaningful?
+- are tolerances or stability criteria justified?
+- can setup/cleanup contaminate the result?
+- does the conclusion go beyond the data?
+- did the experiment design share an assumption with the implementation that could hide a false pass?
+
+This can be a dedicated reviewer later or a responsibility delegated to a strong existing specialist. We do not need to create a permanent agent for it before the workload justifies one.
+
 ### Evidence reviewer
 
 Check whether the claimed validation actually proves this exact candidate. Look closely at provenance, artifact identity, proof boundaries, and acceptance language.
+
+For experimental results, make sure the run identity and result record are strong enough for the claim. Do not demand forensic media provenance when the claim only needs ordinary graphical confirmation.
 
 ### Adversarial test reviewer
 
@@ -59,7 +77,7 @@ Check public contracts, schemas, compatibility promises, status claims, and exte
 
 Check whether existing durable docs remain true. It should not preserve chat context or brainstorm new project history just because it learned something useful during review.
 
-## Review the code, not the sales pitch
+## Review the code and experiment, not the sales pitch
 
 Production summaries are navigation aids, not proof.
 
@@ -69,10 +87,11 @@ When relevant:
 2. inventory the changed files and claims;
 3. trace behavior outside the diff when needed;
 4. inspect tests and independent validators;
-5. inspect current CI/artifacts for this candidate;
-6. compare behavior against accepted project invariants;
-7. reconcile duplicate or conflicting specialist findings;
-8. say clearly what remains unproven.
+5. inspect the experiment design/method when a scientific claim is made;
+6. inspect current CI/artifacts/results for this candidate;
+7. compare behavior against accepted project invariants;
+8. reconcile duplicate or conflicting specialist findings;
+9. say clearly what remains unproven.
 
 ## Handoff
 
@@ -90,6 +109,9 @@ Blocking:
 - ...
 
 Worth fixing / watching:
+- ...
+
+Experimental-method concerns (if applicable):
 - ...
 
 Evidence or acceptance still missing:
@@ -116,10 +138,14 @@ Never:
 - count cancelled work as successful validation;
 - combine passing checks from different candidate revisions unless the project explicitly allows it;
 - substitute headless or synthetic proof for live proof when the claim requires live behavior;
-- assume a current candidate is proven because an ancestor was accepted.
+- demand forensic-grade media proof when ordinary game-development graphical evidence is enough for the claim;
+- assume a current candidate is proven because an ancestor was accepted;
+- accept a numerical conclusion just because the game visibly looked right.
 
 ## What REVIEW PASS means
 
 `REVIEW PASS` means review found no blocking issue in the exact candidate under the requested scope.
 
 It does not grant owner-only merge/promotion authority and it does not invent manual/live evidence that has not happened.
+
+For experimental work, it also does not mean "science proved forever." It means the method, evidence, and conclusion are adequate for the specific claim and acceptance boundary being reviewed.

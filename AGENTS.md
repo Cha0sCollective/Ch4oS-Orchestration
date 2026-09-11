@@ -38,6 +38,20 @@ Public release material crosses that boundary deliberately. Do not publish inter
 
 See `standards/PUBLICATION_BOUNDARY.md`.
 
+## Treat experimental claims differently from ordinary game QA
+
+Some projects run real in-game experiments with numerical state worth measuring carefully.
+
+Be rigorous where the claim is experimental: controlled setup, units, sampling, tolerances, repeatability, cleanup, and result interpretation may all matter.
+
+Do not spread that burden to every artifact around the experiment. A screenshot or video proving a player-visible behavior does not need cryptographic provenance just because the underlying numerical experiment is rigorous.
+
+Match the evidence to the claim.
+
+Leave room for experimental assurance to expand from one specialist into a team, and for repeated experiments to become portable files later. Do not build the team, DSL, runner, or schema before real experiments demonstrate the need.
+
+See `standards/EXPERIMENTAL_ASSURANCE.md`.
+
 ## Stay inside this repo's job
 
 This repo owns orchestration policy, reusable agent designs, project overlays, validation, and config-distribution tooling.
@@ -60,6 +74,8 @@ Prefer narrow jobs over broad personas.
 
 Review agents should be read-only by default and should not fix what they review. Production and review must remain separable even when both use the same GitHub identity.
 
+Experimental-assurance agents may be write-capable when a packet explicitly authorizes fixture, measurement, or experiment implementation, but they should not become the final independent reviewers of their own work.
+
 Use least privilege. Route models by demonstrated adequacy. Verify current Codex/model support before writing executable configuration when product support matters.
 
 ## Call out changes with a long tail
@@ -67,6 +83,8 @@ Use least privilege. Route models by demonstrated adequacy. Verify current Codex
 If a proposed change materially alters the development path, maintenance complexity, compatibility surface, validation burden, operational burden, or implementation resources, say so clearly before treating it as a routine implementation detail.
 
 Explain the likely downstream tradeoffs and follow-on obligations. Significant path-changing decisions belong in explicit review, not buried inside an otherwise ordinary change.
+
+That includes verification infrastructure. A new generalized harness, portable experiment format, cross-version adapter, or experiment team structure may be the right move, but it should be justified by real recurring needs rather than added preemptively.
 
 ## Keep changes bounded
 
@@ -87,6 +105,7 @@ The owner keeps authority over:
 - live/manual acceptance that automation cannot establish;
 - major permission or autonomous-write expansion;
 - changes that materially redefine a project's accepted proof or governance boundary;
-- publishing new categories of internal material to a public repo.
+- publishing new categories of internal material to a public repo;
+- committing a project to a materially heavier experimental/verification architecture, portable experiment format, or long-lived infrastructure layer when that changes the project's maintenance/resources significantly.
 
-Read `standards/OPERATING_MODEL.md`, `standards/MODEL_ROUTING.md`, `standards/REVIEW_PROTOCOL.md`, `standards/CONTEXT_AND_DOCUMENTATION.md`, and `standards/PUBLICATION_BOUNDARY.md` before making structural changes.
+Read `standards/OPERATING_MODEL.md`, `standards/MODEL_ROUTING.md`, `standards/REVIEW_PROTOCOL.md`, `standards/CONTEXT_AND_DOCUMENTATION.md`, `standards/EXPERIMENTAL_ASSURANCE.md`, and `standards/PUBLICATION_BOUNDARY.md` before making structural changes.

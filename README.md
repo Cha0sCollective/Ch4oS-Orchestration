@@ -29,6 +29,9 @@ That does not mean being casual about correctness. Exact revisions, evidence bou
 - **Git is project memory. Chats are working memory.** Durable decisions, accepted architecture, code, tests, issues, PRs, and evidence survive. Conversation history does not need to.
 - **Private continuity and public presentation are different concerns.** A private development repo may preserve useful internal project memory; a public repo is a deliberate publication surface, not a reason to sanitize the workspace continuously.
 - **Production and review are separate lanes.** A write-capable production session does not approve its own candidate. Review starts fresh at an exact revision.
+- **Build the feature and build the proof as different engineering problems.** Product code, game QA, and scientific experiment design may collaborate, but they do not silently collapse into one responsibility.
+- **Be rigorous about the experiment, practical about the game.** Numerical/experimental claims may need controlled scientific methodology. Screenshots and video do not become forensic evidence unless the actual claim requires that level of proof.
+- **Design seams before systems.** Leave room for an experiment specialist to become a team and for experiments to become portable artifacts later, but do not build that machinery before real work earns it.
 - **Work in bounded packets.** A roadmap can be huge. A production assignment should not be.
 - **A review belongs to one exact revision.** Change the candidate and the old review becomes history.
 - **Subagents are specialists, not personalities.** Give them a narrow job, the tools they need, and a clear way to escalate when the task outgrows them.
@@ -47,11 +50,14 @@ standards/
   WORK_PACKET_PROTOCOL.md         how production work stays bounded
   REVIEW_PROTOCOL.md              how independent review works
   CONTEXT_AND_DOCUMENTATION.md    what belongs in project memory and what does not
+  EXPERIMENTAL_ASSURANCE.md       scientific experiment rigor without over-proving the game
   PUBLICATION_BOUNDARY.md         private development vs public publication repos
   CONFIG_DISTRIBUTION.md          how canonical config reaches target projects
 agents/
   README.md                       reusable agent catalog conventions
-  documentation-steward.md        first dedicated documentation role design
+  documentation-steward.md        dedicated documentation role design
+  experiment-specialist.md        expandable experimental-assurance role design
+  publication-steward.md          private-to-public publication role design
 projects/
   README.md                       project overlay conventions
   contraption-lab/
@@ -64,7 +70,7 @@ docs/
 
 We are still designing the foundation. That is intentional.
 
-We want the working style, authority boundaries, context rules, publication boundary, and review model to feel right before we turn them into executable custom-agent TOML or deployment tooling.
+We want the working style, authority boundaries, context rules, experimental-assurance model, publication boundary, and review model to feel right before we turn them into executable custom-agent TOML or deployment tooling.
 
 Nothing in this repo is considered deployed to another project until that project gets an explicit config change.
 
@@ -72,4 +78,4 @@ Nothing in this repo is considered deployed to another project until that projec
 
 The expected working environment is Codex Desktop on Windows with local Git checkouts and worktrees where they make sense. This repo should eventually manage its own agent catalog and project overlays using the same orchestration system it defines.
 
-Start with `standards/OPERATING_MODEL.md`, `standards/CONTEXT_AND_DOCUMENTATION.md`, and `standards/PUBLICATION_BOUNDARY.md`.
+Start with `standards/OPERATING_MODEL.md`, `standards/CONTEXT_AND_DOCUMENTATION.md`, `standards/EXPERIMENTAL_ASSURANCE.md`, and `standards/PUBLICATION_BOUNDARY.md`.

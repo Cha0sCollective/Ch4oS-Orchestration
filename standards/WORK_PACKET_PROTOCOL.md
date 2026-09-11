@@ -11,10 +11,28 @@ A roadmap can describe months of work. A work packet should describe what we are
 - Where are we starting from?
 - What has to be true before we begin?
 - What should we validate before handing it off?
+- Does this packet make an experimental claim that needs controlled methodology beyond ordinary game/software QA?
 - Where do we stop and ask the owner?
 - What does "done" mean for this packet?
 
 Prefer one issue to one bounded PR or one clearly defined acceptance result.
+
+## If the packet contains an experiment
+
+Say what kind of claim we are trying to establish before building the proof around it.
+
+Useful questions include:
+
+- Is this a numerical/scientific claim, a game-integration claim, a graphical claim, or a release-quality claim?
+- Which inputs need to be controlled?
+- What are we actually measuring, in what units, and when?
+- What tolerance/stability/validity rules matter?
+- Does the experiment need an experimental-assurance specialist, or are normal tests enough?
+- Is any proposed new verification infrastructure solving a real recurring need?
+
+Do not turn every test into a science project. Do not treat a real scientific claim like an ordinary smoke test either.
+
+See `EXPERIMENTAL_ASSURANCE.md`.
 
 ## One active packet per production lane
 
@@ -24,12 +42,15 @@ Queued work can exist, but finishing the current issue does not mean the agent g
 
 If we later run truly independent production lanes in parallel, each one needs its own worktree, issue, branch boundary, and integration owner.
 
+Experimental-assurance work can run alongside the product work when it is genuinely separable, but both sides still belong to the same bounded packet unless the project explicitly splits them.
+
 ## Lifecycle
 
 ```text
 queued
   -> active
   -> implementation / validation
+  -> experimental workstream when needed
   -> exact candidate revision
   -> production handoff
   -> ready for independent review
@@ -58,6 +79,9 @@ What I validated:
 - <check/workflow reference>
 - ...
 
+Experimental claim/result (if applicable):
+- <claim + result/artifact reference>
+
 What is still unproven or limited:
 - ...
 
@@ -73,7 +97,7 @@ The packet may include background about future goals, tradeoffs, or constraints.
 
 If the owner says, "we may support another loader later, so don't paint us into a corner," that is context unless the packet actually includes multi-loader work.
 
-Do not create roadmap items, architecture docs, TODOs, compatibility layers, or comments just to preserve useful conversation context.
+Do not create roadmap items, architecture docs, TODOs, compatibility layers, experiment frameworks, or portable schemas just to preserve useful conversation context.
 
 ## Call out a change that makes the project meaningfully bigger
 
@@ -88,6 +112,8 @@ Stop and surface the decision if the implementation starts to materially change:
 
 Explain the downstream tradeoff before quietly building around it. A significant path-changing decision is not a routine implementation detail.
 
+This includes verification/experiment infrastructure. If a packet exposes a genuine need for a new generalized harness, instrumentation layer, portable experiment format, or dedicated experiment team, surface that as a design decision rather than silently growing the packet around it.
+
 ## Other stop conditions
 
 Production should also stop when:
@@ -96,7 +122,8 @@ Production should also stop when:
 - solving the problem would cross an explicit non-goal;
 - a prerequisite turns out to be wrong or missing;
 - a secret, permission, destructive action, or owner-only decision is required;
-- the claimed evidence cannot be tied reliably to the candidate.
+- the claimed evidence cannot be tied reliably to the candidate;
+- an experimental claim cannot be supported confidently without changing the agreed method or proof boundary.
 
 Being blocked is not permission to pull the next roadmap item into scope.
 

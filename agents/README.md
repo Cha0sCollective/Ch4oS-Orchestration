@@ -30,6 +30,32 @@ api-researcher
 
 The documentation steward appears early on purpose. Good documentation hygiene is part of keeping context small and preventing conversation history from leaking into project memory.
 
+## Planned experimental-assurance capability
+
+Start with one expandable role:
+
+```text
+experiment-specialist
+```
+
+This role is for controlled in-game experiments whose claims depend on measurement, methodology, units, sampling, tolerances, or repeatability—not ordinary feature QA.
+
+If real work later proves that one role is too broad, the capability may split into specialists such as:
+
+```text
+experiment-designer
+fixture-environment-specialist
+measurement-instrumentation-specialist
+experiment-runner
+analysis-statistics-specialist
+```
+
+Those are extension points, not agents we need to create now.
+
+The experiment capability should also leave room for portable experiment definitions: versioned files that describe what is being tested independently from the version-specific code that executes the experiment. Do not freeze a schema until repeated experiments tell us what actually belongs in it.
+
+See `experiment-specialist.md` and `../standards/EXPERIMENTAL_ASSURANCE.md`.
+
 ## Planned review-side roles
 
 ```text
@@ -42,6 +68,8 @@ contract-reviewer
 Review specialists should be read-only by default.
 
 The documentation steward may also be asked to inspect a candidate from the review lane, but its job is different from contract review: it asks whether durable docs remain accurate and whether new prose actually deserves to exist.
+
+For experimental work, review should independently challenge the method and interpretation. The specialist that designed an experiment should not be the final judge of whether its evidence proves the claim.
 
 ## Planned publication-side role
 
@@ -66,6 +94,8 @@ project-specific invariants
         =
 project architecture review
 ```
+
+The same idea applies to experiments: keep generic methodology skills reusable, while the project overlay supplies the mod/runtime/claim-specific constraints.
 
 Create a project-specific agent only when it truly needs different tools, permissions, expertise, or decision logic.
 
