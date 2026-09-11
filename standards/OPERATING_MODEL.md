@@ -139,6 +139,8 @@ An experimental workstream may use its own worktree when it is implementing fixt
 
 Stop and ask for the owner when the work reaches something the project has intentionally kept human-controlled.
 
+First check existing authorization. Approval of a defined roadmap can cover its adoption, migration and implementation packages; those actions do not require a fresh permission request at each boundary. New scope and genuinely human-only decisions still require input.
+
 Examples:
 
 - live graphical or hardware acceptance;

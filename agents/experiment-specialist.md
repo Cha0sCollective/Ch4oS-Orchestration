@@ -95,13 +95,13 @@ Independently checks whether the claimed evidence actually supports the exact ca
 
 Looks for false-pass paths, shared assumptions, missing negative cases, and ways the experimental setup could lie to us.
 
-### Documentation steward
+### Production parent
 
-Decides which experiment designs/results deserve durable project memory and where they belong. The experiment specialist should not dump every design conversation into docs.
+Owns affected documentation and decides which experiment designs/results deserve durable project memory. A documentation helper is optional. The experiment specialist should not dump every design conversation into docs.
 
 ## Starting model / permissions
 
-Not frozen yet.
+Initial methodology routing is `gpt-5.6-sol` with high reasoning effort. This remains a role design; no executable profile is required until its first bounded experiment trial.
 
 This role will likely need a strong reasoning model for methodology design and interpretation. Mechanical fixture inventory or result extraction may later delegate to cheaper specialists where quality is preserved.
 

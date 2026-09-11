@@ -38,7 +38,7 @@ See `EXPERIMENTAL_ASSURANCE.md`.
 
 A production lane should normally have one active packet.
 
-Queued work can exist, but finishing the current issue does not mean the agent gets to pick the next interesting thing and keep going. The workflow or owner advances the lane.
+An approved roadmap can authorize advancing through its packages once dependencies and exit criteria are met. Finish each bounded package and record its outcome before moving on. Do not invent unrelated work or repeat permission requests for scope already authorized by the owner.
 
 If we later run truly independent production lanes in parallel, each one needs its own worktree, issue, branch boundary, and integration owner.
 

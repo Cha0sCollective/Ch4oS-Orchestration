@@ -92,9 +92,15 @@ When changing an operating rule, update the affected standard, examples, and pro
 
 When changing reusable agent behavior, explain what problem the change solves, what behavior should improve, and what could regress.
 
-Do not add automated deployment until the canonical/effective-copy contract and drift checks are defined and tested.
+Use reviewed manual copying for initial adoption. Automatic distribution and drift tooling are deferred until repeated work justifies them.
+
+The production parent owns affected documentation. Start with an explorer and fresh independent reviewer; delegate other useful separable work as bounded assignments, without requiring a standing role fleet.
+
+Archive retired work with plausible future organizational value under `standards/TOOL_RETIREMENT.md`.
 
 ## Owner gates
+
+Existing explicit authorization remains valid across bounded packages in an approved roadmap. Check whether an action is already covered before asking again; the list below does not revoke prior approval.
 
 The owner keeps authority over:
 

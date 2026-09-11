@@ -57,7 +57,7 @@ canonical design
 project overlay
       |
       v
-render / synchronize
+reviewed manual copy
       |
       v
 effective files in the repo they govern
@@ -104,7 +104,7 @@ A clean clone of the target should have the effective config it needs to operate
 
 Avoid symlinks or Git submodules as the initial `.codex` distribution mechanism. They add friction around Windows, worktrees, clean clones, and exact-revision reasoning.
 
-Prefer deterministic rendered/copied files plus drift verification.
+Initially use reviewed manual copies and an ordinary file comparison. A deployment framework, project manifest and automated drift verification are deferred, not prerequisites for adoption.
 
 ## Future project manifest
 

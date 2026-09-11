@@ -4,7 +4,7 @@ Independent review is its own lane. The reviewer is there to challenge the candi
 
 ## Start fresh
 
-Review begins in a fresh parent chat/session at an exact candidate revision.
+Initial review begins in fresh context at a named candidate revision. Use an independent subagent when available; a separate user-facing task is not required.
 
 The reviewer can read previous GitHub findings, but it should reconstruct the candidate from durable state instead of depending on production-chat memory.
 
@@ -24,11 +24,11 @@ Review orchestrators and review subagents should be read-only unless a narrowly 
 
 If review finds a bug, describe it clearly and return control to production. Do not "helpfully" fix the candidate in the review worktree.
 
-## A review belongs to one SHA
+## Follow-up review
 
-If code or configuration changes, review the new candidate again.
+Record which revision was reviewed. For a follow-up, inspect the delta and its effects, retaining earlier findings and valid checks for unchanged behavior. Expand the review when the change crosses boundaries or invalidates earlier assumptions; do not reconstruct the whole review for every commit. Documentation-only corrections normally need a documentation check, not another application review or full test run.
 
-Old findings are still useful history. They are not approval of the descendant.
+Do not describe an old result as a new execution. State what was rerun and what unchanged coverage was reused. Routine low-impact edits do not require an independent review lane.
 
 ## Quality is the reason review exists
 
@@ -136,7 +136,7 @@ Inspect CI by reference when current state is available. Do not rely on stale co
 Never:
 
 - count cancelled work as successful validation;
-- combine passing checks from different candidate revisions unless the project explicitly allows it;
+- assemble unrelated passing checks into a claim that a new candidate ran them all;
 - substitute headless or synthetic proof for live proof when the claim requires live behavior;
 - demand forensic-grade media proof when ordinary game-development graphical evidence is enough for the claim;
 - assume a current candidate is proven because an ancestor was accepted;
