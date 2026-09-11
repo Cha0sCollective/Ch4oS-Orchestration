@@ -60,7 +60,7 @@ orchestrator
   -> repo explorer maps the affected area
   -> specialist handles the hard implementation or design question
   -> CI investigator works through validation noise
-  -> documentation steward checks whether durable docs actually need to change
+  -> parent updates affected durable documentation, with a helper only when useful
   -> orchestrator verifies important claims and decides what happens next
 ```
 

@@ -52,7 +52,8 @@ standards/
   CONTEXT_AND_DOCUMENTATION.md    what belongs in project memory and what does not
   EXPERIMENTAL_ASSURANCE.md       scientific experiment rigor without over-proving the game
   PUBLICATION_BOUNDARY.md         private development vs public publication repos
-  CONFIG_DISTRIBUTION.md          how canonical config reaches target projects
+  CONFIG_DISTRIBUTION.md          reviewed manual distribution to target projects
+  TOOL_RETIREMENT.md              archive recoverable tools before removal
 agents/
   README.md                       reusable agent catalog conventions
   documentation-steward.md        dedicated documentation role design
@@ -61,16 +62,17 @@ agents/
 projects/
   README.md                       project overlay conventions
   contraption-lab/
-    README.md                     Contraption Lab adoption staging area
+    README.md                     Contraption Lab adoption and repository topology
+    AGENTS.md                     canonical project instructions for copying
 docs/
   ROADMAP.md                      rollout plan
 ```
 
 ## Current phase
 
-We are still designing the foundation. That is intentional.
+The initial architecture is approved and adoption is underway. The first roster is a production parent, a repository explorer and a fresh independent reviewer. The parent owns documentation. Experiment methodology receives specialist help when needed; other roles remain optional designs.
 
-We want the working style, authority boundaries, context rules, experimental-assurance model, publication boundary, and review model to feel right before we turn them into executable custom-agent TOML or deployment tooling.
+Follow `docs/ROADMAP.md` for the adoption sequence. Contraption Lab's unified roadmap owns the complete application work, including modernization, organization migration and the laboratory features. Replaced tools are copied to Bits-of-Ch4oS before active removal.
 
 Nothing in this repo is considered deployed to another project until that project gets an explicit config change.
 

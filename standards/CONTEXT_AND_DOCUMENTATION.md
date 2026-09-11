@@ -105,7 +105,7 @@ Prefer improving an existing authoritative document over creating a new overlapp
 
 ## Documentation stewardship
 
-A dedicated documentation steward can help decide what actually belongs in project memory.
+The production parent owns documentation decisions and updates. A dedicated documentation steward is an optional helper when the work benefits from one, not a required approval lane.
 
 Its job is not to generate more documentation. Its job is to keep durable docs useful, accurate, non-duplicative, and aligned with accepted project state.
 
