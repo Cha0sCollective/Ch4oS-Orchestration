@@ -10,7 +10,7 @@ Use the reusable `repo-explorer` for useful independent fact gathering and a fre
 
 Named custom-profile selection is not yet verified on the installed host. If unavailable, supply the bounded role instructions and explicit model/effort through the supported delegation tool. Do not claim the profile itself was activated or its sandbox enforced.
 
-Review from durable files and a named candidate, without inheriting the production conversation. Do not edit the reviewed source. Disposable build output is fine within runtime permissions. Report actual permission limitations: parent overrides can supersede a profile's read-only default. Review changes to the candidate again, choosing checks for what changed.
+Initial independent review uses fresh context and a named candidate. Do not edit reviewed source; disposable build output is fine. Review follow-ups as deltas, expanding only for affected behavior or changed assumptions. Reuse valid checks for unchanged behavior without claiming a new execution. Routine low-impact edits need no separate review lane. Report actual permission limitations.
 
 ## Tests and evidence
 
@@ -24,9 +24,7 @@ Current baseline is Minecraft 1.21.1, NeoForge 21.1.233 and Java 21. Use Gradle 
 
 ## Retire instead of accumulating
 
-Archive retired work in [Bits-of-Ch4oS](https://github.com/Cha0sCollective/Bits-of-Ch4oS) only when it has plausible future organizational value, such as reusable automation, verification methods or useful implementation patterns. One-off repairs, generated status documents, duplicates and obsolete process scaffolding normally stay in Git history.
-
-Archival is lightweight storage: put selected files and essential support in a descriptive project directory, with a brief source/purpose note in a README or commit message and existing licensing. Reuse existing copies; keep workflows inert. Commit and push routine deposits directly to the archive's default branch, batching where convenient; confirm the files landed before active removal. No separate PR/review, CI, checksum manifest, detailed provenance report or ongoing archive maintenance is required. Respect existing branch protections using only their required process. Work without plausible reuse value can be removed normally. Preserve useful technical checks when retiring their old process.
+Store retired work with plausible future organizational value in [Bits-of-Ch4oS](https://github.com/Cha0sCollective/Bits-of-Ch4oS); ordinary one-offs and obsolete scaffolding stay in Git history. Use a descriptive folder, brief source note and direct commit/push before active removal, respecting existing protections. No separate review or maintenance process. Preserve useful tests and keep archived workflows inert. Details: [canonical retirement policy](https://github.com/Cha0sCollective/Ch4oS-Orchestration/blob/codex/minimal-studio-adoption/standards/TOOL_RETIREMENT.md).
 
 ## Durable context
 

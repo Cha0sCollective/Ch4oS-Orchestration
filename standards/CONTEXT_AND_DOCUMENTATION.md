@@ -103,6 +103,8 @@ Before adding a new doc, ask:
 
 Prefer improving an existing authoritative document over creating a new overlapping one.
 
+Keep each detailed operating policy in one authoritative location. Project instructions should contain only the short rule needed to act locally and a link for details; roadmaps should describe work and outcomes rather than repeat the policy. Batch related administrative updates. Use Git and CI for revision and execution history instead of repeatedly copying it into status documents.
+
 ## Documentation stewardship
 
 The production parent owns documentation decisions and updates. A dedicated documentation steward is an optional helper when the work benefits from one, not a required approval lane.
