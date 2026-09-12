@@ -17,6 +17,16 @@ A project overlay should answer the practical questions an orchestrator needs to
 
 Overlays provide project context and delegation recommendations. They do not restrict use of shared named agents when a task benefits from them. Keep generic role improvements in the shared catalog; add a project-specific role only when its specialization is useful.
 
+## Current overlays
+
+| Overlay | Product responsibility |
+| --- | --- |
+| [Contraption Lab](contraption-lab/README.md) | Minecraft test and validation tooling. |
+| [Create: Ch4oS](create-ch4os/README.md) | Modpack content, runtime requirements, distribution decisions and installer selection. |
+| [Ch4oS Installer](ch4os-installer/README.md) | Installation, removal, candidate composition and deployment tooling. |
+
+The pack and installer are separate collaborating products with linked overlays. Their canonical proposals do not change either target repository's effective configuration.
+
 ## One project may have more than one repository
 
 A project is not required to map one-to-one with a GitHub repo.

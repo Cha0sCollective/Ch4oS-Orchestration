@@ -26,7 +26,7 @@ At that trial's conclusion the TOMLs were prepared definitions, not verified act
 
 ## Windows readiness trial, September 12
 
-Status: every technical check passed; fresh evidence/documentation review is pending before the readiness decision. Product adoption remains paused. Scope is Orchestration guidance and disposable fixtures. Create-Ch4oS, Ch4oS-Installer, the original Contraption Lab checkout and the uncommitted pack-explorer specification are preserved. The experiment specialist remains future work.
+Status: **the selected retained-CLI workflow is ready on this Windows host**. All required checks and fresh independent evidence/documentation review passed. Scope is Orchestration guidance and disposable fixtures; target adoption remains a separate reviewed change. Create-Ch4oS, Ch4oS-Installer, the original Contraption Lab checkout and the uncommitted pack-explorer specification are preserved. The experiment specialist remains future work.
 
 ### Identity and setup
 
@@ -109,4 +109,8 @@ Independent post-test inventories match every original tracked file, Git state, 
 | Windows build tooling | Exact corrected source, Java 21, Gradle 8.14.4 native initialization, compilation and forced regression passed inside the final sandbox. |
 | Source preservation | Original Git/file inventories, both review worktrees and archive sources unchanged; pack trial retained. |
 
-Fresh evidence/documentation review and the readiness decision are pending. The two linked product overlays will resume only after readiness is established. Shared agents remain available by task need; those overlays will supply context rather than restrict the catalog.
+Fresh evidence reviewer `01a094e0-29a6-71a3-926f-668d2c613671`, native `independent-reviewer` (Sol/high), reviewed exact Orchestration candidate `bc6e5dfaf3b73e7162eb29bcfd0cf4ae671ae27a` against `bb8a0dacb2a033e3a01aabd0b56c70d585c434c7` under read-only parent `01a094df-c538-7283-8dc5-94f1dd77314d`, with `fork_turns="none"`. It reported **no findings** and **no unmet selected-workflow readiness gate**, independently checking the evidence, source hashes, documentation links and `git diff --check`. Parent and child completed without edits or builds.
+
+The production readiness decision is **READY for the selected workflow**, not universal host/client support. Remaining limits are the known user-folder path issue, offline cache prerequisites, unverified direct Desktop activation and ephemeral sessions, other hosts/filesystem paths, and gameplay/live behavior outside this infrastructure scope. Historical pack-trial session IDs are retained records; their primary receipts were not included in the final review's scoped evidence and were not used to close current gates.
+
+The linked [Create: Ch4oS](../projects/create-ch4os/README.md) and [Ch4oS-Installer](../projects/ch4os-installer/README.md) overlays are now prepared as canonical process-only proposals. Shared agents remain available by task need; overlays supply context rather than restrict the catalog. Changing target effective files, merging and publication are not performed by this trial.

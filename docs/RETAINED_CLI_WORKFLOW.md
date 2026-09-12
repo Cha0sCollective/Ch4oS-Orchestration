@@ -34,6 +34,8 @@ On the tested Windows host, Java could read cache JARs under `Documents` and hos
 
 Supply build results back to the reviewer as durable evidence. Successful validation of an ancestor does not establish validation of a descendant. Keep missing execution evidence separate from a source-code finding.
 
+CLI completion and test completion are different results: a successful Codex turn can report a failed build and still exit 0. Check the actual build command's exit code and task output before counting validation as passed.
+
 ## Scope of support
 
 The shared experiment specialist remains a design reference and is outside this readiness trial. Native named activation is verified per host and interface; direct Desktop spawning and ephemeral CLI sessions must not inherit a passing result from a retained CLI test. Product adoption remains a separate reviewed change after the required readiness checks pass.
