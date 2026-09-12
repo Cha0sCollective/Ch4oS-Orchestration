@@ -54,6 +54,8 @@ standards/
   PUBLICATION_BOUNDARY.md         private development vs public publication repos
   CONFIG_DISTRIBUTION.md          reviewed manual distribution to target projects
   TOOL_RETIREMENT.md              curate retired work with future organizational value
+reports/
+  agent-performance/              privacy-safe, project-organized usage snapshots
 agents/
   README.md                       reusable agent catalog conventions
   documentation-steward.md        dedicated documentation role design
