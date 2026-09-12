@@ -282,3 +282,19 @@ test('generation receipt wait observes task cancellation', async () => {
   await assert.rejects(provider.generate({ model, messages: [{ role: 'user', content: 'JSON' }], schema: {}, limits: DEFAULT_LIMITS,
     signal: controller.signal }), error => error === reason);
 });
+
+test('large remote input budget admits above 64 KiB and rejects above 128 KiB before inference', async () => {
+  const base = new OpenRouterProvider(config, fake(), () => 'test-secret');
+  const model = { ...(await registered(base)), contextTokens: 262_144 };
+  const requests: { url: string; init?: RequestInit; body?: Record<string, unknown> }[] = [];
+  const provider = new OpenRouterProvider(config, fake({}, requests), () => 'test-secret');
+  const limits = { ...DEFAULT_LIMITS, contextTokens: 262_144, inputBytes: 131_072 };
+  const accepted = await provider.generate({ model, messages: [{ role: 'user', content: 'x'.repeat(70_000) }], schema: {}, limits,
+    signal: AbortSignal.timeout(1000) });
+  assert.equal(accepted.content, '{"ok":true}');
+  assert.equal(requests.filter(request => new URL(request.url).pathname === '/api/v1/chat/completions').length, 1);
+
+  await assert.rejects(provider.generate({ model, messages: [{ role: 'user', content: 'x'.repeat(131_072) }], schema: {}, limits,
+    signal: AbortSignal.timeout(1000) }), error => error instanceof WorkerError && error.code === 'context_limit');
+  assert.equal(requests.filter(request => new URL(request.url).pathname === '/api/v1/chat/completions').length, 1);
+});

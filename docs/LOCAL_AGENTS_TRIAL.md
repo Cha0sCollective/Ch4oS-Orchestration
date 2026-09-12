@@ -198,6 +198,20 @@ remote byte-to-token overflow guard remains; budgets are separate from actual
 provider token counters. Changing effective limits requires qualification rather
 than assuming quality transfers to smaller or larger contexts.
 
+The 0.1.2 NVIDIA rerun produced five correct answers and one provider failure in
+six trials (510156 ms total). All completed answers used correct evidence; the
+failed hostile-input repetition prevents summary qualification. The six local
+summary repetitions all completed, but one code summary omitted strict-boolean
+acceptance and a citation for `enabled`. Neither candidate qualifies. Exact
+profiles, artifact hashes and counters are in the
+[summary aggregate](../agents/orchestrators/routing/qualifications/2026-09-12-summary-v012.json).
+These small fixtures do not establish large-document quality. A separately
+reviewed offline regression admits an input above 64KiB and rejects an input above
+the serialized 128KiB ceiling before an inference POST; the focused provider suite
+passes 12/12. This test-only addition leaves the installed runtime fingerprint
+unchanged. The next investigation should address the observed provider failures
+and omissions, without repeatedly sampling until a favorable pass appears.
+
 No remote model is qualified, and no paid inference or account purchase is
 authorized. Remote contract tests do not count as live provider qualification.
 

@@ -34,6 +34,9 @@ the material failures. Completion counts are not correctness counts.
 The [reviewed NVIDIA summary evaluation](qualifications/2026-09-12-nvidia.json)
 records two correct results out of six trials, including provider failures and
 one evidence error. It grants no eligibility.
+The [0.1.2 summary rerun](qualifications/2026-09-12-summary-v012.json) records
+the larger remote budget and numbered evidence. Both candidates still miss the
+summary acceptance requirement; neither is eligible for ordinary work.
 
 No local candidate may replace the cloud coordinator or independent reviewer on
 the strength of a vendor card or one successful task. Qualification must name the

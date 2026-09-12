@@ -15,8 +15,8 @@ The owner saved an API key in host-local environment storage; authentication was
 verified. The owner confirmed the Free model training privacy setting is enabled
 and saved, and explicitly requested retrying the synthetic fixtures. Host data
 collection permission is enabled only behind the synthetic repository allowlist;
-supplied source transmission remains disabled. NVIDIA's 16K summary evaluation
-completed with two fully correct results out of six; no eligibility was granted.
+supplied source transmission remains disabled. NVIDIA's latest summary evaluation
+produced five correct answers and one provider failure; no eligibility was granted.
 
 The Node 24 package under `tools/local-agents/` implements a shared core behind
 MCP stdio and CLI. Version 0.1.2 is installed independently of this checkout and
@@ -26,10 +26,11 @@ review passed; 65 tests pass. Evidence and exact fingerprints are in
 LOCAL_AGENTS_TRIAL.md. Remote profile limits are 256K context / 128KiB serialized
 input; local profiles retain their verified 8K / 16KiB limits.
 
-The corrected Qwen general and coding evaluations completed 36 trials. Independent
-review rejected every class for material citation/interpretation errors or invalid
-diffs; neither profile is eligible for ordinary work. An earlier artifact was
-mislabeled: trust recorded settings and fingerprints, not filenames. NVIDIA remains
+The original corrected Qwen evaluations rejected every tested class. With numbered
+evidence in 0.1.2, the local summary rerun still omitted a required behavior and
+citation in one answer. No profile is eligible for ordinary work. Reviewed
+aggregates and artifact identities are under agents/orchestrators/routing/qualifications.
+Trust recorded settings and fingerprints, not filenames. NVIDIA remains
 an evaluation candidate. The owner clarified the intended use is personal modding
 evaluation; inspect endpoint terms and data scope for each proposed assignment.
 The sandbox command lane remains disabled after failed isolation probes; do not
@@ -48,8 +49,10 @@ records pin canonical source `b5f6d97796afc28809f2f59bd66d5867bbff0876`.
 
 Both adoption commits passed independent review; their merge/publication gates
 remain with the owner. The OpenRouter dated endpoint/native-token receipt mismatch
-is fixed. The reviewed 0.1.2 follow-up separates profile limits and labels source
-lines for model reads. Next bounded action: complete and independently assess
-affected synthetic qualification cases with each profile's effective limits.
+is fixed. Source candidate `d1998fa54e3a22668fe0ab8409a8af8e7b7721fa` passed
+independent review. Next bounded action: investigate NVIDIA's missing completion
+responses and local summary omissions, then rerun affected cases after a justified
+change. Keep ordinary workers unavailable until qualification passes; repeated
+sampling alone does not establish reliability.
 Do not infer permission to transmit private sources.
 No issue/PR has been opened and no merge or publication has occurred in this packet.
