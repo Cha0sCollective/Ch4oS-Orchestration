@@ -56,3 +56,26 @@ test('newline CLI rejects an oversized unterminated request',async()=>{
     assert.equal(code,1);assert.match(diagnostic,/input_limit/);
   } finally {child.stdin.destroy();if(child.exitCode===null)child.kill();await rm(f.root,{recursive:true,force:true});}
 });
+
+test('context probe requires a profile when one model has multiple limit sets',async()=>{
+  const f=await fixture();
+  const config={
+    version:1,inferencePolicy:'local-only',dataDir:join(f.root,'state'),leaseDir:join(f.root,'lease'),
+    allowQualification:true,
+    limits:{contextTokens:262144,outputTokens:2048,inputBytes:131072,rounds:8,taskTimeoutMs:5000,
+      checkTimeoutMs:5000,maxFiles:16,maxFileBytes:65536,snapshotBytes:262144,toolOutputBytes:8192,resultBytes:32768},
+    repositories:[{id:'fixture',root:f.root,allowPaths:['.'],excludes:[]}],
+    models:[{id:'local',provider:'ollama',model:'test',digest:'a'.repeat(64),quantization:'Q4',think:false,temperature:0}],
+    profiles:[
+      {id:'small',modelId:'local',taskClasses:['exploration'],instruction:'small',limits:{contextTokens:8192,inputBytes:16384}},
+      {id:'large',modelId:'local',taskClasses:['summary'],instruction:'large',limits:{contextTokens:16384,inputBytes:32768}},
+    ],
+  };
+  await writeFile(f.config,JSON.stringify(config));
+  const child=spawn(process.execPath,[f.cli,'probe-context','--config',f.config,'--model-id','local'],{stdio:['ignore','pipe','pipe'],windowsHide:true});
+  let diagnostic='';child.stderr.on('data',chunk=>diagnostic+=chunk);
+  try {
+    const [code]=await once(child,'close');
+    assert.equal(code,1);assert.match(diagnostic,/Select --profile-id.*multiple profile limit sets/);
+  } finally {if(child.exitCode===null)child.kill();await rm(f.root,{recursive:true,force:true});}
+});

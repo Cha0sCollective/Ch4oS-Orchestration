@@ -1,6 +1,6 @@
 /** Transport-neutral contracts. No provider SDK or MCP types belong here. */
-export const SERVICE_VERSION = '0.1.0';
-export const PROMPT_VERSION = '3';
+export const SERVICE_VERSION = '0.1.2';
+export const PROMPT_VERSION = '4';
 export const TASK_CLASSES = ['exploration', 'research', 'summary', 'triage', 'transformation', 'draft', 'check-monitor'] as const;
 export type TaskClass = typeof TASK_CLASSES[number];
 export interface Limits {
@@ -33,6 +33,7 @@ export function modelIdentity(model: RegisteredModel): string {
 }
 export interface Profile {
   id: string; modelId: string; taskClasses: TaskClass[]; instruction: string;
+  limits?: Partial<Limits>;
   qualification?: { fingerprint: string; taskClasses: TaskClass[]; evidence: string[]; expiresAt?: string };
 }
 export interface CommandRecipe {

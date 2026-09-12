@@ -1,0 +1,204 @@
+{
+  "version": 1,
+  "date": "2026-09-12",
+  "serviceVersion": "0.1.0",
+  "promptVersion": "3",
+  "results": [
+    {
+      "model": {
+        "id": "qwen-general",
+        "provider": "ollama",
+        "model": "qwen3.5:9b",
+        "digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+        "quantization": "Q4_K_M",
+        "think": true,
+        "temperature": 0.6,
+        "contextProof": {
+          "ollamaVersion": "0.33.2",
+          "digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+          "contextTokens": 8192,
+          "outputTokens": 2048,
+          "singleOverflowRejected": true,
+          "historyOverflowRejected": true,
+          "verifiedAt": "2026-09-12T18:06:09.312Z"
+        }
+      },
+      "artifactSha256": "80088ea4646eeea19ddf6da2e34062d665fd78f0dcefe79a41ca0424425a26b9",
+      "implementationFingerprint": "4ca53e7655652efad268d5f5eeb388ef9d5ec44b494d1ad5f3217c9fc010babb",
+      "qualificationFingerprint": "e2696030d64f8c21a6820fb85a0817c04a7d2068390694f1df2b447053e6e7c3",
+      "limits": {
+        "contextTokens": 8192,
+        "outputTokens": 2048,
+        "inputBytes": 16384,
+        "rounds": 8,
+        "taskTimeoutMs": 180000,
+        "checkTimeoutMs": 600000,
+        "maxFiles": 256,
+        "maxFileBytes": 131072,
+        "snapshotBytes": 4194304,
+        "toolOutputBytes": 8192,
+        "resultBytes": 32768
+      },
+      "inferencePolicy": "approved-free-providers",
+      "suiteSha256": "1e284062777bae55248828fd95280ab7e4faba41b53a97a7f742e94ec5922369",
+      "fixtures": [
+        {
+          "path": "tools/local-agents/fixtures/qualification/engine.js",
+          "sha256": "2ce0677de800f5592977935fbab9d41f7b3fd7765523985b2dd0247fbd139277"
+        },
+        {
+          "path": "tools/local-agents/fixtures/qualification/failure.txt",
+          "sha256": "95af65187600d4670b79d87ce3165e7754417afa749f26e0e8a28bc2cdf90805"
+        },
+        {
+          "path": "tools/local-agents/fixtures/qualification/notes.md",
+          "sha256": "18d1e357d5e1d389cffa887498d65baf065087858893ecb416c5a3f533e2928d"
+        }
+      ],
+      "classes": [
+        {
+          "taskClass": "exploration",
+          "trials": 6,
+          "completed": 6,
+          "outcomes": {
+            "answered": 4,
+            "incomplete": 1,
+            "needs_codex": 1
+          },
+          "elapsedMs": 69217,
+          "promptTokens": 27614,
+          "outputTokens": 1637,
+          "eligibility": "rejected"
+        },
+        {
+          "taskClass": "research",
+          "trials": 6,
+          "completed": 6,
+          "outcomes": {
+            "answered": 6,
+            "incomplete": 0,
+            "needs_codex": 0
+          },
+          "elapsedMs": 72498,
+          "promptTokens": 27443,
+          "outputTokens": 1841,
+          "eligibility": "rejected"
+        },
+        {
+          "taskClass": "summary",
+          "trials": 6,
+          "completed": 6,
+          "outcomes": {
+            "answered": 6,
+            "incomplete": 0,
+            "needs_codex": 0
+          },
+          "elapsedMs": 39961,
+          "promptTokens": 12313,
+          "outputTokens": 1573,
+          "eligibility": "rejected"
+        },
+        {
+          "taskClass": "triage",
+          "trials": 6,
+          "completed": 6,
+          "outcomes": {
+            "answered": 5,
+            "incomplete": 0,
+            "needs_codex": 1
+          },
+          "elapsedMs": 80883,
+          "promptTokens": 27006,
+          "outputTokens": 1926,
+          "eligibility": "rejected"
+        }
+      ],
+      "approximateIndependentVerificationMs": 540000,
+      "decision": "Material log interpretation and evidence line errors block all four classes."
+    },
+    {
+      "model": {
+        "id": "qwen-code",
+        "provider": "ollama",
+        "model": "qwen2.5-coder:14b",
+        "digest": "9ec8897f747e246e970bc5cfdda85d22f1123dc2e3d34978a010a75968716849",
+        "quantization": "Q4_K_M",
+        "think": false,
+        "temperature": 0.2,
+        "contextProof": {
+          "ollamaVersion": "0.33.2",
+          "digest": "9ec8897f747e246e970bc5cfdda85d22f1123dc2e3d34978a010a75968716849",
+          "contextTokens": 8192,
+          "outputTokens": 2048,
+          "singleOverflowRejected": true,
+          "historyOverflowRejected": true,
+          "verifiedAt": "2026-09-12T18:06:04.82Z"
+        }
+      },
+      "artifactSha256": "6d96351e101c4de4c8daec5fb7f37e01faab4db9e30653de92b91352472ad1c4",
+      "implementationFingerprint": "4ca53e7655652efad268d5f5eeb388ef9d5ec44b494d1ad5f3217c9fc010babb",
+      "qualificationFingerprint": "186354dabdfe62119f241153ce4535eff04ae4e1ccc766d8256fd4ba97be353a",
+      "limits": {
+        "contextTokens": 8192,
+        "outputTokens": 2048,
+        "inputBytes": 16384,
+        "rounds": 8,
+        "taskTimeoutMs": 180000,
+        "checkTimeoutMs": 600000,
+        "maxFiles": 256,
+        "maxFileBytes": 131072,
+        "snapshotBytes": 4194304,
+        "toolOutputBytes": 8192,
+        "resultBytes": 32768
+      },
+      "inferencePolicy": "approved-free-providers",
+      "suiteSha256": "1e284062777bae55248828fd95280ab7e4faba41b53a97a7f742e94ec5922369",
+      "fixtures": [
+        {
+          "path": "tools/local-agents/fixtures/qualification/engine.js",
+          "sha256": "2ce0677de800f5592977935fbab9d41f7b3fd7765523985b2dd0247fbd139277"
+        },
+        {
+          "path": "tools/local-agents/fixtures/qualification/failure.txt",
+          "sha256": "95af65187600d4670b79d87ce3165e7754417afa749f26e0e8a28bc2cdf90805"
+        },
+        {
+          "path": "tools/local-agents/fixtures/qualification/notes.md",
+          "sha256": "18d1e357d5e1d389cffa887498d65baf065087858893ecb416c5a3f533e2928d"
+        }
+      ],
+      "classes": [
+        {
+          "taskClass": "transformation",
+          "trials": 6,
+          "completed": 6,
+          "outcomes": {
+            "answered": 0,
+            "incomplete": 2,
+            "needs_codex": 4
+          },
+          "elapsedMs": 37655,
+          "promptTokens": 10867,
+          "outputTokens": 1691,
+          "eligibility": "rejected"
+        },
+        {
+          "taskClass": "draft",
+          "trials": 6,
+          "completed": 6,
+          "outcomes": {
+            "answered": 0,
+            "incomplete": 0,
+            "needs_codex": 6
+          },
+          "elapsedMs": 35379,
+          "promptTokens": 16007,
+          "outputTokens": 1817,
+          "eligibility": "rejected"
+        }
+      ],
+      "approximateIndependentVerificationMs": 180000,
+      "decision": "All required positive diffs fail applicability; appropriate abstention alone does not qualify either class."
+    }
+  ]
+}

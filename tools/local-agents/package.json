@@ -1,13 +1,25 @@
 {
   "name": "@ch4os/local-agents",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "private": true,
   "type": "module",
   "description": "Bounded local inference workers for Codex orchestration",
-  "engines": { "node": ">=24 <25" },
-  "bin": { "ch4os-local-agents": "dist/cli.js" },
-  "exports": { ".": "./dist/index.js" },
-  "files": ["dist", "README.md", "examples", "catalog", "fixtures"],
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "bin": {
+    "ch4os-local-agents": "dist/cli.js"
+  },
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "examples",
+    "catalog",
+    "fixtures"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "npm run build && node --test dist/tests/*.test.js",

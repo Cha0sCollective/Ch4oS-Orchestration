@@ -10,7 +10,7 @@ const text = z.string().max(16000);
 const digest = z.string().regex(/^(sha256:)?[a-f0-9]{64}$/);
 const taskClass = z.enum(TASK_CLASSES);
 export const limitsSchema = z.object({
-  contextTokens: z.number().int().min(2048).max(131072),
+  contextTokens: z.number().int().min(2048).max(1048576),
   outputTokens: z.number().int().min(128).max(16384),
   inputBytes: z.number().int().min(1024).max(524288),
   rounds: z.number().int().min(1).max(32),
@@ -70,14 +70,34 @@ export const hostConfigSchema = z.object({
     catalogFingerprint: digest, temperature: z.number().min(0).max(2).default(0.6), contextTokens: z.number().int().min(2048).max(2097152),
     outputMode: z.enum(['json-schema', 'tool-call']),
   }).strict()])),
-  profiles: z.array(z.object({ id, modelId: id, taskClasses: z.array(taskClass).min(1), instruction: z.string().max(4000),
+  profiles: z.array(z.object({ id, modelId: id, taskClasses: z.array(taskClass).min(1), instruction: z.string().max(4000), limits: limitsSchema.partial().optional(),
     qualification: z.object({ fingerprint: digest, taskClasses: z.array(taskClass).min(1), evidence: z.array(z.string().max(2048)).min(1), expiresAt: z.string().datetime().optional() }).strict().optional(),
   }).strict()),
   runner: z.object({ codexExecutable: z.string(), permissionProfile: id, configFile: z.string(),
     qualification: z.object({ fingerprint: digest, evidence: z.string(), verifiedAt: z.string().datetime() }).strict().optional(),
     recipes: z.array(z.object({ id, executable: z.string(), args: z.array(z.string()), requiredPaths: z.array(z.string()), timeoutMs: z.number().int().positive().max(3600000) }).strict()),
   }).strict().optional(),
-}).strict();
+}).strict().superRefine((config, context) => {
+  for (let profileIndex = 0; profileIndex < config.profiles.length; profileIndex += 1) {
+    const profile = config.profiles[profileIndex]!;
+    for (const [key, value] of Object.entries(profile.limits ?? {}) as [keyof typeof config.limits, number][]) {
+      if (value > config.limits[key]) {
+        context.addIssue({
+          code: 'custom', path: ['profiles', profileIndex, 'limits', key],
+          message: `Profile limit ${key} exceeds the host ceiling`,
+        });
+      }
+    }
+    const contextTokens = profile.limits?.contextTokens ?? config.limits.contextTokens;
+    const outputTokens = profile.limits?.outputTokens ?? config.limits.outputTokens;
+    if (outputTokens >= contextTokens) {
+      context.addIssue({
+        code: 'custom', path: ['profiles', profileIndex, 'limits'],
+        message: 'Profile output allowance must leave input context space',
+      });
+    }
+  }
+});
 
 export async function loadConfig(filename: string): Promise<HostConfig> {
   const absolute = resolve(filename);
@@ -100,6 +120,9 @@ export async function loadConfig(filename: string): Promise<HostConfig> {
   }
   for (const profile of config.profiles) {
     if (!config.models.some(m => m.id === profile.modelId)) throw new WorkerError('invalid_config', 'Profile references an unregistered model');
+    for (const [key, value] of Object.entries(profile.limits ?? {}) as [keyof typeof config.limits, number][]) {
+      if (value > config.limits[key]) throw new WorkerError('invalid_config', `Profile ${profile.id} limit ${key} exceeds the host ceiling`);
+    }
   }
   if (config.models.some(model => model.provider === 'openrouter') && (config.inferencePolicy !== 'approved-free-providers' || !config.openrouter))
     throw new WorkerError('invalid_config', 'Remote models require the explicit approved-free-providers policy and OpenRouter controls');

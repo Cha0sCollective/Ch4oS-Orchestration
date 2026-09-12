@@ -7,7 +7,7 @@ import { join } from 'node:path';
 import { promisify } from 'node:util';
 import test from 'node:test';
 import { captureSnapshot, listFiles, normalizeSnapshotPath, readLines, searchSnapshot } from '../snapshot.js';
-import { DEFAULT_LIMITS, type RepositoryConfig, type TaskRequest, WorkerError } from '../types.js';
+import { DEFAULT_LIMITS, type RepositoryConfig, type Snapshot, type TaskRequest, WorkerError } from '../types.js';
 
 const execFileAsync = promisify(execFile);
 
@@ -170,6 +170,35 @@ test('snapshot tools preserve one-based lines and bound serialized output', asyn
     assert.ok(Buffer.byteLength(JSON.stringify(listFiles(snapshot, 40))) <= 40);
     assert.ok(Buffer.byteLength(JSON.stringify(searchSnapshot(snapshot, 'e', 40))) <= 40);
   } finally { await item.cleanup(); }
+});
+
+test('numbered reads label partial ranges and blank lines inside the byte bound', () => {
+  const snapshot: Snapshot = {
+    id: 'a'.repeat(64), repositoryId: 'repo', head: null, dirty: false, omissions: [],
+    files: [{ path: 'notes.txt', sha256: 'b'.repeat(64), text: 'first\n\nthird\nfourth' }],
+  };
+  const numbered = readLines(snapshot, 'notes.txt', 2, 4, 512, { numbered: true });
+  assert.deepEqual(numbered, {
+    path: 'notes.txt', startLine: 2, endLine: 4,
+    text: 'L2: \nL3: third\nL4: fourth', truncated: false,
+  });
+  assert.equal(readLines(snapshot, 'notes.txt', 2, 4, 512).text, '\nthird\nfourth');
+
+  const oneLine = readLines(snapshot, 'notes.txt', 2, 2, 512, { numbered: true });
+  const oneLineLimit = Buffer.byteLength(JSON.stringify(oneLine), 'utf8');
+  const bounded = readLines(snapshot, 'notes.txt', 2, 4, oneLineLimit, { numbered: true });
+  assert.deepEqual(bounded, {
+    path: 'notes.txt', startLine: 2, endLine: 2, text: 'L2: ', truncated: true,
+  });
+  assert.ok(Buffer.byteLength(JSON.stringify(bounded), 'utf8') <= oneLineLimit);
+
+  const emptySnapshot: Snapshot = {
+    ...snapshot,
+    files: [{ path: 'empty.txt', sha256: 'c'.repeat(64), text: '' }],
+  };
+  assert.deepEqual(readLines(emptySnapshot, 'empty.txt', 1, 1, 512, { numbered: true }), {
+    path: 'empty.txt', startLine: 1, endLine: 0, text: '', truncated: false,
+  });
 });
 
 test('normalizeSnapshotPath accepts portable relative paths only', () => {

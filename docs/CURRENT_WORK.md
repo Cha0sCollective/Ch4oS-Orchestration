@@ -12,15 +12,19 @@ reviewed adoption. On 2026-09-12 the owner additionally authorized OpenRouter
 implementation for free models. Keep local-only as the default; remote work needs
 explicit endpoint selection, zero-price enforcement, qualification and data consent.
 The owner saved an API key in host-local environment storage; authentication was
-verified. The selected NVIDIA Ultra free endpoint is blocked by the account's
-Free model training privacy setting. Changing that account-wide setting awaits
-the owner's choice. Only synthetic fixture data is authorized for these trials.
+verified. The owner confirmed the Free model training privacy setting is enabled
+and saved, and explicitly requested retrying the synthetic fixtures. Host data
+collection permission is enabled only behind the synthetic repository allowlist;
+supplied source transmission remains disabled. NVIDIA's 16K summary evaluation
+completed with two fully correct results out of six; no eligibility was granted.
 
 The Node 24 package under `tools/local-agents/` implements a shared core behind
-MCP stdio and CLI. Version 0.1.0 is installed independently of this checkout and
+MCP stdio and CLI. Version 0.1.2 is installed independently of this checkout and
 the `ch4os-local-agents` connector is registered. Installed MCP inference,
 idempotency, feedback and cancellation were exercised. Independent implementation
-review passed 56 tests; evidence and exact fingerprints are in LOCAL_AGENTS_TRIAL.md.
+review passed; 65 tests pass. Evidence and exact fingerprints are in
+LOCAL_AGENTS_TRIAL.md. Remote profile limits are 256K context / 128KiB serialized
+input; local profiles retain their verified 8K / 16KiB limits.
 
 The corrected Qwen general and coding evaluations completed 36 trials. Independent
 review rejected every class for material citation/interpretation errors or invalid
@@ -36,7 +40,16 @@ Create-Ch4oS and Ch4oS-Installer after the local pilot. Use manual copying and
 preserve target-local guidance and unrelated work. Merge, publication and live
 operation remain subject to the existing target gates.
 
-Next bounded action: finish the separate adoption review and, once the owner
-confirms the privacy setting is saved, retry the selected NVIDIA endpoint on the
-three synthetic fixture files. Do not infer permission to transmit private sources.
+Prepared adoption worktrees live under the host tools directory's
+`adoption/Create-Ch4oS` and `adoption/Ch4oS-Installer`, both on
+`codex/local-worker-adoption`. Create candidate: `43cce26b9fb429bb0dcb226f39db66f932aec175`;
+Installer: `ac0079a8c904b1e325fc0a2abfe317db1bf9fb19`. Their incremental adoption
+records pin canonical source `b5f6d97796afc28809f2f59bd66d5867bbff0876`.
+
+Both adoption commits passed independent review; their merge/publication gates
+remain with the owner. The OpenRouter dated endpoint/native-token receipt mismatch
+is fixed. The reviewed 0.1.2 follow-up separates profile limits and labels source
+lines for model reads. Next bounded action: complete and independently assess
+affected synthetic qualification cases with each profile's effective limits.
+Do not infer permission to transmit private sources.
 No issue/PR has been opened and no merge or publication has occurred in this packet.

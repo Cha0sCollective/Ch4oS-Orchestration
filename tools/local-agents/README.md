@@ -67,11 +67,33 @@ further exclude private project files. Select narrow paths, especially for logs.
 Live documentation browsing belongs to Codex; `sources` accepts supplied text,
 source URL and retrieval time. File contents cannot grant permissions.
 
+Model-facing reads label every source line, including blank lines, with its exact
+`L<number>:` reference. Labels count toward context/output budgets and are not
+part of the source text. Raw snapshots and proposed-diff validation use the original
+file bytes; models must not insert evidence labels into a proposed patch.
+
 Default limits: 8K model context, 2K generation, 16KiB serialized model input,
 eight rounds, one active inference per host, four queued jobs per service, three
 minutes reasoning and ten minutes maximum per check. Whole-message/schema/history
 bytes count. Tool excerpts report truncation; tasks escalate on exhausted budgets.
 Provider token counters are actual returned counters, not estimates.
+
+Host `limits` are ceilings. Each profile can set its own narrower `limits`.
+Qualification assignments can narrow the selected profile further; ordinary work
+requires limits matching its saved qualification. A smaller context can change
+answer quality, so use separately qualified profiles for different operating
+budgets rather than assuming a pass applies to every smaller budget. For example, a host can
+allow 262144 context tokens and 131072 input bytes, retain 8192/16384 for local
+profiles, and assign the larger allowance to an appropriate remote profile.
+Capabilities expose the effective limits; changing them requires qualification
+to be rerun. Larger remote limits do not invalidate a local context proof when
+that local profile retains its tested limits.
+
+Input bytes include the complete serialized inference request, including schemas,
+instructions, evidence and history. OpenRouter currently reserves one context
+token per serialized byte, plus output and a 512-token margin, as a conservative
+overflow bound. Both limits apply: 64K context cannot accommodate 128KiB under
+that bound; 256K context can. This reservation is not an estimate of billed usage.
 
 Results include findings with inspected line references, limitations, optional
 scoped unified diffs, snapshot identity, command receipts and inference statistics.

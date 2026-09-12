@@ -5,7 +5,7 @@ import { loadConfig } from './config.js';
 import { OllamaProvider } from './ollama.js';
 import { createProviders } from './providers.js';
 import { IsolatedCommandRunner } from './runner.js';
-import { WorkerService, qualificationFingerprint } from './service.js';
+import { effectiveProfileLimits, WorkerService, qualificationFingerprint } from './service.js';
 import { createMcpServer, safeError } from './mcp.js';
 import { WorkerError } from './types.js';
 
@@ -44,7 +44,19 @@ if (!command || ['--help', 'help', '-h'].includes(command)) {
       if (!config.allowQualification) throw new WorkerError('qualification_disabled', 'Host qualification must be explicitly enabled');
       const model = config.models.find(item => item.id === option('--model-id'));
       if (!model || model.provider !== 'ollama') throw new WorkerError('invalid_request', 'Select a registered local Ollama --model-id');
-      process.stdout.write(JSON.stringify(await provider.probeContext(model, config.limits, AbortSignal.timeout(config.limits.taskTimeoutMs))) + '\n');
+      const selectedProfileId = option('--profile-id');
+      const attachedProfiles = config.profiles.filter(item => item.modelId === model.id);
+      const distinctLimitSets = new Set(attachedProfiles.map(item => JSON.stringify(effectiveProfileLimits(config, item))));
+      const profile = selectedProfileId
+        ? attachedProfiles.find(item => item.id === selectedProfileId)
+        : distinctLimitSets.size === 1 ? attachedProfiles[0] : undefined;
+      if (!profile) {
+        throw new WorkerError('invalid_request', selectedProfileId
+          ? 'The selected --profile-id does not use this model'
+          : 'Select --profile-id when a model has no profile or multiple profile limit sets');
+      }
+      const limits = effectiveProfileLimits(config, profile);
+      process.stdout.write(JSON.stringify(await provider.probeContext(model, limits, AbortSignal.timeout(limits.taskTimeoutMs))) + '\n');
     } else if (command === 'fingerprint') {
       const profile = config.profiles.find(item => item.id === option('--profile-id'));
       const model = config.models.find(item => item.id === profile?.modelId);

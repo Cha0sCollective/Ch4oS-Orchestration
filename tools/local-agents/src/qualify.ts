@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { z } from 'zod';
 import { loadConfig, implementationFingerprint } from './config.js';
 import { createProviders } from './providers.js';
-import { WorkerService } from './service.js';
+import { effectiveProfileLimits, qualificationFingerprint, WorkerService } from './service.js';
 import { normalizeSnapshotPath } from './snapshot.js';
 import {
   SERVICE_VERSION, PROMPT_VERSION, TASK_CLASSES, WorkerError,
@@ -306,12 +306,24 @@ async function main(): Promise<void> {
         process.stderr.write(`[${current}/${total}] ${caseItem.id} #${repetition}: ${job.state}${job.result ? `/${job.result.answer.outcome}` : ''}\n`);
       }
     }
+    const runtimeFingerprint = await implementationFingerprint();
+    const profileRecords = await Promise.all(config.profiles.map(async (profile) => {
+      const { qualification: _qualification, ...settings } = profile;
+      const model = config.models.find((candidate) => candidate.id === profile.modelId);
+      return {
+        ...settings,
+        effectiveLimits: effectiveProfileLimits(config, profile),
+        candidateFingerprint: model
+          ? await qualificationFingerprint(config, profile, model, runtimeFingerprint)
+          : null,
+      };
+    }));
     await writeExclusiveJson(output, {
       version: 1,
       generatedAt: new Date().toISOString(),
       serviceVersion: SERVICE_VERSION,
       promptVersion: PROMPT_VERSION,
-      implementationFingerprint: await implementationFingerprint(),
+      implementationFingerprint: runtimeFingerprint,
       inferencePolicy: config.inferencePolicy,
       openrouterPolicy: config.openrouter ? {
         maxCostUsd: config.openrouter.maxCostUsd,
@@ -325,7 +337,7 @@ async function main(): Promise<void> {
       remoteDataConsent: options.remoteDataConsent,
       limits: config.limits,
       models: config.models,
-      profiles: config.profiles.map(({qualification: _qualification, ...profile}) => profile),
+      profiles: profileRecords,
       runtime: { node: process.version, platform: process.platform, arch: process.arch,
         cpu: cpus()[0]?.model, logicalCpus: cpus().length, totalMemoryBytes: totalmem() },
       suite: { cases: selectedCases, sha256: createHash('sha256').update(JSON.stringify(cases)).digest('hex') },

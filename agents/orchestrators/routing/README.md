@@ -27,6 +27,14 @@ evaluation only; it does not permit ordinary work.
 | [Qwen3.5 9B Q4_K_M](models/qwen3.5-9b-q4_k_m.md) | Small bounded local tasks | Candidate; not qualified |
 | [Qwen2.5-Coder 14B Q4_K_M](models/qwen2.5-coder-14b-q4_k_m.md) | Draft code or patch proposals | Candidate; not qualified |
 
+The [reviewed local evaluation aggregate](qualifications/2026-09-12-local.json)
+records exact identities, settings, token counters, elapsed time and rejected
+task classes. The [trial report](../../../docs/LOCAL_AGENTS_TRIAL.md) explains
+the material failures. Completion counts are not correctness counts.
+The [reviewed NVIDIA summary evaluation](qualifications/2026-09-12-nvidia.json)
+records two correct results out of six trials, including provider failures and
+one evidence error. It grants no eligibility.
+
 No local candidate may replace the cloud coordinator or independent reviewer on
 the strength of a vendor card or one successful task. Qualification must name the
 exact tag and digest, quantization, Ollama/runtime version, prompt/task class,

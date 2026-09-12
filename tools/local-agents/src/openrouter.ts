@@ -13,6 +13,7 @@ import {
 const ORIGIN = 'https://openrouter.ai';
 const CATALOG_LIMIT_BYTES = 4 * 1024 * 1024;
 const CONTEXT_TEMPLATE_RESERVE_TOKENS = 512;
+const RECEIPT_RETRY_DELAYS_MS = [100, 200, 400, 800, 1600, 3200, 6400, 2000] as const;
 const BASE_PARAMETERS = ['max_tokens', 'temperature'] as const;
 type JsonObject = Record<string, unknown>;
 
@@ -20,6 +21,7 @@ export interface FreeEndpointIdentity {
   model: string;
   endpointId: string;
   endpointName: string;
+  endpointModel: string;
   providerSlug: string;
   providerName: string;
   contextTokens: number;
@@ -31,6 +33,20 @@ export interface FreeEndpointIdentity {
 }
 
 export type OpenRouterCredentialResolver = (environmentVariable: string) => string | undefined;
+export interface OpenRouterDependencies {
+  wait?: (milliseconds: number, signal: AbortSignal) => Promise<void>;
+}
+
+function wait(milliseconds: number, signal: AbortSignal): Promise<void> {
+  throwIfAborted(signal);
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(done, milliseconds);
+    function done(): void { signal.removeEventListener('abort', aborted); resolve(); }
+    function aborted(): void { clearTimeout(timer); reject(signal.reason ?? new WorkerError('cancelled', 'OpenRouter request was cancelled')); }
+    signal.addEventListener('abort', aborted, { once: true });
+    if (signal.aborted) aborted();
+  });
+}
 
 function object(value: unknown, message: string): JsonObject {
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new WorkerError('provider_error', message);
@@ -78,11 +94,19 @@ function splitModel(model: string): [string, string] {
   }
   return [parts[0]!, parts[1]!];
 }
+function endpointModelFromName(endpointName: string, providerName: string): string | undefined {
+  const prefix = `${providerName} | `;
+  if (!endpointName.startsWith(prefix)) return undefined;
+  const endpointModel = endpointName.slice(prefix.length);
+  try { splitModel(endpointModel); }
+  catch { return undefined; }
+  return endpointModel;
+}
 function throwIfAborted(signal: AbortSignal): void {
   if (signal.aborted) throw signal.reason ?? new WorkerError('cancelled', 'OpenRouter request was cancelled');
 }
 
-function validateRouterMetadata(value: unknown, model: OpenRouterModel): void {
+function validateRouterMetadata(value: unknown, model: OpenRouterModel, endpointModel: string): void {
   if (value === undefined) return; // Cache replays may omit router metadata; generation proof remains mandatory.
   const metadata = object(value, 'OpenRouter returned invalid routing metadata');
   const endpoints = object(metadata.endpoints, 'OpenRouter returned invalid endpoint routing metadata');
@@ -91,7 +115,7 @@ function validateRouterMetadata(value: unknown, model: OpenRouterModel): void {
     .filter(entry => entry.selected === true);
   if (metadata.requested !== model.model || metadata.strategy !== 'direct' || metadata.attempt !== 1
       || (Array.isArray(metadata.pipeline) && metadata.pipeline.length > 0)
-      || selected.length !== 1 || selected[0]!.provider !== model.providerName || selected[0]!.model !== model.model) {
+      || selected.length !== 1 || selected[0]!.provider !== model.providerName || selected[0]!.model !== endpointModel) {
     throw new WorkerError('provider_error', 'OpenRouter routing metadata does not prove the pinned direct endpoint');
   }
 }
@@ -104,6 +128,7 @@ export class OpenRouterProvider implements ModelProvider {
     private readonly config: OpenRouterConfig | undefined,
     private readonly fetcher: typeof fetch = fetch,
     private readonly resolveCredential: OpenRouterCredentialResolver = name => process.env[name],
+    private readonly dependencies: OpenRouterDependencies = {},
   ) {}
 
   private validatedConfig(): OpenRouterConfig {
@@ -126,7 +151,8 @@ export class OpenRouterProvider implements ModelProvider {
     return credential;
   }
 
-  private async json(path: string, init: RequestInit, signal: AbortSignal, maxBytes: number, authenticated = true): Promise<JsonObject> {
+  private async json(path: string, init: RequestInit, signal: AbortSignal, maxBytes: number, authenticated = true,
+    retryGenerationNotFound = false): Promise<JsonObject> {
     throwIfAborted(signal);
     let response: Response;
     try {
@@ -166,8 +192,29 @@ export class OpenRouterProvider implements ModelProvider {
     try { parsed = JSON.parse(Buffer.concat(chunks).toString('utf8')); }
     catch { throw new WorkerError('provider_error', 'OpenRouter returned invalid JSON'); }
     const result = object(parsed, 'OpenRouter returned an invalid response');
-    if (!response.ok) throw new WorkerError('provider_error', `OpenRouter rejected the request (HTTP ${response.status})`);
+    if (!response.ok) {
+      if (retryGenerationNotFound && response.status === 404) {
+        throw new WorkerError('generation_not_ready', 'OpenRouter generation proof is not ready');
+      }
+      throw new WorkerError('provider_error', `OpenRouter rejected the request (HTTP ${response.status})`);
+    }
     return result;
+  }
+
+  private async generationProof(generationId: string, signal: AbortSignal): Promise<JsonObject> {
+    for (let attempt = 0; ; attempt++) {
+      try {
+        const result = await this.json(`/api/v1/generation?id=${encodeURIComponent(generationId)}`, { method: 'GET' }, signal,
+          256 * 1024, true, true);
+        return object(result.data, 'OpenRouter omitted generation proof');
+      } catch (error) {
+        throwIfAborted(signal);
+        if (!(error instanceof WorkerError) || error.code !== 'generation_not_ready') throw error;
+        const delay = RECEIPT_RETRY_DELAYS_MS[attempt];
+        if (delay === undefined) throw new WorkerError('provider_error', 'OpenRouter generation proof was not available within the receipt window');
+        await (this.dependencies.wait ?? wait)(delay, signal);
+      }
+    }
   }
 
   private async catalog(modelName: string, signal: AbortSignal): Promise<{ model: JsonObject; endpoints: JsonObject[] }> {
@@ -190,6 +237,7 @@ export class OpenRouterProvider implements ModelProvider {
     const tag = string(endpoint.tag);
     const endpointName = string(endpoint.name);
     const providerName = string(endpoint.provider_name);
+    const endpointModel = endpointName && providerName ? endpointModelFromName(endpointName, providerName) : undefined;
     const modelContext = nonnegativeInteger(model.context_length);
     const endpointContext = nonnegativeInteger(endpoint.context_length);
     const maxOutputTokens = nonnegativeInteger(endpoint.max_completion_tokens);
@@ -199,7 +247,7 @@ export class OpenRouterProvider implements ModelProvider {
     const modelParameters = sortedStrings(model.supported_parameters);
     const endpointParameters = sortedStrings(endpoint.supported_parameters);
     const supportedToolChoice = sortedBooleanRecord(endpoint.supports_tool_choice);
-    if (!modelName || !tag || !endpointName || !providerName || contextTokens < 1 || !maxOutputTokens || !modelPricing || !endpointPricing
+    if (!modelName || !tag || !endpointName || !endpointModel || !providerName || contextTokens < 1 || !maxOutputTokens || !modelPricing || !endpointPricing
         || endpoint.status !== 0
         || endpoint.model_id !== modelName
         || BASE_PARAMETERS.some(parameter => !modelParameters.includes(parameter) || !endpointParameters.includes(parameter))) return [];
@@ -213,7 +261,8 @@ export class OpenRouterProvider implements ModelProvider {
     }
     return modes.map(outputMode => {
       const fingerprintInput = {
-        format: 'openrouter-catalog-v2', model: modelName, endpointId: tag, endpointName, providerSlug: tag, providerName, outputMode,
+        format: 'openrouter-catalog-v3', model: modelName, endpointId: tag, endpointName, endpointModel,
+        providerSlug: tag, providerName, outputMode,
         contextTokens, maxCompletionTokens: maxOutputTokens,
         maxPromptTokens: nonnegativeInteger(endpoint.max_prompt_tokens) ?? null,
         quantization: string(endpoint.quantization) ?? null, supportsImplicitCaching: endpoint.supports_implicit_caching ?? null,
@@ -221,7 +270,7 @@ export class OpenRouterProvider implements ModelProvider {
         modelPricing, endpointPricing, modelParameters, endpointParameters,
       };
       return {
-        model: modelName, endpointId: tag, endpointName, providerSlug: tag, providerName, outputMode, contextTokens, maxOutputTokens,
+        model: modelName, endpointId: tag, endpointName, endpointModel, providerSlug: tag, providerName, outputMode, contextTokens, maxOutputTokens,
         catalogFingerprint: sha256(fingerprintInput), supportedParameters: endpointParameters, pricing: endpointPricing,
       };
     });
@@ -255,17 +304,22 @@ export class OpenRouterProvider implements ModelProvider {
     return candidate;
   }
 
+  private async qualifiedEndpoint(model: OpenRouterModel, limits: Limits, signal: AbortSignal): Promise<FreeEndpointIdentity> {
+    this.credential();
+    const endpoint = await this.inspect(model, signal);
+    if (!Number.isSafeInteger(limits.contextTokens) || limits.contextTokens < 1 || limits.contextTokens > model.contextTokens
+        || limits.contextTokens > endpoint.contextTokens || !Number.isSafeInteger(limits.outputTokens) || limits.outputTokens < 1
+        || limits.outputTokens > endpoint.maxOutputTokens || !Number.isSafeInteger(limits.inputBytes) || limits.inputBytes < 1
+        || !Number.isSafeInteger(limits.resultBytes) || limits.resultBytes < 1) {
+      throw new WorkerError('model_unavailable', 'Configured request limits exceed the pinned OpenRouter endpoint bounds');
+    }
+    return endpoint;
+  }
+
   async verify(model: RegisteredModel, limits: Limits, signal: AbortSignal): Promise<ProviderHealth> {
     try {
       if (model.provider !== 'openrouter') throw new WorkerError('model_unavailable', 'This provider only accepts OpenRouter model registrations');
-      this.credential();
-      const endpoint = await this.inspect(model, signal);
-      if (!Number.isSafeInteger(limits.contextTokens) || limits.contextTokens < 1 || limits.contextTokens > model.contextTokens
-          || limits.contextTokens > endpoint.contextTokens || !Number.isSafeInteger(limits.outputTokens) || limits.outputTokens < 1
-          || limits.outputTokens > endpoint.maxOutputTokens || !Number.isSafeInteger(limits.inputBytes) || limits.inputBytes < 1
-          || !Number.isSafeInteger(limits.resultBytes) || limits.resultBytes < 1) {
-        return { available: false, reason: 'Configured request limits exceed the pinned OpenRouter endpoint bounds' };
-      }
+      const endpoint = await this.qualifiedEndpoint(model, limits, signal);
       return { available: true, version: endpoint.catalogFingerprint };
     } catch (error) {
       throwIfAborted(signal);
@@ -276,8 +330,7 @@ export class OpenRouterProvider implements ModelProvider {
   async generate(request: GenerateRequest) {
     if (request.model.provider !== 'openrouter') throw new WorkerError('model_unavailable', 'This provider only accepts OpenRouter model registrations');
     const { model, messages, schema, limits, signal } = request;
-    const verified = await this.verify(model, limits, signal);
-    if (!verified.available) throw new WorkerError('model_unavailable', verified.reason ?? 'OpenRouter model unavailable');
+    const endpoint = await this.qualifiedEndpoint(model, limits, signal);
     if (!Number.isFinite(model.temperature) || model.temperature < 0 || model.temperature > 2) {
       throw new WorkerError('invalid_config', 'OpenRouter temperature must be between zero and two');
     }
@@ -349,14 +402,16 @@ export class OpenRouterProvider implements ModelProvider {
       throw new WorkerError('provider_error', 'OpenRouter completion identity or zero-cost usage proof is missing');
     }
     if (Buffer.byteLength(content, 'utf8') > limits.resultBytes) throw new WorkerError('provider_limit', 'Generated content exceeded the result allowance');
-    validateRouterMetadata(result.openrouter_metadata, model);
+    validateRouterMetadata(result.openrouter_metadata, model, endpoint.endpointModel);
 
-    const proofResult = await this.json(`/api/v1/generation?id=${encodeURIComponent(generationId)}`, { method: 'GET' }, signal, 256 * 1024);
-    const proof = object(proofResult.data, 'OpenRouter omitted generation proof');
-    const promptTokens = nonnegativeInteger(proof.tokens_prompt);
-    const outputTokens = nonnegativeInteger(proof.tokens_completion);
-    if (proof.id !== generationId || proof.model !== model.model || proof.provider_name !== model.providerName
+    const proof = await this.generationProof(generationId, signal);
+    const routedPromptTokens = nonnegativeInteger(proof.tokens_prompt);
+    const routedOutputTokens = nonnegativeInteger(proof.tokens_completion);
+    const promptTokens = nonnegativeInteger(proof.native_tokens_prompt);
+    const outputTokens = nonnegativeInteger(proof.native_tokens_completion);
+    if (proof.id !== generationId || proof.model !== endpoint.endpointModel || proof.provider_name !== model.providerName
         || proof.is_byok !== false || finiteNumber(proof.total_cost) !== 0 || finiteNumber(proof.usage) !== 0
+        || routedPromptTokens === undefined || routedOutputTokens === undefined
         || promptTokens === undefined || outputTokens === undefined || outputTokens > limits.outputTokens
         || promptTokens !== usage.prompt_tokens || outputTokens !== usage.completion_tokens) {
       throw new WorkerError('provider_error', 'OpenRouter generation did not prove the pinned free endpoint identity');

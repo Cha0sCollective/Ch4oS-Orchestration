@@ -21,7 +21,7 @@ evaluation, excluding production use without a separate subscription. Sections
 2.6 and 3.3 prohibit confidential/personal inputs and permit collection of inputs
 and outputs for product/model improvement. The endpoint notice says improvement
 session logs are not tied to an identity or persistent identifier. These terms do
-not establish suitability for ongoing project work, even if synthetic cases pass.
+not establish suitability for production service use, even if synthetic cases pass.
 
 Inspect the exact model's endpoints, supported parameters, context, pricing,
 provider data policy and upstream license before registration. Do not select

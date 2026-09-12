@@ -105,6 +105,21 @@ cancellation returned the same cancelled state. This proves the installed transp
 path, not profile eligibility. The thinking-enabled general model separately
 reconfirmed rejection of oversized single-message and accumulated-history input.
 
+Independent review passed source commit `b5f6d97796afc28809f2f59bd66d5867bbff0876`
+and the two separate guidance-only adoption candidates:
+Create `43cce26b9fb429bb0dcb226f39db66f932aec175` and Installer
+`ac0079a8c904b1e325fc0a2abfe317db1bf9fb19`. Each preserves prior target guidance,
+changes exactly four documentation files and records canonical/effective hashes.
+Neither candidate has been merged or published.
+
+A read-only fresh-context agent received only the startup prompt and repository
+access. It recovered the actual source branch/revision/clean state, located both
+adoption worktrees, correctly withheld unqualified workers and identified the
+next authorized action and owner gates. It found missing adoption references in
+the pointer; those references and incremental target records were then added.
+The exercise establishes reconstruction from durable state, not autonomous
+authorization of new product work or live issue/PR verification.
+
 ## Windows command boundary
 
 The live canary permitted scratch writes and denied source/outside writes, but
@@ -137,6 +152,51 @@ Two synthetic smoke trials were blocked before inference by OpenRouter's account
 privacy policy: no endpoint matched the Free model training setting. No account
 privacy setting was changed. Only the three synthetic fixture files are on the
 remote repository allowlist; supplied source transmission is disabled.
+
+The owner subsequently confirmed that the privacy setting was enabled and saved,
+and authorized retrying the synthetic fixtures. A live completion then reported
+zero cost and the requested Ultra model. The adapter rejected the result because
+router metadata names the dated serving model while the top-level response names
+the public model slug. This is an adapter compatibility failure, not a model-quality
+failure. Version 0.1.1 corrected the exact catalog-bound dated identity mapping.
+
+Version 0.1.1 corrects that identity mapping, compares native provider token counts
+with completion usage, and polls temporarily missing generation receipts with a
+fixed 14.7-second wait schedule under the original task deadline. Inference is
+never retried by that polling. Fresh independent delta review passed, and all 59
+focused tests passed. The installed 0.1.1 build matches implementation fingerprint
+`1a27e582a825abebef3239131150bb6d22f16a76b73b5659ae48d99e5447f4d9`.
+Its MCP connection negotiated all five operations and admitted the pinned NVIDIA
+endpoint's health while withholding qualification.
+
+The first 8K summary trial hit the conservative context guard after obtaining file
+evidence. That run was stopped; no qualification was granted. A fresh six-trial
+summary evaluation at 16K context / 2K output completed three jobs. Independent
+review accepted both log summaries, but the completed hostile-document summary
+cited lines 7-9 for a claim supported by line 10. Three other trials failed with
+`provider_error`. Thus only two of six trials fully passed; summary eligibility
+was rejected. Provider failures do not establish inadequate model reasoning.
+
+The retained synthetic artifact is `nvidia-summary-v011-16k.json`, SHA-256
+`38ee3d04a63630ca7079fd0a432772013d4c9cae74c6d4fe43e6011562b0b1ef`;
+its qualification fingerprint is
+`72020bca45e753a29981855a0fe0d411bbbe3ad958f5b9327f159f8a86024c8c`.
+It records six accepted generations with Nvidia provider identity and zero cost.
+Raw receipt fields and failed response messages are not retained in that artifact;
+receipt-validation claims rely on the fingerprint-bound adapter and its tests.
+Earlier local evidence remains bound to its original 8K settings.
+
+Version 0.1.2 adds per-profile limits and numbered evidence excerpts. Independent
+source review passed, type checking passed and all 65 focused tests passed.
+Its installed implementation fingerprint matches
+`940ac453f9e2813f7572d61e5fe79146ac0ed4e78715f2602c6c0f09cf6a5dba`.
+The installed MCP connector negotiates all five operations and reports available
+health for both local models and the pinned NVIDIA endpoint, with no qualification.
+The host now permits 262144 context tokens / 131072 complete serialized input
+bytes for NVIDIA and retains 8192 / 16384 for both local profiles. The conservative
+remote byte-to-token overflow guard remains; budgets are separate from actual
+provider token counters. Changing effective limits requires qualification rather
+than assuming quality transfers to smaller or larger contexts.
 
 No remote model is qualified, and no paid inference or account purchase is
 authorized. Remote contract tests do not count as live provider qualification.

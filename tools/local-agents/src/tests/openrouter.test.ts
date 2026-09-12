@@ -4,6 +4,7 @@ import { OpenRouterProvider } from '../openrouter.js';
 import { DEFAULT_LIMITS, WorkerError, type OpenRouterConfig, type OpenRouterModel } from '../types.js';
 
 const modelName = 'nvidia/nemotron-3-ultra-550b-a55b:free';
+const endpointModel = 'nvidia/nemotron-3-ultra-550b-a55b-20260604:free';
 const requiredParameters = ['reasoning', 'include_reasoning', 'temperature', 'max_tokens', 'seed', 'top_p', 'tools', 'tool_choice', 'reasoning_effort'];
 const config: OpenRouterConfig = {
   apiKeyEnv: 'OPENROUTER_TEST_KEY', maxCostUsd: 0, allowedRepositories: ['repo'],
@@ -18,12 +19,15 @@ interface FakeOptions {
   supportsToolChoice?: Record<string, boolean>;
   finishReason?: string;
   metadataProvider?: string;
+  metadataModel?: string;
   proof?: Record<string, unknown>;
   completion?: Record<string, unknown>;
   completionStatus?: number;
+  generationNotFoundCount?: number;
 }
 
 function fake(options: FakeOptions = {}, requests: { url: string; init?: RequestInit; body?: Record<string, unknown> }[] = []): typeof fetch {
+  let generationRequests = 0;
   return (async (input: string | URL | Request, init?: RequestInit) => {
     const url = String(input);
     requests.push({ url, init, ...(typeof init?.body === 'string' ? { body: JSON.parse(init.body) as Record<string, unknown> } : {}) });
@@ -39,7 +43,7 @@ function fake(options: FakeOptions = {}, requests: { url: string; init?: Request
     if (pathname.startsWith('/api/v1/models/')) return Response.json({ data: {
       id: modelName,
       endpoints: [{
-        name: 'Nvidia | nvidia/nemotron-3-ultra-550b-a55b-20260604:free',
+        name: `Nvidia | ${endpointModel}`,
         tag: 'nvidia', provider_name: 'Nvidia', model_id: modelName, context_length: 1_000_000,
         max_prompt_tokens: null, max_completion_tokens: 65_536, status: 0,
         quantization: 'unknown', supports_implicit_caching: false,
@@ -52,13 +56,18 @@ function fake(options: FakeOptions = {}, requests: { url: string; init?: Request
       id: 'gen-test', model: modelName,
       choices: [{ finish_reason: options.finishReason ?? 'tool_calls', message: { role: 'assistant', content: null,
         tool_calls: [{ type: 'function', function: { name: 'worker_action', arguments: '{"ok":true}' } }] } }],
-      usage: { prompt_tokens: 12, completion_tokens: 4, total_tokens: 16, cost: 0 },
+      usage: { prompt_tokens: 1681, completion_tokens: 70, total_tokens: 1751, cost: 0 },
       openrouter_metadata: { requested: modelName, strategy: 'direct', attempt: 1, pipeline: [],
-        endpoints: { available: [{ provider: options.metadataProvider ?? 'Nvidia', model: modelName, selected: true }] } },
+        endpoints: { available: [{ provider: options.metadataProvider ?? 'Nvidia',
+          model: options.metadataModel ?? endpointModel, selected: true }] } },
     }, { status: options.completionStatus ?? 200 });
+    if (pathname === '/api/v1/generation' && generationRequests++ < (options.generationNotFoundCount ?? 0)) {
+      return Response.json({ error: { message: 'Generation not found' } }, { status: 404 });
+    }
     if (pathname === '/api/v1/generation') return Response.json({ data: {
-      id: 'gen-test', model: modelName, provider_name: 'Nvidia', is_byok: false,
-      tokens_prompt: 12, tokens_completion: 4, total_cost: 0, usage: 0,
+      id: 'gen-test', model: endpointModel, provider_name: 'Nvidia', is_byok: false,
+      tokens_prompt: 1095, tokens_completion: 78, native_tokens_prompt: 1681, native_tokens_completion: 70,
+      total_cost: 0, usage: 0,
       ...(options.proof ?? {}),
     } });
     return Response.json({ error: { message: 'unexpected test request' } }, { status: 404 });
@@ -81,6 +90,7 @@ test('discovery admits only exact zero-price endpoints with an explicit supporte
   const endpoint = (await provider.discoverFreeEndpoints(modelName))[0]!;
   assert.equal(endpoint.endpointId, 'nvidia');
   assert.equal(endpoint.providerSlug, 'nvidia');
+  assert.equal(endpoint.endpointModel, endpointModel);
   assert.equal(endpoint.outputMode, 'tool-call');
   assert.match(endpoint.catalogFingerprint, /^[a-f0-9]{64}$/);
 
@@ -119,7 +129,7 @@ test('generation fixes free routing and returns only generation-proven identity 
   });
   assert.equal(result.content, '{"ok":true}');
   assert.deepEqual(result.stats, {
-    promptTokens: 12, outputTokens: 4, costUsd: 0, generationId: 'gen-test', endpointId: 'nvidia', providerName: 'Nvidia',
+    promptTokens: 1681, outputTokens: 70, costUsd: 0, generationId: 'gen-test', endpointId: 'nvidia', providerName: 'Nvidia',
   });
   const completion = requests.find(request => new URL(request.url).pathname === '/api/v1/chat/completions')!;
   assert.equal((completion.init!.headers as Record<string, string>)['X-OpenRouter-Metadata'], 'enabled');
@@ -140,7 +150,7 @@ test('json-schema mode sends no tool contract and remains separately fingerprint
   const parameters = [...requiredParameters, 'response_format', 'structured_outputs'];
   const options: FakeOptions = { modelParameters: parameters, endpointParameters: parameters, completion: {
     id: 'gen-test', model: modelName, choices: [{ finish_reason: 'stop', message: { content: '{"ok":true}' } }],
-    usage: { prompt_tokens: 12, completion_tokens: 4, cost: 0 },
+    usage: { prompt_tokens: 1681, completion_tokens: 70, cost: 0 },
   } };
   const discovery = new OpenRouterProvider(config, fake(options), () => 'test-secret');
   const endpoint = (await discovery.discoverFreeEndpoints(modelName)).find(value => value.outputMode === 'json-schema')!;
@@ -166,7 +176,9 @@ test('generation fails closed on length, paid or mismatched generation proof and
     [{ finishReason: 'length' }, /output allowance/],
     [{ proof: { total_cost: 0.001 } }, /did not prove/],
     [{ proof: { provider_name: 'Another Provider' } }, /did not prove/],
+    [{ proof: { model: modelName } }, /did not prove/],
     [{ metadataProvider: 'Another Provider' }, /routing metadata/],
+    [{ metadataModel: 'nvidia/wrong-dated-endpoint:free' }, /routing metadata/],
   ] as const) {
     const provider = new OpenRouterProvider(config, fake(options), () => 'test-secret');
     await assert.rejects(provider.generate({ model, messages: [{ role: 'user', content: 'JSON' }], schema: {}, limits: DEFAULT_LIMITS,
@@ -218,8 +230,55 @@ test('tool-call output rejects wrong functions and multiple calls', async () => 
   ]) {
     const provider = new OpenRouterProvider(config, fake({ completion: {
       id: 'gen-test', model: modelName, choices: [{ finish_reason: 'tool_calls', message: { tool_calls } }],
-      usage: { prompt_tokens: 12, completion_tokens: 4, cost: 0 },
+      usage: { prompt_tokens: 1681, completion_tokens: 70, cost: 0 },
     } }), () => 'test-secret');
     await assert.rejects(provider.generate(request), /tool call/);
   }
+});
+
+test('generation receipt retries transient 404 without retrying inference', async () => {
+  const base = new OpenRouterProvider(config, fake(), () => 'test-secret');
+  const model = await registered(base);
+  const requests: { url: string; init?: RequestInit; body?: Record<string, unknown> }[] = [];
+  const delays: number[] = [];
+  const provider = new OpenRouterProvider(config, fake({ generationNotFoundCount: 2 }, requests), () => 'test-secret', {
+    async wait(milliseconds) { delays.push(milliseconds); },
+  });
+  const result = await provider.generate({ model, messages: [{ role: 'user', content: 'JSON' }], schema: {}, limits: DEFAULT_LIMITS,
+    signal: AbortSignal.timeout(1000) });
+  assert.equal(result.stats.generationId, 'gen-test');
+  assert.deepEqual(delays, [100, 200]);
+  assert.equal(requests.filter(request => new URL(request.url).pathname === '/api/v1/chat/completions').length, 1);
+  assert.equal(requests.filter(request => new URL(request.url).pathname === '/api/v1/generation').length, 3);
+});
+
+test('generation receipt persistent 404 exhausts the bounded wait schedule', async () => {
+  const base = new OpenRouterProvider(config, fake(), () => 'test-secret');
+  const model = await registered(base);
+  const requests: { url: string; init?: RequestInit; body?: Record<string, unknown> }[] = [];
+  const delays: number[] = [];
+  const provider = new OpenRouterProvider(config, fake({ generationNotFoundCount: 100 }, requests), () => 'test-secret', {
+    async wait(milliseconds) { delays.push(milliseconds); },
+  });
+  await assert.rejects(provider.generate({ model, messages: [{ role: 'user', content: 'JSON' }], schema: {}, limits: DEFAULT_LIMITS,
+    signal: AbortSignal.timeout(1000) }), /not available within the receipt window/);
+  assert.equal(delays.reduce((sum, value) => sum + value, 0), 14_700);
+  assert.equal(requests.filter(request => new URL(request.url).pathname === '/api/v1/chat/completions').length, 1);
+  assert.equal(requests.filter(request => new URL(request.url).pathname === '/api/v1/generation').length, 9);
+});
+
+test('generation receipt wait observes task cancellation', async () => {
+  const base = new OpenRouterProvider(config, fake(), () => 'test-secret');
+  const model = await registered(base);
+  const controller = new AbortController();
+  const reason = new WorkerError('cancelled', 'cancel receipt wait');
+  const provider = new OpenRouterProvider(config, fake({ generationNotFoundCount: 1 }), () => 'test-secret', {
+    async wait(_milliseconds, signal) {
+      controller.abort(reason);
+      assert.equal(signal.aborted, true);
+      throw signal.reason;
+    },
+  });
+  await assert.rejects(provider.generate({ model, messages: [{ role: 'user', content: 'JSON' }], schema: {}, limits: DEFAULT_LIMITS,
+    signal: controller.signal }), error => error === reason);
 });

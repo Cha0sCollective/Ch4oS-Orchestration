@@ -3,11 +3,12 @@ import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
+import { hostConfigSchema } from '../config.js';
 import { qualificationFingerprint, WorkerService } from '../service.js';
 import {
   DEFAULT_LIMITS, WorkerError,
   type CommandReceipt, type CommandRunner, type GenerateRequest, type HostConfig,
-  type Job, type ModelProvider, type ProviderStats, type RegisteredModel, type TaskRequest,
+  type Job, type Limits, type ModelProvider, type ProviderStats, type RegisteredModel, type TaskRequest,
 } from '../types.js';
 
 const DIGEST = 'a'.repeat(64);
@@ -17,8 +18,12 @@ class ScriptedProvider implements ModelProvider {
   readonly id = 'ollama';
   readonly locality = 'local';
   calls = 0;
+  verifiedLimits: Limits[] = [];
   constructor(private readonly script: (request: GenerateRequest, call: number) => Promise<string>) {}
-  async verify(): Promise<{ available: boolean }> { return { available: true }; }
+  async verify(_model: RegisteredModel, limits: Limits): Promise<{ available: boolean }> {
+    this.verifiedLimits.push(structuredClone(limits));
+    return { available: true };
+  }
   async generate(request: GenerateRequest): Promise<{ content: string; stats: { promptTokens: number; outputTokens: number } }> {
     this.calls += 1;
     return { content: await this.script(request, this.calls), stats: { promptTokens: 10, outputTokens: 4 } };
@@ -30,6 +35,7 @@ class RemoteScriptedProvider implements ModelProvider {
   readonly locality = 'remote';
   calls = 0;
   verifyCalls = 0;
+  verifiedLimits: Limits[] = [];
   constructor(
     private readonly script: (request: GenerateRequest, call: number) => Promise<string>,
     private readonly stats: ProviderStats = {
@@ -37,7 +43,11 @@ class RemoteScriptedProvider implements ModelProvider {
       generationId: 'generation-1', endpointId: 'endpoint-1', providerName: 'Test Provider',
     },
   ) {}
-  async verify(): Promise<{ available: boolean }> { this.verifyCalls += 1; return { available: true }; }
+  async verify(_model: RegisteredModel, limits: Limits): Promise<{ available: boolean }> {
+    this.verifyCalls += 1;
+    this.verifiedLimits.push(structuredClone(limits));
+    return { available: true };
+  }
   async generate(request: GenerateRequest): Promise<{ content: string; stats: ProviderStats }> {
     this.calls += 1;
     return { content: await this.script(request, this.calls), stats: { ...this.stats } };
@@ -95,11 +105,15 @@ async function fixture(provider: ModelProvider, queueLimit = 4, runner?: Command
   return { service, config, request, root };
 }
 
-async function configureRemote(config: HostConfig, expiresAt = new Date(Date.now() + 60 * 60 * 1_000).toISOString()): Promise<RegisteredModel> {
+async function configureRemote(
+  config: HostConfig,
+  expiresAt = new Date(Date.now() + 60 * 60 * 1_000).toISOString(),
+  contextTokens = 8192,
+): Promise<RegisteredModel> {
   const model: RegisteredModel = {
     id: 'remote-model', provider: 'openrouter', model: 'test/model:free', endpointId: 'endpoint-1',
     providerSlug: 'test-provider', providerName: 'Test Provider', catalogFingerprint: CATALOG_FINGERPRINT,
-    outputMode: 'json-schema', temperature: 0, contextTokens: 8192,
+    outputMode: 'json-schema', temperature: 0, contextTokens,
   };
   config.inferencePolicy = 'approved-free-providers';
   config.openrouter = {
@@ -126,15 +140,21 @@ async function waitForTerminal(service: WorkerService, id: string): Promise<Job>
 }
 
 test('runs an evidence-backed structured inspection to completion', async () => {
-  const provider = new ScriptedProvider(async (_request, call) => call === 1
-    ? JSON.stringify({ action: 'read', path: 'sample.txt', startLine: 2, endLine: 2 })
-    : JSON.stringify({
+  const provider = new ScriptedProvider(async (generateRequest, call) => {
+    if (call === 1) return JSON.stringify({ action: 'read', path: 'sample.txt', startLine: 2, endLine: 2 });
+    const observationEnvelope = JSON.parse(generateRequest.messages.at(-1)!.content) as { observation: string };
+    const observation = JSON.parse(observationEnvelope.observation) as { startLine: number; endLine: number; text: string };
+    assert.equal(observation.startLine, 2);
+    assert.equal(observation.endLine, 2);
+    assert.equal(observation.text, 'L2: beta');
+    return JSON.stringify({
       action: 'finish', answer: {
         outcome: 'answered', summary: 'Found beta.',
         findings: [{ text: 'The second line is beta.', evidence: [{ path: 'sample.txt', startLine: 2, endLine: 2 }] }],
         limitations: [], proposals: [],
       },
-    }));
+    });
+  });
   const { service, request, root } = await fixture(provider);
   try {
     const started = await service.startTask(request);
@@ -465,6 +485,74 @@ test('capabilities do not advertise stale profile qualification', async () => {
   } finally { await service.close(); }
 });
 
+test('profile limits keep an 8K local model available under larger host ceilings', async () => {
+  const provider = new ScriptedProvider(async () => JSON.stringify({ action: 'list' }));
+  const initial = await fixture(provider);
+  await initial.service.close();
+  initial.config.limits.contextTokens = 262_144;
+  initial.config.limits.inputBytes = 131_072;
+  const profile = initial.config.profiles[0]!;
+  profile.limits = { contextTokens: 8_192, inputBytes: 16_384 };
+  const firstFingerprint = await qualificationFingerprint(initial.config, profile, initial.config.models[0]!);
+  profile.qualification!.fingerprint = firstFingerprint;
+  const service = await WorkerService.create(initial.config, provider);
+  try {
+    const capabilities = await service.capabilities();
+    assert.equal(capabilities.models[0]?.available, true);
+    assert.equal(capabilities.profiles[0]?.modelId, 'model');
+    assert.equal(capabilities.profiles[0]?.limits.contextTokens, 8_192);
+    assert.equal(capabilities.profiles[0]?.limits.inputBytes, 16_384);
+    assert.equal(provider.verifiedLimits.at(-1)?.contextTokens, 8_192);
+    assert.equal(provider.verifiedLimits.at(-1)?.inputBytes, 16_384);
+    await assert.rejects(
+      service.startTask({
+        ...initial.request, requestKey: 'expand-profile', mode: 'qualification', limits: { contextTokens: 16_384 },
+      }),
+      (error: unknown) => error instanceof WorkerError && error.code === 'invalid_request',
+    );
+    profile.limits.inputBytes = 16_000;
+    assert.notEqual(
+      await qualificationFingerprint(initial.config, profile, initial.config.models[0]!),
+      firstFingerprint,
+    );
+  } finally { await service.close(); }
+});
+
+test('a remote profile can use the larger host context and input budget', async () => {
+  const local = new ScriptedProvider(async () => JSON.stringify({ action: 'list' }));
+  const initial = await fixture(local);
+  await initial.service.close();
+  initial.config.limits.contextTokens = 262_144;
+  initial.config.limits.inputBytes = 131_072;
+  const model = await configureRemote(initial.config, new Date(Date.now() + 60 * 60 * 1_000).toISOString(), 262_144);
+  assert.equal(hostConfigSchema.safeParse(initial.config).success, true);
+  initial.config.profiles[0]!.qualification!.fingerprint = await qualificationFingerprint(
+    initial.config, initial.config.profiles[0]!, model,
+  );
+  const remote = new RemoteScriptedProvider(async () => JSON.stringify({ action: 'list' }));
+  const service = await WorkerService.create(initial.config, remote);
+  try {
+    const capabilities = await service.capabilities();
+    assert.equal(capabilities.models[0]?.available, true);
+    assert.equal(capabilities.profiles[0]?.limits.contextTokens, 262_144);
+    assert.equal(capabilities.profiles[0]?.limits.inputBytes, 131_072);
+    assert.equal(remote.verifiedLimits.at(-1)?.contextTokens, 262_144);
+    assert.equal(remote.verifiedLimits.at(-1)?.inputBytes, 131_072);
+  } finally { await service.close(); }
+});
+
+test('profile limits above host ceilings fail in both the schema and service core', async () => {
+  const provider = new ScriptedProvider(async () => JSON.stringify({ action: 'list' }));
+  const initial = await fixture(provider);
+  await initial.service.close();
+  initial.config.profiles[0]!.limits = { inputBytes: initial.config.limits.inputBytes + 1 };
+  assert.equal(hostConfigSchema.safeParse(initial.config).success, false);
+  await assert.rejects(
+    WorkerService.create(initial.config, provider),
+    (error: unknown) => error instanceof WorkerError && error.code === 'invalid_config',
+  );
+});
+
 test('allows idle clients while serializing active inference across services', async () => {
   const blocking = new ScriptedProvider((request) => new Promise<string>((_resolve, reject) => {
     request.signal.addEventListener('abort', () => reject(request.signal.reason), { once: true });
@@ -536,6 +624,27 @@ test('turns fabricated evidence into an explicit needs_codex result', async () =
     assert.equal(job.state, 'completed');
     assert.equal(job.result?.answer.outcome, 'needs_codex');
     assert.match(job.result?.answer.limitations[0] ?? '', /not inspected/);
+  } finally { await service.close(); }
+});
+
+test('rejects a citation to nonexistent line one in an empty file', async () => {
+  const provider = new ScriptedProvider(async (_request, call) => call === 1
+    ? JSON.stringify({ action: 'read', path: 'empty.txt', startLine: 1, endLine: 1 })
+    : JSON.stringify({
+      action: 'finish', answer: {
+        outcome: 'answered', summary: 'The empty file contains evidence.',
+        findings: [{ text: 'Evidence exists.', evidence: [{ path: 'empty.txt', startLine: 1, endLine: 1 }] }],
+        limitations: [], proposals: [],
+      },
+    }));
+  const { service, request, config } = await fixture(provider);
+  await writeFile(path.join(config.repositories[0]!.root, 'empty.txt'), '', 'utf8');
+  config.repositories[0]!.allowPaths.push('empty.txt');
+  try {
+    const job = await waitForTerminal(service, (await service.startTask({ ...request, paths: ['empty.txt'] })).id);
+    assert.equal(job.state, 'completed');
+    assert.equal(job.result?.answer.outcome, 'needs_codex');
+    assert.match(job.result?.answer.limitations[0] ?? '', /invalid snapshot range: empty\.txt:1-1/);
   } finally { await service.close(); }
 });
 

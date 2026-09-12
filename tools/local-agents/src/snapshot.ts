@@ -31,6 +31,7 @@ export interface ReadLinesResult {
   text: string;
   truncated: boolean;
 }
+export interface ReadLinesOptions { numbered?: boolean }
 export interface SearchMatch { path: string; line: number; text: string }
 export interface SearchSnapshotResult { matches: SearchMatch[]; truncated: boolean }
 
@@ -380,7 +381,14 @@ export function listFiles(snapshot: Snapshot, limitBytes: number): ListFilesResu
   return { files, truncated };
 }
 
-export function readLines(snapshot: Snapshot, path: string, startLine = 1, endLine = Number.MAX_SAFE_INTEGER, limitBytes = 8192): ReadLinesResult {
+export function readLines(
+  snapshot: Snapshot,
+  path: string,
+  startLine = 1,
+  endLine = Number.MAX_SAFE_INTEGER,
+  limitBytes = 8192,
+  options: ReadLinesOptions = {},
+): ReadLinesResult {
   assertByteLimit(limitBytes);
   const normalized = normalizeSnapshotPath(path);
   if (!Number.isSafeInteger(startLine) || startLine < 1 || !Number.isSafeInteger(endLine) || endLine < startLine) {
@@ -388,17 +396,19 @@ export function readLines(snapshot: Snapshot, path: string, startLine = 1, endLi
   }
   const file = snapshot.files.find(candidate => candidate.path === normalized);
   if (!file) throw new WorkerError('path_not_in_snapshot', 'Path is not available in this snapshot');
-  const lines = file.text.split(/\r\n|\r|\n/);
+  const lines = file.text.length === 0 ? [] : file.text.split(/\r\n|\r|\n/);
   const actualEnd = Math.min(endLine, lines.length);
   const chosen: string[] = [];
   let truncated = false;
   const empty: ReadLinesResult = { path: normalized, startLine, endLine: startLine - 1, text: '', truncated: true };
   if (Buffer.byteLength(JSON.stringify(empty), 'utf8') > limitBytes) throw new WorkerError('invalid_limit', 'Byte limit is too small for read metadata');
   for (let index = startLine - 1; index < actualEnd; index++) {
-    const candidate = [...chosen, lines[index]!].join('\n');
+    const sourceLine = lines[index]!;
+    const renderedLine = options.numbered ? `L${index + 1}: ${sourceLine}` : sourceLine;
+    const candidate = [...chosen, renderedLine].join('\n');
     const candidateResult: ReadLinesResult = { path: normalized, startLine, endLine: index + 1, text: candidate, truncated: false };
     if (Buffer.byteLength(JSON.stringify(candidateResult), 'utf8') > limitBytes) { truncated = true; break; }
-    chosen.push(lines[index]!);
+    chosen.push(renderedLine);
   }
   const text = chosen.join('\n');
   const consumed = chosen.length;
