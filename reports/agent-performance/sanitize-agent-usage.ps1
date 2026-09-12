@@ -121,4 +121,4 @@ else {
 
 $outputDirectory = Split-Path -Parent $OutputPath
 if ($outputDirectory) { New-Item -ItemType Directory -Force -Path $outputDirectory | Out-Null }
-$result | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $OutputPath -Encoding utf8
+[IO.File]::WriteAllText($OutputPath, (($result | ConvertTo-Json -Depth 8) + "`n"), (New-Object Text.UTF8Encoding($false)))

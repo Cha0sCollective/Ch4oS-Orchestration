@@ -1,4 +1,4 @@
-﻿{
+{
     "schemaVersion":  1,
     "generatedAtUtc":  "2026-09-12T16:52:15.126769+00:00",
     "scope":  "Memory/logging stabilization, Tracks addition, IDAS restoration, report storage and coordinator continuation requests from the first repair turn onward; earlier 0.2 work excluded.",
