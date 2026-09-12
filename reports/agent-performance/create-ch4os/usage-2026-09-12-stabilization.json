@@ -5178,7 +5178,7 @@
                                               "count":  201,
                                               "firstInputTokens":  162552,
                                               "meanInputTokens":  121840,
-                                              "medianInputTokens":  null,
+                                              "medianInputTokens":  117318,
                                               "maximumInputTokens":  266802
                                           },
                        "requests":  [

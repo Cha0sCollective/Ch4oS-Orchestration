@@ -31,6 +31,10 @@ function Copy-Usage([object]$usage) {
     }
 }
 
+function Copy-Modes([object]$entry) {
+    @(@($entry.collaborationMode) + @($entry.collaborationModes) | Where-Object { $_ -is [string] -and $_ } | Select-Object -Unique)
+}
+
 function Copy-RequestMetrics([object]$agent) {
     if ($null -eq $agent.requestCount) { return $null }
 
@@ -50,6 +54,7 @@ if ($SourceShape -eq 'original') {
             work = $_.purpose
             model = $_.model
             reasoningEffort = $_.reasoningEffort
+            modes = @(Copy-Modes $_)
             status = $_.status
             startedAtUtc = $_.startedAtUtc
             lastEventAtUtc = $_.lastEventAtUtc
@@ -77,6 +82,7 @@ if ($SourceShape -eq 'original') {
             work = $source.auditTurn.purpose
             model = $source.auditTurn.model
             reasoningEffort = $source.auditTurn.reasoningEffort
+            modes = @(Copy-Modes $source.auditTurn)
             snapshotAtUtc = $source.auditTurn.snapshotAtUtc
             status = $source.auditTurn.status
             usage = Copy-Usage $source.auditTurn.usage

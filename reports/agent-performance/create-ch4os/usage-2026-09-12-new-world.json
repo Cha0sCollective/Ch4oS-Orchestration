@@ -1,132 +1,226 @@
-{
-  "schemaVersion": 1,
-  "generatedAtUtc": "2026-09-12T13:48:32.791924+00:00",
-  "scope": "Create: Ch4oS 0.2 New World and portable-package work only",
-  "snapshotStatus": "final",
-  "fieldSemantics": {
-    "cachedInputTokens": "Subset of inputTokens.",
-    "reasoningOutputTokens": "Subset of outputTokens.",
-    "totalTokens": "inputTokens plus outputTokens."
-  },
-  "finalCompletedWorkAggregate": {
-    "inputTokens": 72204055,
-    "cachedInputTokens": 70254080,
-    "outputTokens": 247801,
-    "reasoningOutputTokens": 53486,
-    "totalTokens": 72451856
-  },
-  "aggregateLimits": {
-    "included": "Completed planning, exploration, production, two unsuccessful activation sessions, retained review coordination and independent review with two delta reviews.",
-    "excluded": "Metadata audit and root coordinator. The retained review parent combines activation work and coordination; its whole usage is not classified as failed activation overhead."
-  },
-  "excludedMetadataAudit": {
-    "work": "This metadata/usage audit",
-    "model": "gpt-5.6-sol",
-    "reasoningEffort": "medium",
-    "snapshotAtUtc": "2026-09-12T13:35:04.830Z",
-    "status": "final for audit worker; coordinator report refresh excluded",
-    "usage": { "inputTokens": 6405543, "cachedInputTokens": 6097280, "outputTokens": 38829, "reasoningOutputTokens": 7217, "totalTokens": 6444372 }
-  },
-  "agents": [
-    {
-      "work": "Native planning parent",
-      "model": "gpt-6-astra",
-      "reasoningEffort": "medium",
-      "status": "final",
-      "startedAtUtc": "2026-09-12T11:22:35.236Z",
-      "lastEventAtUtc": "2026-09-12T11:26:11.352Z",
-      "usageSnapshotsRecorded": 1,
-      "usage": { "inputTokens": 860544, "cachedInputTokens": 767872, "outputTokens": 4269, "reasoningOutputTokens": 211, "totalTokens": 864813 }
-    },
-    {
-      "work": "Planning repo/package explorer",
-      "model": "gpt-5.6-terra",
-      "reasoningEffort": "medium",
-      "status": "final",
-      "startedAtUtc": "2026-09-12T11:22:51.262Z",
-      "lastEventAtUtc": "2026-09-12T11:25:24.677Z",
-      "usageSnapshotsRecorded": 2,
-      "usage": { "inputTokens": 538636, "cachedInputTokens": 416512, "outputTokens": 6894, "reasoningOutputTokens": 838, "totalTokens": 545530 }
-    },
-    {
-      "work": "Portable installer engine and package-contract production",
-      "model": "gpt-5.6-sol",
-      "reasoningEffort": "high",
-      "status": "final",
-      "startedAtUtc": "2026-09-12T12:03:17.386Z",
-      "lastEventAtUtc": "2026-09-12T12:41:48.608Z",
-      "usageSnapshotsRecorded": 1,
-      "usage": { "inputTokens": 19910470, "cachedInputTokens": 19488000, "outputTokens": 77094, "reasoningOutputTokens": 16068, "totalTokens": 19987564 }
-    },
-    {
-      "work": "Server identity and corrective follow-up",
-      "model": "gpt-5.6-sol",
-      "reasoningEffort": "high",
-      "status": "final",
-      "startedAtUtc": "2026-09-12T12:03:37.917Z",
-      "lastEventAtUtc": "2026-09-12T13:27:01.189Z",
-      "usageSnapshotsRecorded": 2,
-      "usage": { "inputTokens": 20306277, "cachedInputTokens": 19893248, "outputTokens": 60156, "reasoningOutputTokens": 13924, "totalTokens": 20366433 }
-    },
-    {
-      "work": "Pack documentation and fresh-seed validation",
-      "model": "gpt-5.6-sol",
-      "reasoningEffort": "medium",
-      "status": "final for documentation/seed work; completed audit reported separately",
-      "startedAtUtc": "2026-09-12T12:08:10.959Z",
-      "lastEventAtUtc": "2026-09-12T13:35:04.830Z",
-      "usageSnapshotsRecorded": 3,
-      "usage": { "inputTokens": 16418131, "cachedInputTokens": 16089600, "outputTokens": 45589, "reasoningOutputTokens": 7663, "totalTokens": 16463720 }
-    },
-    {
-      "work": "Failed native reviewer activation attempt 1",
-      "model": "gpt-6-astra",
-      "reasoningEffort": "medium",
-      "status": "final",
-      "startedAtUtc": "2026-09-12T12:46:03.960Z",
-      "lastEventAtUtc": "2026-09-12T12:46:45.815Z",
-      "usageSnapshotsRecorded": 1,
-      "usage": { "inputTokens": 149955, "cachedInputTokens": 127744, "outputTokens": 968, "reasoningOutputTokens": 65, "totalTokens": 150923 }
-    },
-    {
-      "work": "Failed native reviewer activation attempt 2",
-      "model": "gpt-6-astra",
-      "reasoningEffort": "medium",
-      "status": "final",
-      "startedAtUtc": "2026-09-12T12:57:35.577Z",
-      "lastEventAtUtc": "2026-09-12T12:58:02.392Z",
-      "usageSnapshotsRecorded": 1,
-      "usage": { "inputTokens": 116147, "cachedInputTokens": 96640, "outputTokens": 602, "reasoningOutputTokens": 19, "totalTokens": 116749 }
-    },
-    {
-      "work": "Retained review coordination, activation attempt and bounded follow-ups",
-      "model": "gpt-6-astra",
-      "reasoningEffort": "medium",
-      "status": "final",
-      "startedAtUtc": "2026-09-12T12:59:12.778Z",
-      "lastEventAtUtc": "2026-09-12T13:45:11.992Z",
-      "usageSnapshotsRecorded": 3,
-      "usage": { "inputTokens": 4438741, "cachedInputTokens": 4210688, "outputTokens": 13985, "reasoningOutputTokens": 1186, "totalTokens": 4452726 }
-    },
-    {
-      "work": "Independent review and two bounded delta reviews",
-      "model": "gpt-5.6-sol",
-      "reasoningEffort": "high",
-      "status": "final; retained parent and child confirmed completed",
-      "startedAtUtc": "2026-09-12T13:00:06.537Z",
-      "lastEventAtUtc": "2026-09-12T13:45:02.053Z",
-      "usageSnapshotsRecorded": 3,
-      "usage": { "inputTokens": 9465154, "cachedInputTokens": 9163776, "outputTokens": 38244, "reasoningOutputTokens": 13512, "totalTokens": 9503398 }
-    },
-    {
-      "work": "Current root production coordinator",
-      "model": "gpt-6-astra",
-      "reasoningEffort": "xhigh",
-      "status": "provisional; current-work usage unavailable",
-      "startedAtUtc": null,
-      "lastEventAtUtc": null,
-      "usageSnapshotsRecorded": 1,
-      "usage": null
-    }
-  ]
+﻿{
+    "schemaVersion":  1,
+    "generatedAtUtc":  "2026-09-12T13:48:32.791924+00:00",
+    "scope":  "Create: Ch4oS 0.2 New World and portable-package work only",
+    "snapshotStatus":  "Completed worker/review snapshot; root current-work usage unavailable.",
+    "fieldSemantics":  {
+                           "cachedInputTokens":  "Subset of inputTokens.",
+                           "reasoningOutputTokens":  "Subset of outputTokens.",
+                           "totalTokens":  "inputTokens plus outputTokens."
+                       },
+    "finalCompletedWorkAggregate":  {
+                                        "inputTokens":  72204055,
+                                        "cachedInputTokens":  70254080,
+                                        "outputTokens":  247801,
+                                        "reasoningOutputTokens":  53486,
+                                        "totalTokens":  72451856
+                                    },
+    "aggregateLimits":  {
+                            "included":  "Completed planning, exploration, production, two unsuccessful activation sessions, retained review coordination and independent review with two delta reviews.",
+                            "excluded":  "Metadata audit and root coordinator. The retained review parent combines activation work and coordination; its whole usage is not classified as failed activation overhead."
+                        },
+    "excludedMetadataAudit":  {
+                                  "work":  "This metadata/usage audit",
+                                  "model":  "gpt-5.6-sol",
+                                  "reasoningEffort":  "medium",
+                                  "modes":  [
+                                                "default"
+                                            ],
+                                  "snapshotAtUtc":  "2026-09-12T13:35:04.830Z",
+                                  "status":  "final for audit worker; coordinator report refresh excluded",
+                                  "usage":  {
+                                                "inputTokens":  6405543,
+                                                "cachedInputTokens":  6097280,
+                                                "outputTokens":  38829,
+                                                "reasoningOutputTokens":  7217,
+                                                "totalTokens":  6444372
+                                            }
+                              },
+    "agents":  [
+                   {
+                       "work":  "Native planning parent",
+                       "model":  "gpt-6-astra",
+                       "reasoningEffort":  "medium",
+                       "modes":  [
+                                     "default"
+                                 ],
+                       "status":  "final",
+                       "startedAtUtc":  "2026-09-12T11:22:35.236Z",
+                       "lastEventAtUtc":  "2026-09-12T11:26:11.352Z",
+                       "usageSnapshotsRecorded":  1,
+                       "usage":  {
+                                     "inputTokens":  860544,
+                                     "cachedInputTokens":  767872,
+                                     "outputTokens":  4269,
+                                     "reasoningOutputTokens":  211,
+                                     "totalTokens":  864813
+                                 }
+                   },
+                   {
+                       "work":  "Planning repo/package explorer",
+                       "model":  "gpt-5.6-terra",
+                       "reasoningEffort":  "medium",
+                       "modes":  [
+                                     "default"
+                                 ],
+                       "status":  "final",
+                       "startedAtUtc":  "2026-09-12T11:22:51.262Z",
+                       "lastEventAtUtc":  "2026-09-12T11:25:24.677Z",
+                       "usageSnapshotsRecorded":  2,
+                       "usage":  {
+                                     "inputTokens":  538636,
+                                     "cachedInputTokens":  416512,
+                                     "outputTokens":  6894,
+                                     "reasoningOutputTokens":  838,
+                                     "totalTokens":  545530
+                                 }
+                   },
+                   {
+                       "work":  "Portable installer engine and package-contract production",
+                       "model":  "gpt-5.6-sol",
+                       "reasoningEffort":  "high",
+                       "modes":  [
+                                     "default"
+                                 ],
+                       "status":  "final",
+                       "startedAtUtc":  "2026-09-12T12:03:17.386Z",
+                       "lastEventAtUtc":  "2026-09-12T12:41:48.608Z",
+                       "usageSnapshotsRecorded":  1,
+                       "usage":  {
+                                     "inputTokens":  19910470,
+                                     "cachedInputTokens":  19488000,
+                                     "outputTokens":  77094,
+                                     "reasoningOutputTokens":  16068,
+                                     "totalTokens":  19987564
+                                 }
+                   },
+                   {
+                       "work":  "Server identity and corrective follow-up",
+                       "model":  "gpt-5.6-sol",
+                       "reasoningEffort":  "high",
+                       "modes":  [
+                                     "default"
+                                 ],
+                       "status":  "final",
+                       "startedAtUtc":  "2026-09-12T12:03:37.917Z",
+                       "lastEventAtUtc":  "2026-09-12T13:27:01.189Z",
+                       "usageSnapshotsRecorded":  2,
+                       "usage":  {
+                                     "inputTokens":  20306277,
+                                     "cachedInputTokens":  19893248,
+                                     "outputTokens":  60156,
+                                     "reasoningOutputTokens":  13924,
+                                     "totalTokens":  20366433
+                                 }
+                   },
+                   {
+                       "work":  "Pack documentation and fresh-seed validation",
+                       "model":  "gpt-5.6-sol",
+                       "reasoningEffort":  "medium",
+                       "modes":  [
+                                     "default"
+                                 ],
+                       "status":  "final for documentation/seed work; completed audit reported separately",
+                       "startedAtUtc":  "2026-09-12T12:08:10.959Z",
+                       "lastEventAtUtc":  "2026-09-12T13:35:04.830Z",
+                       "usageSnapshotsRecorded":  3,
+                       "usage":  {
+                                     "inputTokens":  16418131,
+                                     "cachedInputTokens":  16089600,
+                                     "outputTokens":  45589,
+                                     "reasoningOutputTokens":  7663,
+                                     "totalTokens":  16463720
+                                 }
+                   },
+                   {
+                       "work":  "Failed native reviewer activation attempt 1",
+                       "model":  "gpt-6-astra",
+                       "reasoningEffort":  "medium",
+                       "modes":  [
+                                     "default"
+                                 ],
+                       "status":  "final",
+                       "startedAtUtc":  "2026-09-12T12:46:03.960Z",
+                       "lastEventAtUtc":  "2026-09-12T12:46:45.815Z",
+                       "usageSnapshotsRecorded":  1,
+                       "usage":  {
+                                     "inputTokens":  149955,
+                                     "cachedInputTokens":  127744,
+                                     "outputTokens":  968,
+                                     "reasoningOutputTokens":  65,
+                                     "totalTokens":  150923
+                                 }
+                   },
+                   {
+                       "work":  "Failed native reviewer activation attempt 2",
+                       "model":  "gpt-6-astra",
+                       "reasoningEffort":  "medium",
+                       "modes":  [
+                                     "default"
+                                 ],
+                       "status":  "final",
+                       "startedAtUtc":  "2026-09-12T12:57:35.577Z",
+                       "lastEventAtUtc":  "2026-09-12T12:58:02.392Z",
+                       "usageSnapshotsRecorded":  1,
+                       "usage":  {
+                                     "inputTokens":  116147,
+                                     "cachedInputTokens":  96640,
+                                     "outputTokens":  602,
+                                     "reasoningOutputTokens":  19,
+                                     "totalTokens":  116749
+                                 }
+                   },
+                   {
+                       "work":  "Retained review coordination, activation attempt and bounded follow-ups",
+                       "model":  "gpt-6-astra",
+                       "reasoningEffort":  "medium",
+                       "modes":  [
+                                     "default"
+                                 ],
+                       "status":  "final",
+                       "startedAtUtc":  "2026-09-12T12:59:12.778Z",
+                       "lastEventAtUtc":  "2026-09-12T13:45:11.992Z",
+                       "usageSnapshotsRecorded":  3,
+                       "usage":  {
+                                     "inputTokens":  4438741,
+                                     "cachedInputTokens":  4210688,
+                                     "outputTokens":  13985,
+                                     "reasoningOutputTokens":  1186,
+                                     "totalTokens":  4452726
+                                 }
+                   },
+                   {
+                       "work":  "Independent review and two bounded delta reviews",
+                       "model":  "gpt-5.6-sol",
+                       "reasoningEffort":  "high",
+                       "modes":  [
+                                     "default"
+                                 ],
+                       "status":  "final; retained parent and child confirmed completed",
+                       "startedAtUtc":  "2026-09-12T13:00:06.537Z",
+                       "lastEventAtUtc":  "2026-09-12T13:45:02.053Z",
+                       "usageSnapshotsRecorded":  3,
+                       "usage":  {
+                                     "inputTokens":  9465154,
+                                     "cachedInputTokens":  9163776,
+                                     "outputTokens":  38244,
+                                     "reasoningOutputTokens":  13512,
+                                     "totalTokens":  9503398
+                                 }
+                   },
+                   {
+                       "work":  "Current root production coordinator",
+                       "model":  "gpt-6-astra",
+                       "reasoningEffort":  "xhigh",
+                       "modes":  [
+                                     "plan",
+                                     "default"
+                                 ],
+                       "status":  "provisional; current-work usage unavailable",
+                       "startedAtUtc":  null,
+                       "lastEventAtUtc":  null,
+                       "usageSnapshotsRecorded":  1,
+                       "usage":  null
+                   }
+               ]
 }
