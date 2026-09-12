@@ -135,7 +135,7 @@ review_agents = [
 publication_agent = "publication-steward"
 ```
 
-This is not an executable schema yet.
+This is not an executable schema yet. Agent-selection fields would describe intended installed configuration and useful capabilities, not an allowlist restricting the shared catalog. Separate collaborating products may use linked overlays when they own different contracts and source files.
 
 ## Target-specific rules still belong to the target
 

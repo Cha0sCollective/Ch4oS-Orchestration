@@ -10,11 +10,19 @@ The main idea is simple: **chat context should be disposable; project state shou
 
 The owner sets priorities, resolves genuine ambiguity, handles owner-only gates, and decides when a project-level tradeoff is worth taking.
 
-### Production orchestrator
+### Production coordinator and workers
 
-Production owns one bounded work packet at a time.
+The user-facing Desktop chat is the production coordinator and overall integration
+point for one bounded work packet at a time. It receives owner input and remains
+accountable for scope, integration, appropriate checks, affected documentation and
+the final handoff.
 
-It can delegate exploration, implementation, testing, research, or documentation work to specialists, but it still owns scope, integration, validation, and the final handoff.
+The coordinator can delegate exploration, implementation, testing, research or
+documentation work. It does not need to personally make every change. A bounded
+implementation worker may edit within the packet's scoped workspace and should do
+the production work when that routing is a better fit. Give each worker explicit
+scope, acceptance criteria, source references, write boundaries and escalation
+conditions, then verify its actual model, effort and permissions on the host.
 
 Production is write-capable when the packet requires it. It should not quietly pull future roadmap work into the current assignment.
 
@@ -38,6 +46,9 @@ Initial review starts fresh at a named candidate revision. Follow-ups inspect th
 
 Its job is to decide whether the candidate holds up, not to continue production with a different prompt. It can delegate specialist review, but it should not implement fixes. If the candidate needs changes, control goes back to production.
 
+An implementation worker cannot independently review or accept its own work. Use
+a fresh review context and a separate reviewer for review that the packet requires.
+
 ### Specialist subagents
 
 Specialists are temporary workers, not long-lived identities. Give them a narrow question and let them return a useful result.
@@ -55,11 +66,12 @@ work packet
    |
    v
 PRODUCTION
-  fresh bounded chat/worktree
+  Desktop coordinator / integration point
   -> understand the packet
-  -> delegate where useful
-  -> implement
-  -> validate
+  -> assign bounded production workers where useful
+  -> integrate implementation and evidence
+  -> run or account for appropriate checks
+  -> update affected documentation
   -> exact candidate revision
   -> handoff
    |

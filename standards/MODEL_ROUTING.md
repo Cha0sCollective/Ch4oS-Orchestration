@@ -40,8 +40,9 @@ These are starting points, not ceilings.
 
 | Role | Starting capability | Typical effort | Good fit |
 | --- | --- | --- | --- |
-| Orchestrator | Astra-class | Medium, High when warranted | Decompose, delegate, reconcile, decide, integrate |
-| Deep specialist | Sol-class | Medium/High | Architecture, evidence reasoning, difficult implementation, adversarial analysis |
+| Coordinator | Astra-class | Medium, High when warranted | Receive owner input, decompose, delegate, reconcile, decide and integrate |
+| Production worker | Sol-class by default | Medium/High | Bounded implementation, focused testing and implementation documentation |
+| Deep specialist | Sol-class | Medium/High | Architecture, evidence reasoning and difficult specialist analysis |
 | High-volume analyst | Terra-class | Medium | Repo exploration, CI/log analysis, broad docs/contract comparison |
 | Mechanical worker | Luna-class | Low/Medium | Search, extraction, cataloguing, straightforward repetitive edits |
 
@@ -51,20 +52,31 @@ Verify exact executable model identifiers against the current Codex installation
 
 ## Production
 
-The production orchestrator should normally use the strongest practical orchestration model and delegate the noisy parts.
+The user-facing Desktop production coordinator should normally use the strongest
+practical orchestration model. Its job is to own the packet and integrate the
+result; it need not personally implement the change. Route bounded implementation
+to a Sol-class worker by default, or another model when the task's difficulty and
+verifiability make that model a better fit. Verify the selected model and effort on
+the actual host rather than inferring them from a prompt or role label.
 
 A healthy pattern looks like:
 
 ```text
-orchestrator
+coordinator
   -> repo explorer maps the affected area
-  -> specialist handles the hard implementation or design question
+  -> production worker implements within scoped write access
+  -> specialist handles a hard design or evidence question
   -> CI investigator works through validation noise
-  -> parent updates affected durable documentation, with a helper only when useful
-  -> orchestrator verifies important claims and decides what happens next
+  -> coordinator integrates the work and keeps affected documentation true
+  -> coordinator verifies important claims and decides what happens next
 ```
 
 Do not spawn agents just to make the graph look busy. Delegate when the work is separable, noisy, independently verifiable, or genuinely benefits from a second reasoning perspective.
+
+A task-scoped implementation worker does not need a saved named profile. Do not
+claim that such a profile exists or was activated. Record the worker's actual host
+model, effort and scoped write permissions. Keep the candidate's independent review
+in a separate fresh context; a worker does not review or accept its own changes.
 
 ## Review
 
