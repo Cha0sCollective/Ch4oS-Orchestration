@@ -1,6 +1,26 @@
 # Retained CLI coordination
 
-Desktop coordinates the work while retained CLI parents activate the saved shared roles. The production parent owns implementation and integration. Independent review has its own read-only parent and fresh children. See [the adoption trial](ADOPTION_TRIAL.md) for the tested versions, results and current readiness decision.
+The user-facing Desktop chat coordinates production and receives owner input while
+retained CLI parents and task-scoped workers carry out bounded assignments. The
+Desktop coordinator remains accountable for scope, integration, appropriate checks,
+affected documentation and delivery; it need not personally implement every change.
+Independent review has its own read-only parent and fresh children. See [the
+adoption trial](ADOPTION_TRIAL.md) for the tested versions, results and current
+readiness decision.
+
+## Production implementation workers
+
+Assign bounded implementation to a Sol worker by default, or another model suited
+to the task. A production worker may use scoped workspace-write access to edit and
+run appropriate checks. Supply the repository/worktree, bounded scope, acceptance
+criteria, source references, validation expectations, write boundary and escalation
+conditions. Record the worker's actual host model, effort and permission fields.
+
+This is a task-scoped worker, not a saved named profile in the shared catalog. Do
+not claim profile activation for it or simulate one by pasting the instructions for
+another role. The Desktop coordinator must inspect and integrate its output. When
+independent review is required, use the saved reviewer from a fresh read-only parent;
+the implementation worker cannot review or accept its own candidate.
 
 ## Start and verify
 

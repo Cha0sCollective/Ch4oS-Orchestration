@@ -25,12 +25,16 @@ and production operations need separate authorization.
 
 ## Shared development process
 
-The production parent owns scope, implementation, integration, appropriate checks,
-affected documentation and the final handoff. Use the named `repo-explorer` for
+The user-facing Desktop production coordinator receives owner input and owns scope,
+integration, appropriate checks, affected documentation and the final handoff. It
+may assign implementation to bounded production workers and need not make every
+change itself. Use the named `repo-explorer` for
 bounded fact gathering and a fresh `independent-reviewer` for consequential
-completed candidates. The normal starting points are Astra/medium for the parent,
-Terra/medium for exploration and Sol/high for review; escalate when uncertainty
-warrants it. Delegate other useful separable work by task needs. Shared agents are
+completed candidates. The normal starting points are Astra/medium for coordination,
+Sol at suitable effort for implementation, Terra/medium for exploration and Sol/high
+for review; route by task suitability and escalate when uncertainty warrants it.
+Verify a production worker's actual model, effort and scoped write access; it is a
+task-scoped assignment, not a saved named profile. Delegate other useful separable work by task needs. Shared agents are
 available across projects; these starting roles are not an allowlist or a required
 standing team. The shared experiment specialist remains a design reference until
 an executable profile is available.
@@ -55,7 +59,9 @@ Review follow-ups as deltas and inspect affected behavior. Reuse valid unchanged
 coverage without calling it a new execution; an ancestor's success does not prove
 the candidate was tested. Distinguish missing validation from a source defect.
 Routine low-impact edits need no separate review lane. Review does not authorize
-owner-only actions or establish unperformed live acceptance.
+owner-only actions or establish unperformed live acceptance. When review is needed,
+use a fresh separate reviewer; a production worker does not review or accept its own
+changes.
 
 Reusable orchestration policy comes from Ch4oS-Orchestration. Effective local
 files are adopted through reviewed manual copying with the source revision

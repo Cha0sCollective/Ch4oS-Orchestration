@@ -20,10 +20,9 @@ evidence. Installer `main` is not a substitute for the pack's selected commit.
 Neither overlay authorizes one project to change the other's inputs or makes
 either checkout depend on a sibling filesystem path.
 
-## Planned effective configuration
+## Manual adoption
 
-Target adoption remains a separate reviewed change. Prepare these files by
-manual copying from one recorded Orchestration revision:
+Adopt these files by manual copying from one recorded Orchestration revision:
 
 | Canonical source | Effective installer path |
 | --- | --- |
@@ -36,11 +35,16 @@ reviewed exceptions, and check discovery/model/permissions on the target host.
 Reconcile target changes deliberately before adoption; do not overwrite local
 work or silently reverse-sync it. No symlinks, submodules, automatic distribution
 framework or broader permissions are part of this overlay. See
-[configuration distribution](../../standards/CONFIG_DISTRIBUTION.md).
+[configuration distribution](../../standards/CONFIG_DISTRIBUTION.md). Record actual
+adoption progress in the target repository's `docs/ORCHESTRATION_ADOPTION.md`.
 
-The production parent owns scope, integration, validation and affected
-documentation. Use the named `repo-explorer` and a fresh `independent-reviewer`
-where useful. All shared agents remain available according to the assignment;
+The Desktop production coordinator receives owner input and owns scope, integration,
+appropriate checks, affected documentation and delivery. Bounded production workers
+normally make the changes using Sol or another suitable model; verify their host
+model, effort and scoped write access without claiming a saved implementation
+profile. Use the named `repo-explorer` and a fresh, separate
+`independent-reviewer` where useful. Production workers do not review their own
+changes. All shared agents remain available according to the assignment;
 this initial copy set is not a repository allowlist. The shared experiment
 specialist is currently a design reference, not an executable profile or a
 required installer role.

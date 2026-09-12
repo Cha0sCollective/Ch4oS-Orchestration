@@ -107,7 +107,11 @@ Keep each detailed operating policy in one authoritative location. Project instr
 
 ## Documentation stewardship
 
-The production parent owns documentation decisions and updates. A dedicated documentation steward is an optional helper when the work benefits from one, not a required approval lane.
+The production coordinator remains accountable for documentation decisions and for
+keeping affected documents true. A bounded production worker may author the updates
+within its assignment; the coordinator integrates them with the candidate. A
+dedicated documentation steward is an optional helper when the work benefits from
+one, not a required approval lane.
 
 Its job is not to generate more documentation. Its job is to keep durable docs useful, accurate, non-duplicative, and aligned with accepted project state.
 

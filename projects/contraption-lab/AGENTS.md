@@ -4,13 +4,14 @@ Contraption Lab is a Minecraft test and validation tool. Follow the unified impl
 
 ## Development
 
-The production parent owns scope, implementation, integration, suitable tests, affected documentation and delivery. Work in bounded changes on `codex/` branches. Preserve unrelated work. Continue through authorized roadmap packages once their dependencies and exit criteria are met; seek input only for a new decision or a real blocker outside that authorization.
+The user-facing Desktop production coordinator receives owner input and owns scope, integration, suitable tests, affected documentation and delivery. It may assign implementation to bounded production workers and need not make every change itself. Work in bounded changes on `codex/` branches. Preserve unrelated work. Continue through authorized roadmap packages once their dependencies and exit criteria are met; seek input only for a new decision or a real blocker outside that authorization.
 
-Use the reusable `repo-explorer` for useful independent fact gathering and a fresh `independent-reviewer` for consequential completed candidates. The parent normally uses Astra/medium, explorer Terra/medium and reviewer Sol/high; escalate difficult reasoning. Ordinary edits need no standing agent team or documentation approval lane. Consult an experiment specialist when methodology warrants it.
+Use the reusable `repo-explorer` for useful independent fact gathering and a fresh `independent-reviewer` for consequential completed candidates. The coordinator normally uses Astra/medium, a production worker uses Sol or another model suited to the task, the explorer uses Terra/medium and the reviewer uses Sol/high; escalate difficult reasoning. Verify each production worker's actual host model, effort and scoped write access without claiming it is a saved named profile. Ordinary edits need no standing agent team or documentation approval lane. Consult an experiment specialist when methodology warrants it.
 
 Use retained CLI sessions coordinated from Desktop when its direct delegation interface cannot select saved native roles. Verify project profile discovery, selected model/effort and effective permissions on the host. If native selection is unavailable, report the compatibility limitation; a pasted role prompt does not count as profile activation. Ephemeral sessions are outside the selected workflow. Shared agents remain available according to task needs.
 
 Initial independent review uses a read-only parent, fresh context and a named candidate. Do not edit reviewed source. Run checks requiring writes in a separate disposable workspace under scoped workspace-write permissions and supply their exact revision, command and results to review. Diagnose build and cache permission failures separately; do not expand reviewer access. Review follow-ups as deltas, expanding only for affected behavior or changed assumptions. Reuse valid checks for unchanged behavior without claiming a new execution. Routine low-impact edits need no separate review lane. Report actual permission limitations.
+When review is needed, keep it separate from implementation; a production worker does not review or accept its own changes.
 
 ## Tests and evidence
 
