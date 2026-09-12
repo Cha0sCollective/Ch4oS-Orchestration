@@ -250,10 +250,11 @@ test('rejects proposals that target supplied document virtual files', async () =
       },
     });
   });
-  const { service, request } = await fixture(provider);
+  const { service, request, config } = await fixture(provider);
+  config.profiles[0]!.taskClasses.push('draft');
   try {
     const job = await waitForTerminal(service, (await service.startTask({
-      ...request,
+      ...request, taskClass: 'draft', mode: 'qualification',
       sources: [{ url: 'https://example.test/source', retrievedAt: '2026-09-12T12:00:00.000Z', text: 'old' }],
     })).id);
     assert.equal(job.state, 'completed');
@@ -435,10 +436,9 @@ test('fails closed when remote generation lacks zero-cost or approved-route proo
   }
 });
 
-test('requires a fresh remote qualification with no more than 24 hours of validity', async () => {
+test('enforces explicit remote qualification expiry', async () => {
   for (const [label, expiresAt] of [
     ['expired', new Date(Date.now() - 1_000).toISOString()],
-    ['too-far', new Date(Date.now() + 25 * 60 * 60 * 1_000).toISOString()],
   ] as const) {
     const local = new ScriptedProvider(async () => JSON.stringify({ action: 'list' }));
     const initial = await fixture(local);
@@ -453,7 +453,7 @@ test('requires a fresh remote qualification with no more than 24 hours of validi
       );
       const capabilities = await service.capabilities();
       assert.deepEqual(capabilities.profiles[0]?.qualifiedTaskClasses, []);
-      assert.match(capabilities.profiles[0]?.reason ?? '', /qualification is expired, missing, or exceeds/);
+      assert.match(capabilities.profiles[0]?.reason ?? '', /explicitly expired/);
       assert.equal(remote.calls, 0);
     } finally { await service.close(); }
   }
@@ -662,13 +662,110 @@ test('keeps authoritative failed check receipts separate from model claims', asy
     : JSON.stringify({ action: 'finish', answer: {
       outcome: 'answered', summary: 'All tests passed.', findings: [], limitations: [], proposals: [],
     } }));
-  const { service, request } = await fixture(provider, 4, runner);
+  const { service, request, config } = await fixture(provider, 4, runner);
+  config.profiles[0]!.taskClasses.push('check-monitor');
   try {
     const job = await waitForTerminal(service, (await service.startTask({
-      ...request, enabledCheckIds: ['unit'],
+      ...request, taskClass: 'check-monitor', mode: 'qualification', enabledCheckIds: ['unit'],
     })).id);
     assert.equal(job.result?.answer.summary, 'All tests passed.');
     assert.equal(job.result?.commands[0]?.status, 'failed');
     assert.equal(job.result?.commands[0]?.output, 'one test failed');
   } finally { await service.close(); }
+});
+
+test('initial excerpts establish evidence and required coverage rejects omissions', async () => {
+  for (const missing of [false, true]) {
+    const provider = new ScriptedProvider(async input => {
+      assert.match(input.messages[2]!.content, /L2: beta/);
+      assert.ok((input.schema as any).properties.answer.required.includes('coverage'));
+      assert.doesNotMatch(input.messages[0]!.content, /run_check|unified diff/);
+      return JSON.stringify({ action: 'finish', answer: {
+        outcome: 'answered', summary: 'beta', findings: [{ text: 'beta', evidence: [{ path: 'sample.txt', startLine: 2, endLine: 2 }] }],
+        coverage: missing ? [] : [{ id: 'value', status: 'answered', findingIndices: [0] }], limitations: [], proposals: [],
+      } });
+    });
+    const { service, request } = await fixture(provider);
+    try {
+      const job = await waitForTerminal(service, (await service.startTask({ ...request,
+        initialReads: [{ path: 'sample.txt', startLine: 2, endLine: 2 }], requiredItems: [{ id: 'value', question: 'What is line two?' }],
+      })).id);
+      assert.equal(job.result?.answer.outcome, missing ? 'needs_codex' : 'answered');
+    } finally { await service.close(); }
+  }
+});
+
+test('initial excerpts cannot enlarge scope and oversized input never reaches inference', async () => {
+  const provider = new ScriptedProvider(async () => '{}');
+  const { service, request } = await fixture(provider);
+  try {
+    const job = await waitForTerminal(service, (await service.startTask({ ...request,
+      initialReads: [{ path: '../outside.txt', startLine: 1, endLine: 2 }],
+    })).id);
+    assert.equal(job.state, 'failed'); assert.equal(provider.calls, 0);
+  } finally { await service.close(); }
+});
+
+test('read-only profiles reject proposal payloads and command actions', async () => {
+  for (const action of [{ action: 'run_check', checkId: 'unit' }, { action: 'finish', answer: {
+    outcome: 'answered', summary: 'edit', findings: [], limitations: [], proposals: [{ path: 'sample.txt', originalSha256: DIGEST, unifiedDiff: 'bad' }],
+  } }]) {
+    const provider = new ScriptedProvider(async () => JSON.stringify(action));
+    const { service, request } = await fixture(provider);
+    try {
+      const job = await waitForTerminal(service, (await service.startTask(request)).id);
+      assert.equal(job.result?.answer.outcome, 'needs_codex'); assert.deepEqual(job.result?.commands, []);
+    } finally { await service.close(); }
+  }
+});
+
+test('failed jobs retain partial counters and accept takeover feedback', async () => {
+  const provider = new ScriptedProvider(async (_input, call) => {
+    if (call === 1) return JSON.stringify({ action: 'list' });
+    throw new WorkerError('provider_error', 'Safe error', { phase: 'completion', httpStatus: 503, providerCode: '503', generationId: 'gen-test' }, { promptTokens: 12, outputTokens: 3 });
+  });
+  const { service, request } = await fixture(provider);
+  try {
+    const job = await waitForTerminal(service, (await service.startTask(request)).id);
+    assert.equal(job.state, 'failed'); assert.equal(job.statistics?.length, 2);
+    assert.equal(job.error?.details?.httpStatus, 503);
+    await service.recordFeedback({ jobId: job.id, verdict: 'escalated', evidence: ['provider unavailable; Codex took over'], correctionCount: 0, verificationMs: 1, takeoverMs: 20 });
+  } finally { await service.close(); }
+});
+
+test('rejected feedback withdraws qualification across service restarts', async () => {
+  const provider = new ScriptedProvider(async () => JSON.stringify({ action: 'finish', answer: {
+    outcome: 'answered', summary: 'done', findings: [], limitations: [], proposals: [],
+  } }));
+  const { service, request, config } = await fixture(provider);
+  const job = await waitForTerminal(service, (await service.startTask(request)).id);
+  await service.recordFeedback({ jobId: job.id, verdict: 'rejected', evidence: ['material omission'], correctionCount: 1, verificationMs: 10 });
+  assert.deepEqual((await service.capabilities()).profiles[0]?.qualifiedTaskClasses, []);
+  await service.close();
+  const restarted = await WorkerService.create(config, provider);
+  try {
+    await assert.rejects(restarted.startTask({ ...request, requestKey: 'after-rejection' }), error => error instanceof WorkerError && error.code === 'profile_not_qualified');
+    const rerun = await waitForTerminal(restarted, (await restarted.startTask({ ...request, mode: 'qualification', requestKey: 'reviewed-rerun' })).id);
+    assert.equal(rerun.state, 'completed');
+    assert.deepEqual((await restarted.capabilities()).profiles[0]?.qualifiedTaskClasses, []);
+  } finally { await restarted.close(); }
+});
+
+test('remote qualification accepts no expiry or a later explicit expiry and advertises scoped repositories', async () => {
+  for (const expiry of [undefined, new Date(Date.now() + 7 * 86400000).toISOString()]) {
+    const initial = await fixture(new ScriptedProvider(async () => '{}'));
+    await initial.service.close(); await configureRemote(initial.config);
+    initial.config.profiles[0]!.qualification!.expiresAt = expiry;
+    const service = await WorkerService.create(initial.config, new RemoteScriptedProvider(async () => JSON.stringify({ action: 'finish', answer: {
+      outcome: 'answered', summary: 'done', findings: [], limitations: [], proposals: [],
+    } })));
+    try {
+      const caps = await service.capabilities();
+      assert.deepEqual(caps.profiles[0]?.qualifiedTaskClasses, ['exploration']);
+      assert.equal(caps.repositories[0]?.remote.allowed, true);
+      assert.equal(JSON.stringify(caps).includes(initial.root), false);
+      const job = await waitForTerminal(service, (await service.startTask({ ...initial.request, remoteDataConsent: true })).id);
+      assert.equal(job.state, 'completed');
+    } finally { await service.close(); }
+  }
 });

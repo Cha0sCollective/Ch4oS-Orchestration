@@ -1,6 +1,6 @@
 /** Transport-neutral contracts. No provider SDK or MCP types belong here. */
-export const SERVICE_VERSION = '0.1.2';
-export const PROMPT_VERSION = '4';
+export const SERVICE_VERSION = '0.1.4';
+export const PROMPT_VERSION = '5';
 export const TASK_CLASSES = ['exploration', 'research', 'summary', 'triage', 'transformation', 'draft', 'check-monitor'] as const;
 export type TaskClass = typeof TASK_CLASSES[number];
 export interface Limits {
@@ -20,7 +20,7 @@ export interface ContextProof {
 }
 export interface LocalModel {
   id: string; provider: 'ollama'; model: string; digest: string; quantization: string;
-  think: boolean; temperature: number; contextProof?: ContextProof;
+  think: boolean | 'low' | 'medium' | 'high'; temperature: number; contextProof?: ContextProof;
 }
 export interface OpenRouterModel {
   id: string; provider: 'openrouter'; model: string; endpointId: string;
@@ -61,6 +61,8 @@ export interface TaskRequest {
   mode: 'work' | 'qualification'; enabledCheckIds: string[]; limits?: Partial<Limits>;
   sources?: { url: string; retrievedAt: string; text: string }[];
   remoteDataConsent?: boolean;
+  requiredItems?: { id: string; question: string }[];
+  initialReads?: Evidence[];
 }
 export interface SnapshotFile { path: string; sha256: string; text: string }
 export interface Snapshot {
@@ -73,6 +75,7 @@ export interface Proposal { path: string; originalSha256: string; unifiedDiff: s
 export interface WorkerAnswer {
   outcome: 'answered' | 'incomplete' | 'needs_codex'; summary: string;
   findings: Finding[]; limitations: string[]; proposals: Proposal[];
+  coverage?: { id: string; status: 'answered' | 'missing'; findingIndices: number[] }[];
 }
 export interface CommandReceipt {
   id: string; checkId: string; snapshotId: string; executable: string; args: string[];
@@ -113,12 +116,19 @@ export interface ModelRouting {
 }
 export interface Job {
   id: string; requestKey: string; state: JobState; createdAt: string; updatedAt: string;
-  progress: string; result?: JobResult; error?: { code: string; message: string };
+  progress: string; result?: JobResult; error?: { code: string; message: string; details?: FailureDetails };
+  statistics?: ProviderStats[];
+}
+export interface FailureDetails {
+  phase?: string; httpStatus?: number; providerCode?: string; generationId?: string; finishReason?: string;
 }
 export interface Feedback {
   jobId: string; verdict: 'accepted' | 'corrected' | 'rejected' | 'escalated';
   evidence: string[]; correctionCount: number; verificationMs: number;
+  preparationMs?: number; correctionMs?: number; takeoverMs?: number;
+  invalidatesQualification?: boolean;
 }
 export class WorkerError extends Error {
-  constructor(public readonly code: string, message: string) { super(message); this.name = 'WorkerError'; }
+  constructor(public readonly code: string, message: string, public readonly details?: FailureDetails,
+    public readonly stats?: ProviderStats) { super(message); this.name = 'WorkerError'; }
 }

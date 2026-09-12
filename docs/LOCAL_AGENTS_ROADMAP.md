@@ -121,6 +121,45 @@ structured-output support, bounded context and real provider statistics.
 Remote dispatch needs host-approved repository data and per-task consent. Keep
 credentials in host-local environment storage. Qualify each endpoint/profile and
 record provider/catalog identity, observed cost and correction effort. Remote
-model revisions are less reproducible than local digests; expire eligibility.
+model revisions are less reproducible than local digests; verify each pilot answer
+and rerun qualification after relevant changes or material quality failures.
 Missing credentials or suitable endpoints are explicit failures. Paid inference
 and account purchases are outside this authorization.
+
+## Approved workflow rollout
+
+Improve the shared service before ordinary adoption: safe failure diagnostics and
+partial counters, discoverable repository scope, task-specific actions, required-item
+coverage and optional bounded initial excerpts. Qualification is change-triggered;
+explicit expiry remains supported, with no mandatory 24-hour eligibility window.
+
+Start with local evidence summaries and NVIDIA source comparison using two real-work
+cases plus one ambiguity/adversarial case, each twice. Retain every attempt; at most
+two operational-failure replacements per campaign are permitted. Incorrect or
+malformed answers are not replacement candidates. Independent review precedes five
+supervised pilot attempts. Codex takes over when an opportunistic remote job fails.
+No passing run automatically promotes a model or changes independent review routing.
+
+Minecraft project source is owner-approved nonconfidential material within registered
+scope. Codex may supply reviewed documentation sources and sets task consent under
+that standing authorization. Keys and unrelated private runtime data remain excluded.
+
+Install Cherry Studio as a host-local personal model playground, with explicit free
+OpenRouter presets and audited auxiliary routing. Add a separate ComfyUI/FLUX.2 Klein
+4B manual image pilot. Keep installs, weights, credentials and routine history outside
+Git; commit reproducible setup records and reviewed findings. Evaluate additional
+models sequentially. Do not build an image worker API in this packet.
+
+Refresh the prepared Create-Ch4oS and Installer adoption changes with actual revisions
+and validation. Sandbox commands remain disabled; no incidental UAC/setup retries.
+Existing merge, publication and live acceptance gates remain unchanged.
+
+## Current closeout boundary
+
+The owner paused further trials on 2026-09-12. Finish documentation and prepared
+adoption handoffs; do not resume model qualification, supervised pilots, image
+trials, paid searches or sandbox experiments automatically. Manual use of installed
+Cherry Studio and ComfyUI remains available. See
+[installed capabilities](INSTALLED_CAPABILITIES.md) and [local images](LOCAL_IMAGES.md).
+The separately authorized $5 search integration remains disabled after provider
+failures. No paused evaluation implies permission to enable an unqualified worker.

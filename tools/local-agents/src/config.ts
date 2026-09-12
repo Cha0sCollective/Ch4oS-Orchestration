@@ -28,6 +28,8 @@ export const answerSchema = z.object({
   findings: z.array(z.object({ text, evidence: z.array(evidenceSchema).max(32) }).strict()).max(32),
   limitations: z.array(text).max(32),
   proposals: z.array(z.object({ path: text, originalSha256: digest, unifiedDiff: z.string().max(65536) }).strict()).max(8),
+  coverage: z.array(z.object({ id, status: z.enum(['answered', 'missing']),
+    findingIndices: z.array(z.number().int().min(0).max(31)).max(32) }).strict()).max(16).optional(),
 }).strict();
 export const actionSchema = z.object({
   action: z.enum(['list', 'read', 'search', 'run_check', 'finish']),
@@ -42,12 +44,19 @@ export const taskRequestSchema = z.object({
   mode: z.enum(['work', 'qualification']).default('work'), enabledCheckIds: z.array(id).max(16).default([]),
   limits: limitsSchema.partial().optional(),
   remoteDataConsent: z.boolean().default(false),
+  requiredItems: z.array(z.object({ id, question: z.string().min(1).max(1000) }).strict()).min(1).max(16)
+    .refine(items => new Set(items.map(item => item.id)).size === items.length, 'Duplicate required item').optional(),
+  initialReads: z.array(evidenceSchema.refine(item => item.endLine >= item.startLine)).max(16).optional(),
   sources: z.array(z.object({ url: z.string().url().max(2048), retrievedAt: z.string().datetime(), text: z.string().max(16000) }).strict()).max(8).optional(),
 }).strict();
 export const feedbackSchema = z.object({
   jobId: z.string().uuid(), verdict: z.enum(['accepted', 'corrected', 'rejected', 'escalated']),
   evidence: z.array(z.string().min(1).max(2048)).min(1).max(16),
   correctionCount: z.number().int().min(0).max(10000), verificationMs: z.number().int().min(0).max(86400000),
+  preparationMs: z.number().int().min(0).max(86400000).optional(),
+  correctionMs: z.number().int().min(0).max(86400000).optional(),
+  takeoverMs: z.number().int().min(0).max(86400000).optional(),
+  invalidatesQualification: z.boolean().optional(),
 }).strict();
 export const hostConfigSchema = z.object({
   version: z.literal(1), inferencePolicy: z.enum(['local-only', 'approved-free-providers']),
@@ -61,7 +70,7 @@ export const hostConfigSchema = z.object({
     allowSuppliedSources: z.boolean().default(false), dataCollection: z.enum(['deny','allow']).default('deny'),
   }).strict().optional(),
   models: z.array(z.discriminatedUnion('provider', [z.object({ id, provider: z.literal('ollama'), model: z.string().min(1).max(128), digest,
-    quantization: z.string().min(1).max(32), think: z.boolean().default(false), temperature: z.number().min(0).max(2).default(0.2),
+    quantization: z.string().min(1).max(32), think: z.union([z.boolean(), z.enum(['low', 'medium', 'high'])]).default(false), temperature: z.number().min(0).max(2).default(0.2),
     contextProof: z.object({ ollamaVersion: z.string(), digest, contextTokens: z.number().int(), outputTokens: z.number().int(),
       singleOverflowRejected: z.boolean(), historyOverflowRejected: z.boolean(), verifiedAt: z.string().datetime() }).strict().optional(),
   }).strict(), z.object({ id, provider: z.literal('openrouter'),

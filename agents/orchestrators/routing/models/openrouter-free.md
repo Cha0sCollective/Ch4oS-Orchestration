@@ -11,8 +11,8 @@ token context and a 65,536 token completion ceiling. Its advertised structured
 interface is forced function calling; it does not advertise JSON-schema response
 format. The worker uses a single forced `worker_action` call for this endpoint.
 The endpoint does not establish its quantization, and this record makes no claim
-about it. Worker limits remain 8K context and 2K generation regardless of the
-larger published ceiling. Catalog identity and pricing must be verified again
+about it. Remote worker limits are 256K context, 128KiB serialized input and 2K
+generation; local profiles retain 8K context and 16KiB input. Catalog identity and pricing must be verified again
 when registering and using an endpoint.
 
 This NVIDIA free endpoint is an evaluation candidate only. Its linked API Trial
@@ -30,7 +30,8 @@ the meaning of a qualification. A selected endpoint must support the worker's
 structured action protocol and zero-price routing constraints.
 
 Remote qualification records include the model slug, endpoint/provider identity,
-catalog fingerprint, complete settings, data policy, reviewed cases and expiration.
+catalog fingerprint, complete settings, data policy, reviewed cases and optional expiration.
+Eligibility is change-triggered, with no mandatory daily renewal.
 An API model is not a content-addressed local weight artifact; an unchanged slug
 or catalog fingerprint cannot guarantee unchanged remote weights.
 

@@ -48,5 +48,7 @@ Local-only remains the default. Remote qualification identifies the exact model,
 underlying endpoint, catalog fingerprint and fallback policy. Require zero-price
 routing, host data permission and per-task consent; credentials stay host-local.
 No random free router or silent fallback is accepted. Remote model contents cannot
-be pinned like local weight digests, so eligibility also expires and requires
-renewed verification. See [the OpenRouter record](models/openrouter-free.md).
+be pinned like local weight digests, so changed endpoint identity or settings
+require renewed qualification. Optional explicit expiry remains supported.
+See [the OpenRouter record](models/openrouter-free.md) and the
+[additional trial candidates](models/additional-candidates.md).

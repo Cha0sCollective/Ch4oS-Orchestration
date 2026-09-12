@@ -26,6 +26,10 @@ test('MCP stdio negotiates and exposes all five bounded operations',async()=>{
     assert.deepEqual(list.tools.map(t=>t.name).sort(),['cancel_task','capabilities','get_task','record_feedback','start_task']);
     const response=await client.callTool({name:'capabilities',arguments:{}});
     assert.equal((response.structuredContent as any).provider.locality,'local');
+    assert.equal((response.structuredContent as any).repositories[0].id,'fixture');
+    assert.equal(list.tools.find(t=>t.name==='start_task')?.description?.includes('local-only'),false);
+    assert.ok(JSON.stringify(list.tools.find(t=>t.name==='start_task')?.inputSchema).includes('requiredItems'));
+    assert.ok(JSON.stringify(list.tools.find(t=>t.name==='start_task')?.inputSchema).includes('initialReads'));
     const bad=await client.callTool({name:'start_task',arguments:{provider:'openrouter'}});
     assert.equal(bad.isError,true);
     const unknown=await client.callTool({name:'get_task',arguments:{jobId:'12345678-1234-4123-8123-123456789abc'}});
@@ -42,6 +46,7 @@ test('newline CLI exposes the same local-only capabilities and structured failur
   try {
     const [code]=await exited;assert.equal(code,0);
     assert.equal(responses[0].result.provider.locality,'local');assert.equal(responses[1].error.code,'invalid_request');
+    assert.equal(responses[0].result.repositories[0].id,'fixture');
   } finally { lines.close(); if(child.exitCode===null)child.kill();await rm(f.root,{recursive:true,force:true}); }
 });
 test('newline CLI rejects an oversized unterminated request',async()=>{

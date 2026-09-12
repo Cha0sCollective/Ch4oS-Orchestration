@@ -41,6 +41,9 @@ export class OllamaProvider implements ModelProvider {
   }
 
   async inspect(model: LocalModel, signal = AbortSignal.timeout(10000)): Promise<{ version: string; digest: string; quantization: string }> {
+    if (/^gpt-oss(?::|$)/i.test(model.model) && typeof model.think !== 'string') {
+      throw new WorkerError('invalid_config', 'GPT-OSS requires a low, medium, or high reasoning level.');
+    }
     if (model.provider !== 'ollama' || /cloud|https?:|[/\\]{2}/i.test(model.model)) throw new WorkerError('local_only', 'Only registered local model identities are admitted');
     const status = await this.json('/api/status', undefined, signal);
     if (status.cloud?.disabled !== true) throw new WorkerError('local_only', 'Ollama cloud must be disabled on the running server');

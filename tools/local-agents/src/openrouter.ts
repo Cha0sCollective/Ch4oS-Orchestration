@@ -1,12 +1,14 @@
 import { createHash } from 'node:crypto';
 import {
   WorkerError,
+  type FailureDetails,
   type GenerateRequest,
   type Limits,
   type ModelProvider,
   type OpenRouterConfig,
   type OpenRouterModel,
   type ProviderHealth,
+  type ProviderStats,
   type RegisteredModel,
 } from './types.js';
 
@@ -15,6 +17,12 @@ const CATALOG_LIMIT_BYTES = 4 * 1024 * 1024;
 const CONTEXT_TEMPLATE_RESERVE_TOKENS = 512;
 const RECEIPT_RETRY_DELAYS_MS = [100, 200, 400, 800, 1600, 3200, 6400, 2000] as const;
 const BASE_PARAMETERS = ['max_tokens', 'temperature'] as const;
+const PROVIDER_ERROR_CODES = new Set([
+  'invalid_request_error', 'authentication_error', 'permission_error', 'not_found_error',
+  'rate_limit_exceeded', 'rate_limit_error', 'context_length_exceeded', 'content_filter',
+  'provider_error', 'server_error', 'overloaded_error', 'insufficient_quota',
+]);
+const FINISH_REASONS = new Set(['stop', 'length', 'tool_calls', 'function_call', 'content_filter', 'error']);
 type JsonObject = Record<string, unknown>;
 
 export interface FreeEndpointIdentity {
@@ -59,6 +67,42 @@ function finiteNumber(value: unknown): number | undefined {
 }
 function nonnegativeInteger(value: unknown): number | undefined {
   return typeof value === 'number' && Number.isSafeInteger(value) && value >= 0 ? value : undefined;
+}
+function diagnosticGenerationId(value: unknown): string | undefined {
+  return typeof value === 'string' && /^gen-[A-Za-z0-9_-]{1,240}$/.test(value) ? value : undefined;
+}
+function diagnosticProviderCode(value: unknown): string | undefined {
+  if (typeof value === 'number' && Number.isInteger(value) && value >= 100 && value <= 599) return String(value);
+  if (typeof value !== 'string') return undefined;
+  return /^[1-5][0-9]{2}$/.test(value) || PROVIDER_ERROR_CODES.has(value) ? value : undefined;
+}
+function responseDetails(result: JsonObject): FailureDetails {
+  const error = result.error && typeof result.error === 'object' && !Array.isArray(result.error)
+    ? result.error as JsonObject : undefined;
+  const providerCode = diagnosticProviderCode(error?.code);
+  const generationId = diagnosticGenerationId(result.id);
+  return { ...(providerCode ? { providerCode } : {}), ...(generationId ? { generationId } : {}) };
+}
+/** Response-reported counters remain diagnostic observations until receipt validation succeeds. */
+function completionStatistics(result: JsonObject): ProviderStats | undefined {
+  const usage = result.usage && typeof result.usage === 'object' && !Array.isArray(result.usage)
+    ? result.usage as JsonObject : undefined;
+  const promptTokens = nonnegativeInteger(usage?.prompt_tokens);
+  const outputTokens = nonnegativeInteger(usage?.completion_tokens);
+  const cost = finiteNumber(usage?.cost);
+  const generationId = diagnosticGenerationId(result.id);
+  const stats: ProviderStats = {
+    ...(promptTokens !== undefined ? { promptTokens } : {}),
+    ...(outputTokens !== undefined ? { outputTokens } : {}),
+    ...(cost !== undefined && cost >= 0 ? { costUsd: cost } : {}),
+    ...(generationId ? { generationId } : {}),
+  };
+  return Object.keys(stats).length ? stats : undefined;
+}
+function withDiagnostics(error: unknown, details: FailureDetails, stats?: ProviderStats): WorkerError {
+  return error instanceof WorkerError
+    ? new WorkerError(error.code, error.message, { ...details, ...error.details }, error.stats ?? stats)
+    : new WorkerError('provider_error', 'OpenRouter could not complete the request', details, stats);
 }
 function sortedStrings(value: unknown): string[] {
   if (!Array.isArray(value) || value.some(item => typeof item !== 'string')) return [];
@@ -152,11 +196,14 @@ export class OpenRouterProvider implements ModelProvider {
   }
 
   private async json(path: string, init: RequestInit, signal: AbortSignal, maxBytes: number, authenticated = true,
-    retryGenerationNotFound = false): Promise<JsonObject> {
+    retryGenerationNotFound = false): Promise<{ value: JsonObject; httpStatus: number }> {
     throwIfAborted(signal);
-    let response: Response;
+    const phase = path.startsWith('/api/v1/generation') ? 'receipt'
+      : path === '/api/v1/chat/completions' ? 'completion' : 'catalog';
+    let details: FailureDetails = { phase };
+    let statistics: ProviderStats | undefined;
     try {
-      response = await this.fetcher(`${ORIGIN}${path}`, {
+      const response = await this.fetcher(`${ORIGIN}${path}`, {
         ...init,
         redirect: 'error',
         signal,
@@ -166,52 +213,54 @@ export class OpenRouterProvider implements ModelProvider {
           ...(init.headers ?? {}),
         },
       });
+      details.httpStatus = response.status;
+      if (response.url && !response.url.startsWith(`${ORIGIN}/api/v1/`)) {
+        await response.body?.cancel().catch(() => {});
+        throw new WorkerError('provider_error', 'OpenRouter returned an unexpected response origin');
+      }
+      const reader = response.body?.getReader();
+      if (!reader) throw new WorkerError('provider_error', 'OpenRouter returned no response body');
+      const chunks: Uint8Array[] = [];
+      let total = 0;
+      try {
+        while (true) {
+          throwIfAborted(signal);
+          const { done, value } = await reader.read();
+          if (done) break;
+          total += value.byteLength;
+          if (total > maxBytes) throw new WorkerError('provider_limit', 'OpenRouter response exceeded the byte allowance');
+          chunks.push(value);
+        }
+      } finally { await reader.cancel().catch(() => {}); }
+      let parsed: unknown;
+      try { parsed = JSON.parse(Buffer.concat(chunks).toString('utf8')); }
+      catch { throw new WorkerError('provider_error', 'OpenRouter returned invalid JSON'); }
+      const result = object(parsed, 'OpenRouter returned an invalid response');
+      details = { ...details, ...responseDetails(result) };
+      if (phase === 'completion') statistics = completionStatistics(result);
+      if (!response.ok) {
+        if (retryGenerationNotFound && response.status === 404) {
+          throw new WorkerError('generation_not_ready', 'OpenRouter generation proof is not ready');
+        }
+        throw new WorkerError('provider_error', `OpenRouter rejected the request (HTTP ${response.status})`);
+      }
+      return { value: result, httpStatus: response.status };
     } catch (error) {
-      throwIfAborted(signal);
-      throw new WorkerError('provider_error', 'OpenRouter could not be reached');
+      throw withDiagnostics(signal.aborted ? (signal.reason ?? new WorkerError('cancelled', 'OpenRouter request was cancelled')) : error, details, statistics);
     }
-    if (response.url && !response.url.startsWith(`${ORIGIN}/api/v1/`)) {
-      await response.body?.cancel().catch(() => {});
-      throw new WorkerError('provider_error', 'OpenRouter returned an unexpected response origin');
-    }
-    const reader = response.body?.getReader();
-    if (!reader) throw new WorkerError('provider_error', 'OpenRouter returned no response body');
-    const chunks: Uint8Array[] = [];
-    let total = 0;
-    try {
-      while (true) {
-        throwIfAborted(signal);
-        const { done, value } = await reader.read();
-        if (done) break;
-        total += value.byteLength;
-        if (total > maxBytes) throw new WorkerError('provider_limit', 'OpenRouter response exceeded the byte allowance');
-        chunks.push(value);
-      }
-    } finally { await reader.cancel().catch(() => {}); }
-    let parsed: unknown;
-    try { parsed = JSON.parse(Buffer.concat(chunks).toString('utf8')); }
-    catch { throw new WorkerError('provider_error', 'OpenRouter returned invalid JSON'); }
-    const result = object(parsed, 'OpenRouter returned an invalid response');
-    if (!response.ok) {
-      if (retryGenerationNotFound && response.status === 404) {
-        throw new WorkerError('generation_not_ready', 'OpenRouter generation proof is not ready');
-      }
-      throw new WorkerError('provider_error', `OpenRouter rejected the request (HTTP ${response.status})`);
-    }
-    return result;
   }
 
-  private async generationProof(generationId: string, signal: AbortSignal): Promise<JsonObject> {
+  private async generationProof(generationId: string, signal: AbortSignal): Promise<{ value: JsonObject; httpStatus: number }> {
     for (let attempt = 0; ; attempt++) {
       try {
-        const result = await this.json(`/api/v1/generation?id=${encodeURIComponent(generationId)}`, { method: 'GET' }, signal,
+        const { value: result, httpStatus } = await this.json(`/api/v1/generation?id=${encodeURIComponent(generationId)}`, { method: 'GET' }, signal,
           256 * 1024, true, true);
-        return object(result.data, 'OpenRouter omitted generation proof');
+        return { value: object(result.data, 'OpenRouter omitted generation proof'), httpStatus };
       } catch (error) {
         throwIfAborted(signal);
         if (!(error instanceof WorkerError) || error.code !== 'generation_not_ready') throw error;
         const delay = RECEIPT_RETRY_DELAYS_MS[attempt];
-        if (delay === undefined) throw new WorkerError('provider_error', 'OpenRouter generation proof was not available within the receipt window');
+        if (delay === undefined) throw new WorkerError('provider_error', 'OpenRouter generation proof was not available within the receipt window', error.details, error.stats);
         await (this.dependencies.wait ?? wait)(delay, signal);
       }
     }
@@ -224,8 +273,8 @@ export class OpenRouterProvider implements ModelProvider {
       this.json(`/api/v1/model/${encoded}`, { method: 'GET' }, signal, CATALOG_LIMIT_BYTES, false),
       this.json(`/api/v1/models/${encoded}/endpoints`, { method: 'GET' }, signal, CATALOG_LIMIT_BYTES, false),
     ]);
-    const model = object(modelResult.data, 'OpenRouter returned invalid model catalog data');
-    const endpointData = object(endpointResult.data, 'OpenRouter returned invalid endpoint catalog data');
+    const model = object(modelResult.value.data, 'OpenRouter returned invalid model catalog data');
+    const endpointData = object(endpointResult.value.data, 'OpenRouter returned invalid endpoint catalog data');
     if (model.id !== modelName || endpointData.id !== modelName || !Array.isArray(endpointData.endpoints)) {
       throw new WorkerError('model_unavailable', 'OpenRouter catalog identity differs from the requested model');
     }
@@ -361,65 +410,77 @@ export class OpenRouterProvider implements ModelProvider {
         || inputBytes + limits.outputTokens + CONTEXT_TEMPLATE_RESERVE_TOKENS > Math.min(limits.contextTokens, model.contextTokens)) {
       throw new WorkerError('context_limit', 'Complete OpenRouter input cannot fit the conservative context allowance');
     }
-    const result = await this.json('/api/v1/chat/completions', {
+    const { value: result, httpStatus } = await this.json('/api/v1/chat/completions', {
       method: 'POST',
       headers: { 'X-OpenRouter-Metadata': 'enabled' },
       body: serializedBody,
     }, signal, Math.min(CATALOG_LIMIT_BYTES, Math.max(65_536, limits.resultBytes * 4)));
-    const generationId = string(result.id);
-    if (!Array.isArray(result.choices) || result.choices.length !== 1) {
-      throw new WorkerError('provider_error', 'OpenRouter did not return exactly one completion choice');
-    }
-    const choice = object(result.choices[0], 'OpenRouter returned no completion choice');
-    const finishReason = string(choice.finish_reason);
-    const message = object(choice.message, 'OpenRouter returned no completion message');
-    let content: string | undefined;
-    if (model.outputMode === 'json-schema') {
-      content = string(message.content);
-      if (finishReason === 'length') throw new WorkerError('context_limit', 'OpenRouter exhausted the requested output allowance');
-      if (finishReason !== 'stop') throw new WorkerError('provider_error', 'OpenRouter did not return a complete structured response');
-    } else {
-      if (finishReason === 'length') throw new WorkerError('context_limit', 'OpenRouter exhausted the requested output allowance');
-      if (finishReason !== 'tool_calls' || !Array.isArray(message.tool_calls) || message.tool_calls.length !== 1) {
-        throw new WorkerError('provider_error', 'OpenRouter did not return exactly one worker_action tool call');
+    const details: FailureDetails = { phase: 'completion_validation', httpStatus, ...responseDetails(result) };
+    const statistics = completionStatistics(result);
+    try {
+      const generationId = string(result.id);
+      if (!Array.isArray(result.choices) || result.choices.length !== 1) {
+        throw new WorkerError('provider_error', 'OpenRouter did not return exactly one completion choice');
       }
-      const call = object(message.tool_calls[0], 'OpenRouter returned an invalid worker_action tool call');
-      const fn = object(call.function, 'OpenRouter returned an invalid worker_action function call');
-      content = string(fn.arguments);
-      if (call.type !== 'function' || fn.name !== 'worker_action' || content === undefined) {
-        throw new WorkerError('provider_error', 'OpenRouter returned a different tool call');
+      const choice = object(result.choices[0], 'OpenRouter returned no completion choice');
+      const finishReason = string(choice.finish_reason);
+      if (finishReason && FINISH_REASONS.has(finishReason)) details.finishReason = finishReason;
+      const message = object(choice.message, 'OpenRouter returned no completion message');
+      let content: string | undefined;
+      if (model.outputMode === 'json-schema') {
+        content = string(message.content);
+        if (finishReason === 'length') throw new WorkerError('context_limit', 'OpenRouter exhausted the requested output allowance');
+        if (finishReason !== 'stop') throw new WorkerError('provider_error', 'OpenRouter did not return a complete structured response');
+      } else {
+        if (finishReason === 'length') throw new WorkerError('context_limit', 'OpenRouter exhausted the requested output allowance');
+        if (finishReason !== 'tool_calls' || !Array.isArray(message.tool_calls) || message.tool_calls.length !== 1) {
+          throw new WorkerError('provider_error', 'OpenRouter did not return exactly one worker_action tool call');
+        }
+        const call = object(message.tool_calls[0], 'OpenRouter returned an invalid worker_action tool call');
+        const fn = object(call.function, 'OpenRouter returned an invalid worker_action function call');
+        content = string(fn.arguments);
+        if (call.type !== 'function' || fn.name !== 'worker_action' || content === undefined) {
+          throw new WorkerError('provider_error', 'OpenRouter returned a different tool call');
+        }
+        try { object(JSON.parse(content), 'OpenRouter worker_action arguments must be a JSON object'); }
+        catch (error) {
+          if (error instanceof WorkerError) throw error;
+          throw new WorkerError('provider_error', 'OpenRouter worker_action arguments are invalid JSON');
+        }
       }
-      try { object(JSON.parse(content), 'OpenRouter worker_action arguments must be a JSON object'); }
-      catch (error) {
-        if (error instanceof WorkerError) throw error;
-        throw new WorkerError('provider_error', 'OpenRouter worker_action arguments are invalid JSON');
+      const usage = object(result.usage, 'OpenRouter omitted response usage proof');
+      if (!generationId || generationId.length > 256 || result.model !== model.model || content === undefined
+          || nonnegativeInteger(usage.prompt_tokens) === undefined || nonnegativeInteger(usage.completion_tokens) === undefined
+          || finiteNumber(usage.cost) !== 0) {
+        throw new WorkerError('provider_error', 'OpenRouter completion identity or zero-cost usage proof is missing');
       }
-    }
-    const usage = object(result.usage, 'OpenRouter omitted response usage proof');
-    if (!generationId || generationId.length > 256 || result.model !== model.model || content === undefined
-        || nonnegativeInteger(usage.prompt_tokens) === undefined || nonnegativeInteger(usage.completion_tokens) === undefined
-        || finiteNumber(usage.cost) !== 0) {
-      throw new WorkerError('provider_error', 'OpenRouter completion identity or zero-cost usage proof is missing');
-    }
-    if (Buffer.byteLength(content, 'utf8') > limits.resultBytes) throw new WorkerError('provider_limit', 'Generated content exceeded the result allowance');
-    validateRouterMetadata(result.openrouter_metadata, model, endpoint.endpointModel);
+      if (Buffer.byteLength(content, 'utf8') > limits.resultBytes) throw new WorkerError('provider_limit', 'Generated content exceeded the result allowance');
+      details.phase = 'routing_validation';
+      validateRouterMetadata(result.openrouter_metadata, model, endpoint.endpointModel);
 
-    const proof = await this.generationProof(generationId, signal);
-    const routedPromptTokens = nonnegativeInteger(proof.tokens_prompt);
-    const routedOutputTokens = nonnegativeInteger(proof.tokens_completion);
-    const promptTokens = nonnegativeInteger(proof.native_tokens_prompt);
-    const outputTokens = nonnegativeInteger(proof.native_tokens_completion);
-    if (proof.id !== generationId || proof.model !== endpoint.endpointModel || proof.provider_name !== model.providerName
-        || proof.is_byok !== false || finiteNumber(proof.total_cost) !== 0 || finiteNumber(proof.usage) !== 0
-        || routedPromptTokens === undefined || routedOutputTokens === undefined
-        || promptTokens === undefined || outputTokens === undefined || outputTokens > limits.outputTokens
-        || promptTokens !== usage.prompt_tokens || outputTokens !== usage.completion_tokens) {
-      throw new WorkerError('provider_error', 'OpenRouter generation did not prove the pinned free endpoint identity');
+      details.phase = 'receipt';
+      delete details.httpStatus;
+      const { value: proof, httpStatus: receiptHttpStatus } = await this.generationProof(generationId, signal);
+      details.phase = 'receipt_validation';
+      details.httpStatus = receiptHttpStatus;
+      const routedPromptTokens = nonnegativeInteger(proof.tokens_prompt);
+      const routedOutputTokens = nonnegativeInteger(proof.tokens_completion);
+      const promptTokens = nonnegativeInteger(proof.native_tokens_prompt);
+      const outputTokens = nonnegativeInteger(proof.native_tokens_completion);
+      if (proof.id !== generationId || proof.model !== endpoint.endpointModel || proof.provider_name !== model.providerName
+          || proof.is_byok !== false || finiteNumber(proof.total_cost) !== 0 || finiteNumber(proof.usage) !== 0
+          || routedPromptTokens === undefined || routedOutputTokens === undefined
+          || promptTokens === undefined || outputTokens === undefined || outputTokens > limits.outputTokens
+          || promptTokens !== usage.prompt_tokens || outputTokens !== usage.completion_tokens) {
+        throw new WorkerError('provider_error', 'OpenRouter generation did not prove the pinned free endpoint identity');
+      }
+      return {
+        content,
+        doneReason: 'stop',
+        stats: { promptTokens, outputTokens, costUsd: 0, generationId, endpointId: model.endpointId, providerName: model.providerName },
+      };
+    } catch (error) {
+      throw withDiagnostics(signal.aborted ? (signal.reason ?? new WorkerError('cancelled', 'OpenRouter request was cancelled')) : error, details, statistics);
     }
-    return {
-      content,
-      doneReason: 'stop',
-      stats: { promptTokens, outputTokens, costUsd: 0, generationId, endpointId: model.endpointId, providerName: model.providerName },
-    };
   }
 }

@@ -1,58 +1,37 @@
 # Current work
 
-The approved active packet is the local-agent service roadmap in
-[LOCAL_AGENTS_ROADMAP.md](LOCAL_AGENTS_ROADMAP.md). Work is ongoing on branch
-`codex/local-agent-service`, based on `d52afebcdf2c721f3a1f383ee9c0f06ace950b1c`.
-Before continuing, verify the actual branch, `HEAD`, dirty state and work item;
-this pointer does not assert that the implementation is complete or runtime-ready.
+The owner paused further model trials on 2026-09-12 and requested closeout plus a
+short installed-tools guide. Do not automatically resume qualification, supervised
+pilots, paid searches, sandbox setup or installation experiments.
 
-Delivery order is foundation/install, native host probes, shared core and MCP/CLI,
-sandbox/cancellation checks, model qualification and independent review, then
-reviewed adoption. On 2026-09-12 the owner additionally authorized OpenRouter
-implementation for free models. Keep local-only as the default; remote work needs
-explicit endpoint selection, zero-price enforcement, qualification and data consent.
-The owner saved an API key in host-local environment storage; authentication was
-verified. The owner confirmed the Free model training privacy setting is enabled
-and saved, and explicitly requested retrying the synthetic fixtures. Host data
-collection permission is enabled only behind the synthetic repository allowlist;
-supplied source transmission remains disabled. NVIDIA's latest summary evaluation
-produced five correct answers and one provider failure; no eligibility was granted.
+Start with [INSTALLED_CAPABILITIES.md](INSTALLED_CAPABILITIES.md) for what is
+installed and how to access it, and [LOCAL_IMAGES.md](LOCAL_IMAGES.md) for making
+images yourself in ComfyUI without Codex.
 
-The Node 24 package under `tools/local-agents/` implements a shared core behind
-MCP stdio and CLI. Version 0.1.2 is installed independently of this checkout and
-the `ch4os-local-agents` connector is registered. Installed MCP inference,
-idempotency, feedback and cancellation were exercised. Independent implementation
-review passed; 65 tests pass. Evidence and exact fingerprints are in
-LOCAL_AGENTS_TRIAL.md. Remote profile limits are 256K context / 128KiB serialized
-input; local profiles retain their verified 8K / 16KiB limits.
+Branch: `codex/local-agent-service`; implementation base:
+`b10631b4a0351baac318ed3ae2704051287aef3e`. Verify actual HEAD and dirty state before
+continuing; no merge or publication is authorized by this pointer.
 
-The original corrected Qwen evaluations rejected every tested class. With numbered
-evidence in 0.1.2, the local summary rerun still omitted a required behavior and
-citation in one answer. No profile is eligible for ordinary work. Reviewed
-aggregates and artifact identities are under agents/orchestrators/routing/qualifications.
-Trust recorded settings and fingerprints, not filenames. NVIDIA remains
-an evaluation candidate. The owner clarified the intended use is personal modding
-evaluation; inspect endpoint terms and data scope for each proposed assignment.
-The sandbox command lane remains disabled after failed isolation probes; do not
-resume UAC/setup trials incidentally. See LOCAL_AGENTS_TRIAL.md for evidence.
+Worker service 0.1.4 is installed and registered. Qualification mode is now disabled
+in host configuration. No profile is enabled for ordinary assignments. Local Gemma
+passed earlier summary cases, but qualification did not transfer to the new runtime.
+Command execution remains disabled. Minecraft sources are approved nonconfidential
+within configured scope; Codex still verifies worker claims and controls integration.
 
-The approved scope includes preparing separately reviewed adoption changes for
-Create-Ch4oS and Ch4oS-Installer after the local pilot. Use manual copying and
-preserve target-local guidance and unrelated work. Merge, publication and live
-operation remain subject to the existing target gates.
+Cherry Studio 2.0.14 and ComfyUI 0.35.0 with FLUX.2 Klein 4B FP8 are installed.
+The owner is configuring Cherry manually: default Gemma4 12B, quick/translate Qwen3.5
+9B, all through local Ollama. The local image workflow is available in ComfyUI as
+`Ch4oS - Local FLUX image`; it was opened without running another generation.
 
-Prepared adoption worktrees live under the host tools directory's
-`adoption/Create-Ch4oS` and `adoption/Ch4oS-Installer`, both on
-`codex/local-worker-adoption`. Create candidate: `43cce26b9fb429bb0dcb226f39db66f932aec175`;
-Installer: `ac0079a8c904b1e325fc0a2abfe317db1bf9fb19`. Their incremental adoption
-records pin canonical source `b5f6d97796afc28809f2f59bd66d5867bbff0876`.
+The separate search key has a verified $5 non-resetting limit. Search is registered
+but disabled after two failed provider attempts. Last checked spend was $0.007;
+remaining credit $4.993. Preserve both local reservations. Do not retry automatically.
 
-Both adoption commits passed independent review; their merge/publication gates
-remain with the owner. The OpenRouter dated endpoint/native-token receipt mismatch
-is fixed. Source candidate `d1998fa54e3a22668fe0ab8409a8af8e7b7721fa` passed
-independent review. Next bounded action: investigate NVIDIA's missing completion
-responses and local summary omissions, then rerun affected cases after a justified
-change. Keep ordinary workers unavailable until qualification passes; repeated
-sampling alone does not establish reliability.
-Do not infer permission to transmit private sources.
-No issue/PR has been opened and no merge or publication has occurred in this packet.
+The documentation/adoption closeout provides the two short guides above and
+refreshed prepared Create-Ch4oS and Installer changes. Primary target checkouts,
+existing agent profiles and unrelated work remain intact. Target merge/publication
+and live acceptance gates remain with the owner. Detailed evidence stays in
+LOCAL_AGENTS_TRIAL.md and routing qualification records, not this startup pointer.
+
+A future session needs a new bounded assignment; paused evaluations are not
+its default next task. Ultra delegation requires explicit approval.

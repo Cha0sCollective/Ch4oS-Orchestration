@@ -53,6 +53,7 @@ interface TrialRecord {
   profileId: string;
   state: Job['state'];
   errorCode?: string;
+  failureDetails?: NonNullable<Job['error']>['details'];
   answer?: NonNullable<Job['result']>['answer'];
   statistics?: NonNullable<Job['result']>['statistics'];
   model?: {
@@ -186,7 +187,8 @@ function trialFromJob(caseItem: QualificationCase, repetition: 1 | 2, profile: P
     taskClass: caseItem.taskClass,
     profileId: profile.id,
     state: job.state,
-    ...(job.error ? { errorCode: job.error.code } : {}),
+    ...(job.error ? { errorCode: job.error.code, failureDetails: job.error.details } : {}),
+    ...(job.statistics ? { statistics: job.statistics } : {}),
     ...(result ? {
       answer: result.answer,
       statistics: result.statistics,

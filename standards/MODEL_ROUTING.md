@@ -12,7 +12,10 @@ to the existing cloud production route. Local workers are not final reviewers.
 Local-only inference remains the default. The owner has authorized OpenRouter
 implementation for free models. Remote work additionally requires a registered
 zero-price endpoint, current qualification, host data permission and explicit
-per-task consent; paid requests and automatic provider fallback remain disabled.
+per-task consent; paid inference and automatic provider fallback remain disabled.
+The separately authorized web-search capability uses a distinct key and a $5
+non-resetting budget. It does not authorize paid model inference, GUI auxiliary
+requests or unrestricted worker browsing.
 
 Use a cheaper model or lower reasoning effort when there is good reason to believe it will do the job just as well. Do not downgrade because saving usage feels virtuous.
 
@@ -118,6 +121,11 @@ Escalate when:
 Do not use maximum reasoning just because something is important. Collect the facts efficiently, then spend the deeper reasoning on the part that actually needs it.
 
 ## Context efficiency
+
+Ultra reasoning for delegated agents requires explicit owner approval. Set the
+model and effort for each bounded assignment instead of inheriting the coordinator's
+settings. Give a fresh worker only its assignment, relevant sources, permissions
+and acceptance criteria; do not copy the full conversation by default.
 
 Strong models should receive distilled findings when practical, but important decisions must stay traceable to primary sources.
 

@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { mkdir, open, readFile, rename, stat, unlink, writeFile, appendFile } from 'node:fs/promises';
 import path from 'node:path';
-import type { Feedback, Job, ModelRouting, RegisteredModel, TaskClass } from './types.js';
+import type { FailureDetails, Feedback, Job, ModelRouting, RegisteredModel, TaskClass } from './types.js';
 
 const DAY_MS = 24 * 60 * 60 * 1_000;
 const DEFAULT_TTL_MS = DAY_MS;
@@ -67,6 +67,10 @@ interface MetricRecord {
   evidenceHashes?: string[];
   correctionCount?: number;
   verificationMs?: number;
+  preparationMs?: number;
+  correctionMs?: number;
+  takeoverMs?: number;
+  failureDetails?: FailureDetails;
   serviceVersion?: string;
   modelId?: string;
   modelIdentity?: string;
@@ -305,6 +309,7 @@ export class JobStore {
       evidenceHashes: feedback.evidence.map((entry) => createHash('sha256').update(entry).digest('hex')),
       correctionCount: feedback.correctionCount,
       verificationMs: feedback.verificationMs,
+      preparationMs: feedback.preparationMs, correctionMs: feedback.correctionMs, takeoverMs: feedback.takeoverMs,
       serviceVersion: metadata.serviceVersion,
       promptVersion: metadata.promptVersion,
       runtimeFingerprint: metadata.runtimeFingerprint,

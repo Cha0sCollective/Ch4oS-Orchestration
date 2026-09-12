@@ -9,6 +9,13 @@ and issue or owner instruction. Begin with `docs/PRODUCT-CHARTER.md` and
 The baseline records accepted behavior and outstanding observations without making
 those observations a new assignment.
 
-Local-agent service implementation is active only in Ch4oS-Orchestration. It does
-not change this project's effective agents. Adoption requires a separate reviewed
-target change and owner approval.
+The prepared coordinator-guidance adoption is paused. It does not change this
+project's effective agents until separately reviewed and approved in the target
+repository. There is no active product packet and no authority to merge or proceed
+automatically.
+
+Local-worker trials are stopped. Worker service 0.1.4 is installed and registered
+on the host, but no profile is currently qualified, so ordinary work must not be
+assigned to it. The earlier local Gemma summary result remains 6/6 evidence from
+its recorded run; it is not a new qualification for the installed version. See
+[Local tools](LOCAL_TOOLS.md) for the concise installed-capability summary.

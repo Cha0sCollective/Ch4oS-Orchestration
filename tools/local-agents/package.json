@@ -1,6 +1,6 @@
 {
   "name": "@ch4os/local-agents",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "private": true,
   "type": "module",
   "description": "Bounded local inference workers for Codex orchestration",
@@ -8,7 +8,8 @@
     "node": ">=24 <25"
   },
   "bin": {
-    "ch4os-local-agents": "dist/cli.js"
+    "ch4os-local-agents": "dist/cli.js",
+    "ch4os-web-search": "dist/search-cli.js"
   },
   "exports": {
     ".": "./dist/index.js"
@@ -16,6 +17,7 @@
   "files": [
     "dist",
     "README.md",
+    "SEARCH.md",
     "examples",
     "catalog",
     "fixtures"

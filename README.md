@@ -2,6 +2,9 @@
 
 This repo is where Cha0sCollective designs and maintains the Codex setup we use across projects.
 
+For installed models, applications, access instructions and current availability,
+see the [installed capabilities quick guide](docs/INSTALLED_CAPABILITIES.md).
+
 The goal is not to build a giant policy system. It is to give our agents the same kind of clear working environment we would want for a strong developer joining the team: enough context to do good work, clear boundaries where mistakes are expensive, and a clean way to hand work off without depending on a giant chat history.
 
 ## How we want this to feel

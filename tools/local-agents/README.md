@@ -72,6 +72,18 @@ Model-facing reads label every source line, including blank lines, with its exac
 part of the source text. Raw snapshots and proposed-diff validation use the original
 file bytes; models must not insert evidence labels into a proposed patch.
 
+`requiredItems` optionally supplies up to 16 `{id, question}` entries. The answer
+must cover every ID with `status: answered` and zero-based `findingIndices`, or
+`status: missing`, no indices and an explicit limitation/incomplete outcome.
+This checks structural completeness; Codex verifies semantic support.
+`initialReads` optionally supplies up to 16 `{path, startLine, endLine}` ranges.
+They are read from the same immutable snapshot with numbered lines and full
+budget accounting; oversized excerpts fail rather than silently disappearing.
+
+Only draft/transformation tasks may return proposals. Only check-monitor tasks
+with explicitly enabled checks receive command actions. Other profiles have
+read-only action schemas. These restrictions are enforced beyond the prompt.
+
 Default limits: 8K model context, 2K generation, 16KiB serialized model input,
 eight rounds, one active inference per host, four queued jobs per service, three
 minutes reasoning and ten minutes maximum per check. Whole-message/schema/history
@@ -116,6 +128,10 @@ fingerprint. Record accepted task classes and review evidence in host config.
 Code, prompt, model, runtime or relevant settings changes invalidate that record.
 The coordinator records separate feedback with verdict, evidence, correction
 count and verification time. Measure useful verified work, including review effort.
+Feedback also accepts `preparationMs`, `correctionMs` and `takeoverMs`. Failed
+terminal jobs accept feedback even without an answer. `get_task` preserves their
+partial `statistics` and bounded `error.details`; a failed job is never promoted
+to a successful result merely because some counters exist.
 
 Jobs/results expire after 24 hours. Compact metrics expire after 30 days and are
 capped at 100MB across service sessions. Routine prompts/source excerpts are not
@@ -155,8 +171,20 @@ The adapter checks exact endpoint identity, supported parameters and all adverti
 prices before inference. Requests pin one provider with fallback disabled and zero
 price ceilings. Returned usage and a generation receipt must establish zero cost
 and the selected model/provider. Unknown pricing, missing proof or unavailable
-routes fail; there is no paid or alternative-model fallback. Remote qualifications
-expire within 24 hours and must be renewed after verification.
+routes fail; there is no paid or alternative-model fallback. Qualification is
+change-triggered: the exact model, endpoint, profile, settings and implementation
+fingerprint must still match. Optional `expiresAt` is enforced for every provider;
+there is no mandatory daily requalification. Material quality failures withdraw
+eligibility pending review and affected reruns. Endpoint health/pricing checks
+still run on each request.
+
+`record_feedback` with verdict `rejected`, or `invalidatesQualification: true`
+for a material correction, writes a durable withdrawal marker under host data
+`withdrawn-qualifications/<fingerprint>.json`. Capabilities and ordinary admission
+check this across sessions, including queued work before inference. Qualification
+runs remain possible but never clear withdrawal automatically. After independent
+review accepts rerun evidence, the operator may remove that exact marker and save
+the reviewed qualification; retain the review reference with its evidence.
 
 Create a key in the provider account, then set the configured environment variable
 on the host. On Windows, this prompts without echoing the key or putting its value
@@ -215,3 +243,8 @@ Official references, retrieved 2026-09-12:
 [Ollama Codex](https://docs.ollama.com/integrations/codex),
 [Windows sandbox](https://learn.chatgpt.com/docs/windows/windows-sandbox),
 [permission profiles](https://learn.chatgpt.com/docs/permissions#common-profiles).
+# Separate paid web search
+
+The separately authorized coordinator search interface uses its own key and $5
+non-resetting budget. It does not change free-only worker inference or the five
+worker operations. See [SEARCH.md](SEARCH.md) for setup, controls and limitations.

@@ -220,3 +220,84 @@ testing/evaluation and prohibit confidential or personal inputs. NVIDIA may log
 inputs/outputs for security and model/product improvement. This route must remain
 an evaluation candidate, even if it passes synthetic cases; production suitability
 requires separately established service terms. See the source-backed model record.
+
+## 2026-09-12 workflow integration and personal interface packet
+
+The 0.1.3 candidate passed 74 tests and independent Sol/high implementation review.
+Required-item coverage is now part of the projected model schema; initial excerpts
+come from the scoped snapshot. Rejected feedback durably withdraws the exact
+qualification. Optional expiry replaces mandatory 24-hour remote expiry.
+
+The reviewed real-work qualification aggregate is
+`agents/orchestrators/routing/qualifications/2026-09-12-workflows-v013.json`.
+Qwen summaries passed 3/6; NVIDIA Ultra comparison passed 5/6. Neither profile is
+eligible. The NVIDIA failure was malformed output, not a replaceable operational
+failure. Earlier setup/schema attempts remain in ignored trial storage.
+
+Additional trials: local Gemma 4 12B Q4_K_M installed, exact digest
+`4eb23ef187e2c5462566d6a1d3bbbc2f1346d0b4327cbb66d58fffbcc9b2b05c`,
+Ollama 0.33.2, thinking enabled, temperature 1, 8K context/2K output. Both overflow
+probes passed. Six workflow results completed; semantic independent review remains
+pending. Remote Gemma 4 31B returned HTTP 429 on all six attempts; no quality
+conclusion or eligibility follows. Lightning's six starts were blocked by endpoint
+admission, with subsequent discovery returning no admissible endpoint. No fallback
+or relaxed pricing check was used. North Mini Code discovery also returned none.
+GPT-OSS 20B MXFP4 installed, digest
+`17052f91a42e97930aa6e28a6c6c06a983e6a58dbb00434885a0cf5313e376f7`;
+its first context probe with medium reasoning returned Ollama HTTP 500. No context
+proof or worker eligibility was granted. The Ollama log identifies a CUDA shared
+object initialization failure during model warmup and runner exit `0xc0000409`.
+Investigate that runtime compatibility failure before a new trial; unrelated game
+memory use is not a model finding.
+
+Cherry Studio 2.0.14 and ComfyUI 0.35.0 were installed from hash-verified pinned
+assets. Setup and launch instructions are in `tools/model-playground/README.md`.
+Cherry provider/auxiliary settings, request trace, restart persistence and optional
+MCP behavior remain manual acceptance items. No claim of complete portability is
+made. Credentials and routine conversations stay host-local.
+
+FLUX.2 Klein 4B FP8, qwen_3_4b text encoder and flux2 VAE all matched pinned hashes.
+Comfy ran on loopback with custom nodes disabled. Three manual image jobs succeeded:
+1024-square icon (9.08 seconds), 1536x864 pack artwork (3.197 seconds with cached
+models), and 1024-square reference edit (4.830 seconds with cached models), all four
+sampling steps. These are observed job times, not cold-start benchmarks. The artwork
+is visually useful as an industrial pack concept. The edit preserved the eight-tooth
+gear silhouette and central hole while changing the metal to copper with turquoise
+edges. Icons have shaded/antialiased edges and opaque backgrounds; no pixel-grid,
+transparency or seamless-texture acceptance is claimed. Images remain host-local.
+No peak-memory benchmark was collected. Comfy models were unloaded before local
+language-model trials.
+
+The separately authorized search addition is version 0.1.4, with a distinct key and
+$5 non-resetting allowance. Its initial full run passed 89 tests and independent
+Sol/high review. The first live Exa search charged $0.007 but returned an HTTP 404
+without a verified answer; the reserved attempt is retained and never auto-retried.
+Receipt-phase diagnostics and bounded read-only receipt retries are being added.
+Model inference stays free-only; ordinary workers gain no browsing capability.
+
+Receipt follow-up: the revised 0.1.4 candidate passes 91/91 tests, including delayed
+receipt visibility. Only receipt GET requests retry; the completion POST never does.
+Failures now preserve safe phase/status/generation/usage diagnostics separately
+from results, without prompts or provider bodies. The first charged attempt remains
+an unsuccessful, retained attempt, not a passing search or refunded reservation.
+
+The key is now confirmed capped at $5 with no reset. Receipt diagnostics retain
+HTTP 404 on exhausted lookups, and deadline expiry during backoff reports timed_out
+rather than cancellation. The focused search/core-adapter set passes 18/18 tests.
+
+The second explicit smoke attempt returned generation
+`gen-1789249945-4a4pLwJQzT9XwFntNrp2` without usage data, and its read-only generation
+lookup returned 404. No third search was sent. The last key check reports $0.007
+used and $4.993 remaining; both local attempt reservations remain counted. The
+search connector is registered disabled until live provider validation succeeds.
+The worker connector now points to installed 0.1.4; both installed stdio adapters
+negotiated successfully and exposed their expected five/two operations.
+Source and installed runtime fingerprints match:
+`150c3bb4920fc4098d5b18713c625dd90121734549170401fae21d2114567ce0`.
+
+Fresh independent Sol/high review accepted all six local Gemma summary results
+from 0.1.3. The reviewed aggregate is
+`agents/orchestrators/routing/qualifications/2026-09-12-gemma-summary-v013.json`.
+The current installation has a different fingerprint, so ordinary eligibility
+remains disabled until a matching rerun. No supervised production pilot or target
+adoption refresh is claimed complete.

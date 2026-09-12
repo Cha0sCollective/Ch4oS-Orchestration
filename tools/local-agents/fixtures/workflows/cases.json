@@ -1,0 +1,128 @@
+[
+  {
+    "id": "summary-bcc-state",
+    "suite": "summary",
+    "kind": "representative",
+    "instruction": "Summarize the maintained Better Compatibility Checker identity and explain the status of the inspected configuration record. Answer every required item with snapshot evidence. Do not propose edits.",
+    "paths": ["tools/local-agents/fixtures/workflows/snapshots/create-config/bcc.md"],
+    "initialReads": [
+      {"path": "tools/local-agents/fixtures/workflows/snapshots/create-config/bcc.md", "startLine": 1, "endLine": 30}
+    ],
+    "requiredItems": [
+      {"id": "maintained-identity", "question": "What name, version, and metadata mode does the maintained pack file declare?"},
+      {"id": "record-status", "question": "Which release does the inspected record describe, and may its version be presented as current?"}
+    ],
+    "rubric": [
+      "Reports Create: Ch4oS, 0.1.1-rc.8, and useMetadata=false from the maintained file.",
+      "Distinguishes the rc.5 inspected record from the maintained rc.8 file and does not call rc.5 current.",
+      "Uses evidence-backed findings and coverage for both required item ids."
+    ]
+  },
+  {
+    "id": "summary-big-cannons-ownership",
+    "suite": "summary",
+    "kind": "representative",
+    "instruction": "Summarize the reviewed Create Big Cannons ownership boundary and the update invariant. Answer every required item with snapshot evidence. Do not propose edits or invent additional settings.",
+    "paths": ["tools/local-agents/fixtures/workflows/snapshots/create-config/big-cannons.md"],
+    "initialReads": [
+      {"path": "tools/local-agents/fixtures/workflows/snapshots/create-config/big-cannons.md", "startLine": 1, "endLine": 50}
+    ],
+    "requiredItems": [
+      {"id": "owned-values", "question": "Which exact values are pack-owned continuity choices?"},
+      {"id": "other-ownership", "question": "Which setting families remain player-owned or operator-owned?"},
+      {"id": "update-invariant", "question": "What must updates avoid doing?"}
+    ],
+    "rubric": [
+      "Identifies recoil 4.0 and ammo capacities 16/64 as pack-owned.",
+      "Separates client visual/aiming preferences from other operator gameplay settings.",
+      "States that updates must not silently revert the owned values to upstream defaults.",
+      "Uses evidence-backed findings and coverage for all required item ids."
+    ]
+  },
+  {
+    "id": "summary-sftp-evidence-boundary",
+    "suite": "summary",
+    "kind": "ambiguity-adversarial",
+    "instruction": "Summarize what the recorded SFTP validation establishes and what remains unperformed. A loopback pass is not a real-host acceptance. Answer every required item from the snapshot and do not infer success beyond the stated evidence.",
+    "paths": ["tools/local-agents/fixtures/workflows/snapshots/installer-workflow/validation.md"],
+    "initialReads": [
+      {"path": "tools/local-agents/fixtures/workflows/snapshots/installer-workflow/validation.md", "startLine": 1, "endLine": 26}
+    ],
+    "requiredItems": [
+      {"id": "observed-checks", "question": "What SFTP routes and failure conditions were exercised?"},
+      {"id": "unperformed", "question": "Was full-world AMP-host transfer or owner acceptance performed?"},
+      {"id": "claim-limit", "question": "What practical limit should qualify any readiness claim?"}
+    ],
+    "rubric": [
+      "Accurately summarizes the synthetic loopback routes and named failure cases.",
+      "Explicitly says full-world AMP transfer, host-specific behavior, and owner acceptance remain unperformed.",
+      "Does not convert fixture/loopback evidence into production-host acceptance.",
+      "Uses evidence-backed findings and coverage for all required item ids."
+    ]
+  },
+  {
+    "id": "comparison-bcc-drift",
+    "suite": "comparison",
+    "kind": "representative",
+    "instruction": "Compare the inspected Better Compatibility Checker record with the maintained pack file. Identify agreements and drift exactly. Answer every required item with snapshot evidence. Do not propose a replacement or infer compatibility from the version string.",
+    "paths": ["tools/local-agents/fixtures/workflows/snapshots/create-config/bcc.md"],
+    "initialReads": [
+      {"path": "tools/local-agents/fixtures/workflows/snapshots/create-config/bcc.md", "startLine": 5, "endLine": 30}
+    ],
+    "requiredItems": [
+      {"id": "agreements", "question": "Which explicit pack values agree between the record and maintained file?"},
+      {"id": "drift", "question": "Which explicit value differs, and what are the two values?"},
+      {"id": "safe-conclusion", "question": "What can and cannot be concluded from this comparison alone?"}
+    ],
+    "rubric": [
+      "Reports agreement on modpack name and useMetadata=false.",
+      "Reports version drift from record rc.5 to maintained rc.8.",
+      "Limits the conclusion to documented configuration drift and does not claim runtime compatibility or correctness.",
+      "Uses evidence-backed findings and coverage for all required item ids."
+    ]
+  },
+  {
+    "id": "comparison-migration-contract",
+    "suite": "comparison",
+    "kind": "representative",
+    "instruction": "Compare the migration architecture contract with the operator procedure. Explain where they align on source safety, review guards, copied data, and recovery. Answer every required item with snapshot evidence. Do not propose changes.",
+    "paths": ["tools/local-agents/fixtures/workflows/snapshots/installer-workflow/migration.md"],
+    "initialReads": [
+      {"path": "tools/local-agents/fixtures/workflows/snapshots/installer-workflow/migration.md", "startLine": 3, "endLine": 51}
+    ],
+    "requiredItems": [
+      {"id": "source-and-review", "question": "How do both sections protect the source and require review before startup?"},
+      {"id": "data-boundary", "question": "What data is copied and what is deliberately excluded or left for separate handling?"},
+      {"id": "failure-recovery", "question": "What happens after interrupted or failed staging?"}
+    ],
+    "rubric": [
+      "Connects the unchanged source, stopped servers, fresh destination, review, and startup guard across both sections.",
+      "Accurately separates copied world/access/server data from old mods, root config, runtime, EULA, and other private data.",
+      "States that failure remains guarded and requires a fresh empty destination with no in-place resume or world rollback.",
+      "Uses evidence-backed findings and coverage for all required item ids."
+    ]
+  },
+  {
+    "id": "comparison-package-release-boundary",
+    "suite": "comparison",
+    "kind": "ambiguity-adversarial",
+    "instruction": "Compare composition, documentation, merge, and release effects. Decide whether a current source-doc edit or merge changes an already built ZIP or publishes a release. Answer every required item from the snapshot. Treat historical release references as historical, and do not invent a publication state.",
+    "paths": ["tools/local-agents/fixtures/workflows/snapshots/installer-workflow/package-release.md"],
+    "initialReads": [
+      {"path": "tools/local-agents/fixtures/workflows/snapshots/installer-workflow/package-release.md", "startLine": 3, "endLine": 39}
+    ],
+    "requiredItems": [
+      {"id": "existing-zip", "question": "Can a source documentation update rewrite an existing ZIP or change its installer pin?"},
+      {"id": "merge-release", "question": "Does merging source publish a release or operate a server?"},
+      {"id": "artifact-authority", "question": "Which records and instructions identify the version actually being operated?"},
+      {"id": "historical-reference", "question": "How should the 0.1.0 source tag and artifacts be treated?"}
+    ],
+    "rubric": [
+      "Says source documentation can be newer and cannot rewrite an existing ZIP or silently change its pin.",
+      "Says merge is not publication, package mutation, or production operation.",
+      "Points to candidate.json and included package instructions, plus pinned reviewed identities, for the operated artifact.",
+      "Treats 0.1.0 as historical and does not claim it is current.",
+      "Uses evidence-backed findings and coverage for all required item ids."
+    ]
+  }
+]

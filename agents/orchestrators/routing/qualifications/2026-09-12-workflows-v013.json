@@ -1,0 +1,296 @@
+{
+  "version": 1,
+  "date": "2026-09-12",
+  "serviceVersion": "0.1.3",
+  "promptVersion": "5",
+  "scope": "Real-work summary and comparison qualification",
+  "campaigns": [
+    {
+      "artifact": "summary-local-v013-required-coverage.json",
+      "artifactSha256": "4c46b9dbf43debf72f201b327713fe029237099944f8fd15210aa2a97ee877c7",
+      "profile": {
+        "id": "local-summary",
+        "modelId": "qwen-general",
+        "modelProvider": "ollama",
+        "taskClass": "summary"
+      },
+      "qualificationFingerprint": "8e78269e43e90f355c37d78c1761a7bf7afd15dfcf631564797cf9a8f4b7b49a",
+      "implementationFingerprint": "f2a356072a5162ab96b799d1f98b91992cf9beebfcca77f66e9833a1744b6e78",
+      "attempts": 6,
+      "accepted": 3,
+      "eligible": false,
+      "reviewer": "Independent Sol/high review",
+      "trials": [
+        {
+          "caseId": "summary-bcc-state",
+          "accepted": false,
+          "assessment": "Invalid finding coverage",
+          "state": "completed",
+          "statistics": [
+            {
+              "promptTokens": 1694,
+              "outputTokens": 35,
+              "totalDurationNs": 6072212100,
+              "loadDurationNs": 1545500
+            },
+            {
+              "promptTokens": 2180,
+              "outputTokens": 167,
+              "totalDurationNs": 6350020200,
+              "loadDurationNs": 1541500
+            }
+          ],
+          "error": null
+        },
+        {
+          "caseId": "summary-bcc-state",
+          "accepted": true,
+          "assessment": "Accepted",
+          "state": "completed",
+          "statistics": [
+            {
+              "promptTokens": 1734,
+              "outputTokens": 35,
+              "totalDurationNs": 6473849500,
+              "loadDurationNs": 1552500
+            },
+            {
+              "promptTokens": 2227,
+              "outputTokens": 247,
+              "totalDurationNs": 7747889400,
+              "loadDurationNs": 2068200
+            }
+          ],
+          "error": null
+        },
+        {
+          "caseId": "summary-big-cannons-ownership",
+          "accepted": true,
+          "assessment": "Accepted",
+          "state": "completed",
+          "statistics": [
+            {
+              "promptTokens": 1847,
+              "outputTokens": 402,
+              "totalDurationNs": 9819347300,
+              "loadDurationNs": 2794100
+            }
+          ],
+          "error": null
+        },
+        {
+          "caseId": "summary-big-cannons-ownership",
+          "accepted": true,
+          "assessment": "Accepted",
+          "state": "completed",
+          "statistics": [
+            {
+              "promptTokens": 1795,
+              "outputTokens": 37,
+              "totalDurationNs": 4832645100,
+              "loadDurationNs": 1534700
+            },
+            {
+              "promptTokens": 2554,
+              "outputTokens": 540,
+              "totalDurationNs": 10335896800,
+              "loadDurationNs": 2075100
+            }
+          ],
+          "error": null
+        },
+        {
+          "caseId": "summary-sftp-evidence-boundary",
+          "accepted": false,
+          "assessment": "Coverage cites observed checks for unperformed work and claim limits",
+          "state": "completed",
+          "statistics": [
+            {
+              "promptTokens": 1857,
+              "outputTokens": 36,
+              "totalDurationNs": 8060545400,
+              "loadDurationNs": 2060600
+            },
+            {
+              "promptTokens": 2197,
+              "outputTokens": 326,
+              "totalDurationNs": 8675962700,
+              "loadDurationNs": 2942100
+            }
+          ],
+          "error": null
+        },
+        {
+          "caseId": "summary-sftp-evidence-boundary",
+          "accepted": false,
+          "assessment": "Repeated inspection; needs Codex",
+          "state": "completed",
+          "statistics": [
+            {
+              "promptTokens": 1675,
+              "outputTokens": 36,
+              "totalDurationNs": 6020314700,
+              "loadDurationNs": 2563200
+            },
+            {
+              "promptTokens": 2216,
+              "outputTokens": 36,
+              "totalDurationNs": 5358572300,
+              "loadDurationNs": 2066200
+            }
+          ],
+          "error": null
+        }
+      ]
+    },
+    {
+      "artifact": "comparison-nvidia-v013.json",
+      "artifactSha256": "df1606d3b4c03bef19933d2ef3e6c2f88ca149cff9472b1efb318b5b8450bce1",
+      "profile": {
+        "id": "remote-comparison",
+        "modelId": "nvidia-ultra",
+        "modelProvider": "openrouter",
+        "taskClass": "research"
+      },
+      "qualificationFingerprint": "d4ebe000c7f801e58b5824d256219afe0f1329b765d81ce7ce242cef5dc37d84",
+      "implementationFingerprint": "f2a356072a5162ab96b799d1f98b91992cf9beebfcca77f66e9833a1744b6e78",
+      "attempts": 6,
+      "accepted": 5,
+      "eligible": false,
+      "reviewer": "Independent Sol/high review",
+      "trials": [
+        {
+          "caseId": "comparison-bcc-drift",
+          "accepted": true,
+          "assessment": "Accepted",
+          "state": "completed",
+          "statistics": [
+            {
+              "promptTokens": 2327,
+              "outputTokens": 463,
+              "costUsd": 0,
+              "generationId": "gen-1789247379-dXymfPjf7jyqs8WaTkcV",
+              "endpointId": "nvidia",
+              "providerName": "Nvidia"
+            },
+            {
+              "promptTokens": 2947,
+              "outputTokens": 1246,
+              "costUsd": 0,
+              "generationId": "gen-1789247461-oScuev0vNcI6GebmdF31",
+              "endpointId": "nvidia",
+              "providerName": "Nvidia"
+            }
+          ],
+          "error": null
+        },
+        {
+          "caseId": "comparison-bcc-drift",
+          "accepted": true,
+          "assessment": "Accepted",
+          "state": "completed",
+          "statistics": [
+            {
+              "promptTokens": 2327,
+              "outputTokens": 1207,
+              "costUsd": 0,
+              "generationId": "gen-1789247522-NUXScuCMxAkXv2a7hhn9",
+              "endpointId": "nvidia",
+              "providerName": "Nvidia"
+            }
+          ],
+          "error": null
+        },
+        {
+          "caseId": "comparison-migration-contract",
+          "accepted": true,
+          "assessment": "Accepted",
+          "state": "completed",
+          "statistics": [
+            {
+              "promptTokens": 2684,
+              "outputTokens": 1068,
+              "costUsd": 0,
+              "generationId": "gen-1789247591-8KwyQFr5EmLS47pEju4R",
+              "endpointId": "nvidia",
+              "providerName": "Nvidia"
+            }
+          ],
+          "error": null
+        },
+        {
+          "caseId": "comparison-migration-contract",
+          "accepted": true,
+          "assessment": "Accepted",
+          "state": "completed",
+          "statistics": [
+            {
+              "promptTokens": 2684,
+              "outputTokens": 1381,
+              "costUsd": 0,
+              "generationId": "gen-1789247645-kDjqJxopQpG4ptASrVOG",
+              "endpointId": "nvidia",
+              "providerName": "Nvidia"
+            }
+          ],
+          "error": null
+        },
+        {
+          "caseId": "comparison-package-release-boundary",
+          "accepted": true,
+          "assessment": "Accepted",
+          "state": "completed",
+          "statistics": [
+            {
+              "promptTokens": 2523,
+              "outputTokens": 114,
+              "costUsd": 0,
+              "generationId": "gen-1789247731-XYhYtiuR7ZLfT7ftuRqo",
+              "endpointId": "nvidia",
+              "providerName": "Nvidia"
+            },
+            {
+              "promptTokens": 3291,
+              "outputTokens": 750,
+              "costUsd": 0,
+              "generationId": "gen-1789247773-uTH3yUWr6iIRzH1nfNvn",
+              "endpointId": "nvidia",
+              "providerName": "Nvidia"
+            }
+          ],
+          "error": null
+        },
+        {
+          "caseId": "comparison-package-release-boundary",
+          "accepted": false,
+          "assessment": "Malformed completion: missing worker_action; not replacement eligible",
+          "state": "failed",
+          "statistics": [
+            {
+              "promptTokens": 2523,
+              "outputTokens": 1149,
+              "costUsd": 0,
+              "generationId": "gen-1789247834-YoZzQOQhGfmUDDbfSJXh"
+            }
+          ],
+          "error": {
+            "code": "provider_error",
+            "message": "OpenRouter did not return exactly one worker_action tool call",
+            "details": {
+              "phase": "completion_validation",
+              "generationId": "gen-1789247834-YoZzQOQhGfmUDDbfSJXh",
+              "finishReason": "stop",
+              "httpStatus": 200
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "pilotState": "Not eligible; no ordinary supervised pilot started",
+  "limitations": [
+    "Preparation and verification timing were not captured for these qualification runs; no net efficiency claim",
+    "Subsequent service changes invalidate affected qualification identities",
+    "Routine full outputs remain ignored and local"
+  ]
+}

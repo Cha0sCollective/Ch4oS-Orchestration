@@ -26,6 +26,8 @@ its capabilities report a qualified profile for the bounded task. Supply explici
 paths, snapshot/candidate identity, budgets and acceptance criteria. Verify every
 worker result. Missing capability escalates to Codex. OpenRouter also requires current endpoint terms suitable for the assignment, an approved free endpoint, host data permission and per-task consent. Qualification does not override service terms or authorize private data transmission.
 The connector refers to a versioned host installation, not a sibling checkout.
+See [Local tools](LOCAL_TOOLS.md) for the installed host capabilities and their
+current access limits.
 
 Read `docs/CURRENT_WORK.md` at startup. Reconcile stale pointers against actual
 Git and linked issue/PR state; surface competing assignments or missing authority.

@@ -85,6 +85,25 @@ async function registered(provider: OpenRouterProvider): Promise<OpenRouterModel
   };
 }
 
+test('failed completions preserve safe diagnostics and counters without echoed task data', async () => {
+  for (const status of [200, 503]) {
+    const provider = new OpenRouterProvider(config, fake({ completionStatus: status, completion: {
+      id: 'gen-failure', error: { code: 503, message: 'SECRET_TASK_CONTENT' },
+      usage: { prompt_tokens: 17, completion_tokens: 2, cost: 0 },
+    } }), () => 'test-secret');
+    const model = await registered(provider);
+    await assert.rejects(provider.generate({ model, limits: DEFAULT_LIMITS, messages: [], schema: {}, signal: AbortSignal.timeout(1000) }), error => {
+      assert.ok(error instanceof WorkerError);
+      assert.equal(error.details?.httpStatus, status);
+      assert.equal(error.details?.providerCode, '503');
+      assert.equal(error.details?.generationId, 'gen-failure');
+      assert.equal(error.stats?.promptTokens, 17);
+      assert.equal(JSON.stringify(error).includes('SECRET_TASK_CONTENT'), false);
+      return true;
+    });
+  }
+});
+
 test('discovery admits only exact zero-price endpoints with an explicit supported output mode', async () => {
   const provider = new OpenRouterProvider(config, fake(), () => 'test-secret');
   const endpoint = (await provider.discoverFreeEndpoints(modelName))[0]!;
@@ -280,7 +299,14 @@ test('generation receipt wait observes task cancellation', async () => {
     },
   });
   await assert.rejects(provider.generate({ model, messages: [{ role: 'user', content: 'JSON' }], schema: {}, limits: DEFAULT_LIMITS,
-    signal: controller.signal }), error => error === reason);
+    signal: controller.signal }), error => {
+      assert.ok(error instanceof WorkerError);
+      assert.equal(error.code, 'cancelled');
+      assert.equal(error.details?.phase, 'receipt');
+      assert.equal(error.stats?.promptTokens, 1681);
+      assert.equal(error.stats?.outputTokens, 70);
+      return true;
+    });
 });
 
 test('large remote input budget admits above 64 KiB and rejects above 128 KiB before inference', async () => {

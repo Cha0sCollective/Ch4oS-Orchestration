@@ -31,3 +31,22 @@ test('requires context proof bound to runtime, digest and settings',async()=>{
   assert.equal((await provider.verify(qualified,DEFAULT_LIMITS,AbortSignal.timeout(1000))).available,true);
   assert.equal((await provider.verify(qualified,{...DEFAULT_LIMITS,contextTokens:16384},AbortSignal.timeout(1000))).available,false);
 });
+
+test('preserves boolean and named reasoning settings in Ollama requests', async () => {
+  for (const think of [false, true, 'low', 'medium', 'high'] as const) {
+    const base = fake();
+    const fetcher = (async (url, init) => {
+      if (new URL(String(url)).pathname === '/api/chat') {
+        assert.equal(JSON.parse(String(init?.body)).think, think);
+        return Response.json({ done: true, model: model.model, message: { content: '{}' }, prompt_eval_count: 1, eval_count: 1 });
+      }
+      return base(url, init);
+    }) as typeof fetch;
+    await new OllamaProvider('http://127.0.0.1', fetcher).generate({
+      model: { ...model, think, contextProof: { ollamaVersion: '0.33.2', digest: model.digest, contextTokens: 8192, outputTokens: 2048,
+        singleOverflowRejected: true, historyOverflowRejected: true, verifiedAt: new Date().toISOString() } },
+      messages: [], schema: {}, limits: DEFAULT_LIMITS, signal: AbortSignal.timeout(1000),
+    });
+  }
+  await assert.rejects(new OllamaProvider('http://127.0.0.1', fake()).inspect({ ...model, model: 'gpt-oss:20b', think: false }), /requires a low/);
+});
