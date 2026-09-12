@@ -8,9 +8,9 @@ The owner approved the unified modernization and full application roadmap, inclu
 
 Copy `AGENTS.md` from this directory to Lab's root and the two canonical agent TOMLs into Lab's `.codex/agents/`. Use manual reviewed copying, without a sibling checkout dependency, symlinks or an automatic sync layer. Record source revision and target base in Lab's adoption note. No project-wide permission expansion is part of this overlay.
 
-The initial CLI trial could not select named custom profiles through its exposed tools. Treat copied TOMLs as prepared configuration and use explicit model/effort routing in bounded role assignments. Named-profile activation remains an open adoption check; see [the trial record](../../docs/ADOPTION_TRIAL.md).
+Use Desktop to coordinate retained CLI parents that select the saved native role names. Verify project discovery and model/effort on the actual host; see [the workflow](../../docs/RETAINED_CLI_WORKFLOW.md) and [trial record](../../docs/ADOPTION_TRIAL.md). The earlier discovery and ephemeral-session failures remain historical evidence, not permission to count pasted role prompts as named activation.
 
-The parent owns development and affected documentation. The initial helpers are a Terra/medium explorer and a fresh Sol/high reviewer. Consult an experiment specialist only when the claim needs numerical methodology. Review keeps the candidate unchanged; report the actual host's permission limitations rather than assuming a TOML default enforces them.
+The parent owns development and affected documentation. The initial helpers are a Terra/medium explorer and a fresh Sol/high reviewer. Consult an experiment specialist only when the claim needs numerical methodology; its shared specification is currently a design, not an executable profile. Review starts under a read-only parent. Run writable validation separately in a disposable workspace and return exact-candidate evidence. Report actual permission limitations rather than assuming a TOML default enforces them.
 
 ## Project boundaries
 

@@ -9,11 +9,13 @@ A project overlay should answer the practical questions an orchestrator needs to
 - build/test commands;
 - branch/promotion rules;
 - owner gates;
-- specialist roster;
+- useful specialist capabilities;
 - tool/dependency constraints;
 - documentation boundaries;
 - model-routing overrides when the generic defaults are not good enough;
 - which reusable agents/config the project intends to consume.
+
+Overlays provide project context and delegation recommendations. They do not restrict use of shared named agents when a task benefits from them. Keep generic role improvements in the shared catalog; add a project-specific role only when its specialization is useful.
 
 ## One project may have more than one repository
 

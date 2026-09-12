@@ -20,7 +20,7 @@ At minimum, review should know:
 
 ## Read-only by default
 
-Review orchestrators and review subagents should be read-only unless a narrowly authorized tool needs write access to post the final review.
+Start independent review under a read-only parent with fresh context. Run validation that needs writes in a separate disposable workspace under a scoped workspace-write session. Return its exact revision, command and results to review; the reviewer independently assesses that evidence without editing candidate sources. A role's read-only default does not establish its effective permissions. Diagnose build, cache, Java and sandbox failures separately instead of expanding the reviewer's access. Posting a review remains a separately authorized action.
 
 If review finds a bug, describe it clearly and return control to production. Do not "helpfully" fix the candidate in the review worktree.
 

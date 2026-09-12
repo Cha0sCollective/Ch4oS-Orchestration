@@ -8,9 +8,9 @@ The production parent owns scope, implementation, integration, suitable tests, a
 
 Use the reusable `repo-explorer` for useful independent fact gathering and a fresh `independent-reviewer` for consequential completed candidates. The parent normally uses Astra/medium, explorer Terra/medium and reviewer Sol/high; escalate difficult reasoning. Ordinary edits need no standing agent team or documentation approval lane. Consult an experiment specialist when methodology warrants it.
 
-Named custom-profile selection is not yet verified on the installed host. If unavailable, supply the bounded role instructions and explicit model/effort through the supported delegation tool. Do not claim the profile itself was activated or its sandbox enforced.
+Use retained CLI sessions coordinated from Desktop when its direct delegation interface cannot select saved native roles. Verify project profile discovery, selected model/effort and effective permissions on the host. If native selection is unavailable, report the compatibility limitation; a pasted role prompt does not count as profile activation. Ephemeral sessions are outside the selected workflow. Shared agents remain available according to task needs.
 
-Initial independent review uses fresh context and a named candidate. Do not edit reviewed source; disposable build output is fine. Review follow-ups as deltas, expanding only for affected behavior or changed assumptions. Reuse valid checks for unchanged behavior without claiming a new execution. Routine low-impact edits need no separate review lane. Report actual permission limitations.
+Initial independent review uses a read-only parent, fresh context and a named candidate. Do not edit reviewed source. Run checks requiring writes in a separate disposable workspace under scoped workspace-write permissions and supply their exact revision, command and results to review. Diagnose build and cache permission failures separately; do not expand reviewer access. Review follow-ups as deltas, expanding only for affected behavior or changed assumptions. Reuse valid checks for unchanged behavior without claiming a new execution. Routine low-impact edits need no separate review lane. Report actual permission limitations.
 
 ## Tests and evidence
 
