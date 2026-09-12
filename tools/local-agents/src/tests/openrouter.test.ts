@@ -1,0 +1,225 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import { OpenRouterProvider } from '../openrouter.js';
+import { DEFAULT_LIMITS, WorkerError, type OpenRouterConfig, type OpenRouterModel } from '../types.js';
+
+const modelName = 'nvidia/nemotron-3-ultra-550b-a55b:free';
+const requiredParameters = ['reasoning', 'include_reasoning', 'temperature', 'max_tokens', 'seed', 'top_p', 'tools', 'tool_choice', 'reasoning_effort'];
+const config: OpenRouterConfig = {
+  apiKeyEnv: 'OPENROUTER_TEST_KEY', maxCostUsd: 0, allowedRepositories: ['repo'],
+  allowSuppliedSources: false, dataCollection: 'deny',
+};
+
+interface FakeOptions {
+  modelPricing?: Record<string, string>;
+  endpointPricing?: Record<string, string>;
+  modelParameters?: string[];
+  endpointParameters?: string[];
+  supportsToolChoice?: Record<string, boolean>;
+  finishReason?: string;
+  metadataProvider?: string;
+  proof?: Record<string, unknown>;
+  completion?: Record<string, unknown>;
+  completionStatus?: number;
+}
+
+function fake(options: FakeOptions = {}, requests: { url: string; init?: RequestInit; body?: Record<string, unknown> }[] = []): typeof fetch {
+  return (async (input: string | URL | Request, init?: RequestInit) => {
+    const url = String(input);
+    requests.push({ url, init, ...(typeof init?.body === 'string' ? { body: JSON.parse(init.body) as Record<string, unknown> } : {}) });
+    const pathname = new URL(url).pathname;
+    assert.equal(init?.redirect, 'error');
+    assert.equal((init?.headers as Record<string, string>).Authorization,
+      pathname === '/api/v1/chat/completions' || pathname === '/api/v1/generation' ? 'Bearer test-secret' : undefined);
+    if (pathname.startsWith('/api/v1/model/')) return Response.json({ data: {
+      id: modelName, context_length: 1_000_000,
+      pricing: options.modelPricing ?? { prompt: '0', completion: '0', request: '0', discount: 0 },
+      supported_parameters: options.modelParameters ?? requiredParameters,
+    } });
+    if (pathname.startsWith('/api/v1/models/')) return Response.json({ data: {
+      id: modelName,
+      endpoints: [{
+        name: 'Nvidia | nvidia/nemotron-3-ultra-550b-a55b-20260604:free',
+        tag: 'nvidia', provider_name: 'Nvidia', model_id: modelName, context_length: 1_000_000,
+        max_prompt_tokens: null, max_completion_tokens: 65_536, status: 0,
+        quantization: 'unknown', supports_implicit_caching: false,
+        supports_tool_choice: options.supportsToolChoice ?? { none: true, auto: true, required: true, function: true },
+        pricing: options.endpointPricing ?? { prompt: '0', completion: '0', discount: 0 },
+        supported_parameters: options.endpointParameters ?? requiredParameters,
+      }],
+    } });
+    if (pathname === '/api/v1/chat/completions') return Response.json(options.completion ?? {
+      id: 'gen-test', model: modelName,
+      choices: [{ finish_reason: options.finishReason ?? 'tool_calls', message: { role: 'assistant', content: null,
+        tool_calls: [{ type: 'function', function: { name: 'worker_action', arguments: '{"ok":true}' } }] } }],
+      usage: { prompt_tokens: 12, completion_tokens: 4, total_tokens: 16, cost: 0 },
+      openrouter_metadata: { requested: modelName, strategy: 'direct', attempt: 1, pipeline: [],
+        endpoints: { available: [{ provider: options.metadataProvider ?? 'Nvidia', model: modelName, selected: true }] } },
+    }, { status: options.completionStatus ?? 200 });
+    if (pathname === '/api/v1/generation') return Response.json({ data: {
+      id: 'gen-test', model: modelName, provider_name: 'Nvidia', is_byok: false,
+      tokens_prompt: 12, tokens_completion: 4, total_cost: 0, usage: 0,
+      ...(options.proof ?? {}),
+    } });
+    return Response.json({ error: { message: 'unexpected test request' } }, { status: 404 });
+  }) as typeof fetch;
+}
+
+async function registered(provider: OpenRouterProvider): Promise<OpenRouterModel> {
+  const discovered = await provider.discoverFreeEndpoints(modelName, AbortSignal.timeout(1000));
+  assert.equal(discovered.length, 1);
+  const endpoint = discovered[0]!;
+  return {
+    id: 'remote-free', provider: 'openrouter', model: endpoint.model, endpointId: endpoint.endpointId,
+    providerSlug: endpoint.providerSlug, providerName: endpoint.providerName,
+    catalogFingerprint: endpoint.catalogFingerprint, outputMode: endpoint.outputMode, temperature: 0.1, contextTokens: 8192,
+  };
+}
+
+test('discovery admits only exact zero-price endpoints with an explicit supported output mode', async () => {
+  const provider = new OpenRouterProvider(config, fake(), () => 'test-secret');
+  const endpoint = (await provider.discoverFreeEndpoints(modelName))[0]!;
+  assert.equal(endpoint.endpointId, 'nvidia');
+  assert.equal(endpoint.providerSlug, 'nvidia');
+  assert.equal(endpoint.outputMode, 'tool-call');
+  assert.match(endpoint.catalogFingerprint, /^[a-f0-9]{64}$/);
+
+  assert.deepEqual(await new OpenRouterProvider(config, fake({ endpointPricing: { prompt: '0', completion: '0', future_billable: '0.01' } }), () => 'test-secret')
+    .discoverFreeEndpoints(modelName), []);
+  assert.deepEqual(await new OpenRouterProvider(config, fake({ endpointParameters: ['temperature', 'max_tokens', 'reasoning'] }), () => 'test-secret')
+    .discoverFreeEndpoints(modelName), []);
+  assert.deepEqual(await new OpenRouterProvider(config, fake({ supportsToolChoice: { function: false } }), () => 'test-secret')
+    .discoverFreeEndpoints(modelName), []);
+  const bothModes = [...requiredParameters, 'response_format', 'structured_outputs'];
+  const dual = await new OpenRouterProvider(config, fake({ modelParameters: bothModes, endpointParameters: bothModes }), () => 'test-secret')
+    .discoverFreeEndpoints(modelName);
+  assert.deepEqual(dual.map(value => value.outputMode), ['json-schema', 'tool-call']);
+  assert.notEqual(dual[0]!.catalogFingerprint, dual[1]!.catalogFingerprint);
+  await assert.rejects(provider.discoverFreeEndpoints('openrouter/free'), /explicit :free model/);
+});
+
+test('verification requires a credential and the current catalog fingerprint', async () => {
+  const provider = new OpenRouterProvider(config, fake(), () => 'test-secret');
+  const model = await registered(provider);
+  assert.equal((await provider.verify(model, DEFAULT_LIMITS, AbortSignal.timeout(1000))).available, true);
+  assert.equal((await provider.verify({ ...model, catalogFingerprint: '0'.repeat(64) }, DEFAULT_LIMITS, AbortSignal.timeout(1000))).available, false);
+  assert.equal((await new OpenRouterProvider(config, fake(), () => undefined).verify(model, DEFAULT_LIMITS, AbortSignal.timeout(1000))).available, false);
+  assert.equal((await new OpenRouterProvider({ ...config, maxCostUsd: 1 as 0 }, fake(), () => 'test-secret')
+    .verify(model, DEFAULT_LIMITS, AbortSignal.timeout(1000))).available, false);
+});
+
+test('generation fixes free routing and returns only generation-proven identity and usage', async () => {
+  const requests: { url: string; init?: RequestInit; body?: Record<string, unknown> }[] = [];
+  const provider = new OpenRouterProvider(config, fake({}, requests), () => 'test-secret');
+  const model = await registered(provider);
+  const result = await provider.generate({
+    model, messages: [{ role: 'user', content: 'Return JSON.' }],
+    schema: { type: 'object', properties: { ok: { type: 'boolean' } }, required: ['ok'] },
+    limits: DEFAULT_LIMITS, signal: AbortSignal.timeout(1000),
+  });
+  assert.equal(result.content, '{"ok":true}');
+  assert.deepEqual(result.stats, {
+    promptTokens: 12, outputTokens: 4, costUsd: 0, generationId: 'gen-test', endpointId: 'nvidia', providerName: 'Nvidia',
+  });
+  const completion = requests.find(request => new URL(request.url).pathname === '/api/v1/chat/completions')!;
+  assert.equal((completion.init!.headers as Record<string, string>)['X-OpenRouter-Metadata'], 'enabled');
+  assert.deepEqual(completion.body!.transforms, []);
+  assert.deepEqual(completion.body!.provider, {
+    only: ['nvidia'], allow_fallbacks: false, require_parameters: true,
+    max_price: { prompt: 0, completion: 0, request: 0, image: 0 }, data_collection: 'deny',
+  });
+  assert.equal(completion.body!.response_format, undefined);
+  assert.equal(completion.body!.parallel_tool_calls, undefined);
+  assert.deepEqual(completion.body!.tools, [{ type: 'function', function: { name: 'worker_action',
+    description: 'Return the requested structured worker answer.',
+    parameters: { type: 'object', properties: { ok: { type: 'boolean' } }, required: ['ok'] } } }]);
+  assert.deepEqual(completion.body!.tool_choice, { type: 'function', function: { name: 'worker_action' } });
+});
+
+test('json-schema mode sends no tool contract and remains separately fingerprinted', async () => {
+  const parameters = [...requiredParameters, 'response_format', 'structured_outputs'];
+  const options: FakeOptions = { modelParameters: parameters, endpointParameters: parameters, completion: {
+    id: 'gen-test', model: modelName, choices: [{ finish_reason: 'stop', message: { content: '{"ok":true}' } }],
+    usage: { prompt_tokens: 12, completion_tokens: 4, cost: 0 },
+  } };
+  const discovery = new OpenRouterProvider(config, fake(options), () => 'test-secret');
+  const endpoint = (await discovery.discoverFreeEndpoints(modelName)).find(value => value.outputMode === 'json-schema')!;
+  const model: OpenRouterModel = { id: 'remote-json', provider: 'openrouter', model: modelName, endpointId: endpoint.endpointId,
+    providerSlug: endpoint.providerSlug, providerName: endpoint.providerName, catalogFingerprint: endpoint.catalogFingerprint,
+    outputMode: 'json-schema', temperature: 0.1, contextTokens: 8192 };
+  const requests: { url: string; init?: RequestInit; body?: Record<string, unknown> }[] = [];
+  const provider = new OpenRouterProvider(config, fake(options, requests), () => 'test-secret');
+  await provider.generate({ model, messages: [{ role: 'user', content: 'JSON' }], schema: { type: 'object' }, limits: DEFAULT_LIMITS,
+    signal: AbortSignal.timeout(1000) });
+  const body = requests.find(request => new URL(request.url).pathname === '/api/v1/chat/completions')!.body!;
+  assert.equal(body.tools, undefined);
+  assert.equal(body.tool_choice, undefined);
+  assert.deepEqual(body.response_format, { type: 'json_schema', json_schema: {
+    name: 'worker_answer', strict: true, schema: { type: 'object' },
+  } });
+});
+
+test('generation fails closed on length, paid or mismatched generation proof and context overflow', async () => {
+  const base = new OpenRouterProvider(config, fake(), () => 'test-secret');
+  const model = await registered(base);
+  for (const [options, pattern] of [
+    [{ finishReason: 'length' }, /output allowance/],
+    [{ proof: { total_cost: 0.001 } }, /did not prove/],
+    [{ proof: { provider_name: 'Another Provider' } }, /did not prove/],
+    [{ metadataProvider: 'Another Provider' }, /routing metadata/],
+  ] as const) {
+    const provider = new OpenRouterProvider(config, fake(options), () => 'test-secret');
+    await assert.rejects(provider.generate({ model, messages: [{ role: 'user', content: 'JSON' }], schema: {}, limits: DEFAULT_LIMITS,
+      signal: AbortSignal.timeout(1000) }), pattern);
+  }
+  const provider = new OpenRouterProvider(config, fake(), () => 'test-secret');
+  await assert.rejects(provider.generate({ model, messages: [{ role: 'user', content: 'x'.repeat(6000) }], schema: {}, limits: DEFAULT_LIMITS,
+    signal: AbortSignal.timeout(1000) }), /conservative context allowance/);
+});
+
+test('catalog operations preserve cancellation reasons without making a request', async () => {
+  let fetched = false;
+  const provider = new OpenRouterProvider(config, (async () => { fetched = true; return Response.json({}); }) as typeof fetch, () => 'test-secret');
+  const controller = new AbortController();
+  const reason = new WorkerError('cancelled', 'test cancellation');
+  controller.abort(reason);
+  await assert.rejects(provider.discoverFreeEndpoints(modelName, controller.signal), error => error === reason);
+  assert.equal(fetched, false);
+});
+
+test('generation bounds response bytes and does not expose upstream error bodies', async () => {
+  const base = new OpenRouterProvider(config, fake(), () => 'test-secret');
+  const model = await registered(base);
+  const request = { model, messages: [{ role: 'user' as const, content: 'JSON' }], schema: {}, limits: DEFAULT_LIMITS,
+    signal: AbortSignal.timeout(1000) };
+  const oversized = new OpenRouterProvider(config, fake({ completion: {
+    id: 'gen-test', model: modelName, choices: [{ finish_reason: 'tool_calls', message: { tool_calls: [
+      { type: 'function', function: { name: 'worker_action', arguments: JSON.stringify({ value: 'x'.repeat(70_000) }) } },
+    ] } }],
+    usage: { prompt_tokens: 1, completion_tokens: 1, cost: 0 },
+  } }), () => 'test-secret');
+  await assert.rejects(oversized.generate(request), error => error instanceof WorkerError && error.code === 'provider_limit');
+
+  const rejected = new OpenRouterProvider(config, fake({ completionStatus: 429,
+    completion: { error: { message: 'SECRET echoed task text' } } }), () => 'test-secret');
+  await assert.rejects(rejected.generate(request), error => error instanceof WorkerError && error.code === 'provider_error'
+    && !error.message.includes('SECRET'));
+});
+
+test('tool-call output rejects wrong functions and multiple calls', async () => {
+  const base = new OpenRouterProvider(config, fake(), () => 'test-secret');
+  const model = await registered(base);
+  const request = { model, messages: [{ role: 'user' as const, content: 'JSON' }], schema: {}, limits: DEFAULT_LIMITS,
+    signal: AbortSignal.timeout(1000) };
+  for (const tool_calls of [
+    [{ type: 'function', function: { name: 'different', arguments: '{}' } }],
+    [{ type: 'function', function: { name: 'worker_action', arguments: '{}' } },
+      { type: 'function', function: { name: 'worker_action', arguments: '{}' } }],
+  ]) {
+    const provider = new OpenRouterProvider(config, fake({ completion: {
+      id: 'gen-test', model: modelName, choices: [{ finish_reason: 'tool_calls', message: { tool_calls } }],
+      usage: { prompt_tokens: 12, completion_tokens: 4, cost: 0 },
+    } }), () => 'test-secret');
+    await assert.rejects(provider.generate(request), /tool call/);
+  }
+});

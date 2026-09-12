@@ -78,6 +78,13 @@ Nothing in this repo is considered deployed to another project until that projec
 
 ## Local workflow
 
+For a fresh coordinator session, start with [docs/ORCHESTRATOR.md](docs/ORCHESTRATOR.md)
+and [docs/CURRENT_WORK.md](docs/CURRENT_WORK.md). The [worker package](tools/local-agents/README.md)
+provides the shared core, MCP/CLI adapters and operator setup. The
+[model directory](agents/orchestrators/routing/README.md) separates published
+capabilities from demonstrated qualification; [rollout evidence](docs/LOCAL_AGENTS_TRIAL.md)
+records actual results and remaining limits.
+
 The expected working environment is Codex Desktop on Windows with local Git checkouts and worktrees where they make sense. This repo should eventually manage its own agent catalog and project overlays using the same orchestration system it defines.
 
 Start with `standards/OPERATING_MODEL.md`, `standards/CONTEXT_AND_DOCUMENTATION.md`, `standards/EXPERIMENTAL_ASSURANCE.md`, and `standards/PUBLICATION_BOUNDARY.md`.

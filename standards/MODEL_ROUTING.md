@@ -4,6 +4,16 @@
 
 **Quality and correctness come first. Efficiency is secondary.**
 
+The local-worker directory is [agents/orchestrators/routing](../agents/orchestrators/routing/README.md).
+Published capabilities guide candidate selection; exact model/runtime/profile
+qualification determines which bounded tasks may be assigned. Inspect connector
+capabilities before use and verify every pilot result. Missing adequacy escalates
+to the existing cloud production route. Local workers are not final reviewers.
+Local-only inference remains the default. The owner has authorized OpenRouter
+implementation for free models. Remote work additionally requires a registered
+zero-price endpoint, current qualification, host data permission and explicit
+per-task consent; paid requests and automatic provider fallback remain disabled.
+
 Use a cheaper model or lower reasoning effort when there is good reason to believe it will do the job just as well. Do not downgrade because saving usage feels virtuous.
 
 If the task is ambiguous, high-consequence, architecture-sensitive, or a weaker pass leaves material uncertainty, escalate.

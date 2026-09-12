@@ -1,5 +1,10 @@
 # Instructions for Codex
 
+For a fresh coordinator session, also read `docs/ORCHESTRATOR.md` and
+`docs/CURRENT_WORK.md`, verify actual repository/work state, and continue only
+the next authorized bounded packet. Refresh the short current-work pointer at
+packet boundaries and before ending the session.
+
 You are working on the system that shapes how other Cha0sCollective agents work. Treat changes here with the same care you would give production code, but don't turn the repo into a rulebook for its own sake.
 
 ## Work like a strong developer

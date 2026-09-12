@@ -92,3 +92,13 @@ describe the current system. Keep task instructions and approval boundaries here
 implementation discussion in PRs, and dated validation in docs/STATUS.md. Preserve
 useful evidence and known limits without repeating agent handoffs or conversation
 history in README and usage guides.
+
+## Fresh coordinator sessions and local workers
+
+Read `docs/ORCHESTRATOR.md` and `docs/CURRENT_WORK.md` at startup, then verify
+actual Git and linked work state. Refresh the short current-work pointer at
+packet boundaries and before ending a session. Keep detailed evidence in its
+authoritative records. Use the installed `ch4os-local-agents` MCP connector only
+for task classes its capabilities identify as qualified. Give bounded paths and
+budgets, verify every answer and integrate proposals yourself. Local workers do
+not replace the coordinator or independent review. OpenRouter also requires current endpoint terms suitable for the assignment, an approved free endpoint, host data permission and per-task consent. Qualification does not authorize private data transmission. Existing project authority still applies.

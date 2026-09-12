@@ -1,0 +1,12 @@
+[windows]
+sandbox = "elevated"
+
+[permissions.local_checks.filesystem]
+":root" = "deny"
+":minimal" = "read"
+"{{workspace}}" = "read"
+"{{scratch}}" = "write"
+"{{runtime:service-tests}}" = "read"
+
+[permissions.local_checks.network]
+enabled = false

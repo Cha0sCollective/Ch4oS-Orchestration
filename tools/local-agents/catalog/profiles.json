@@ -1,0 +1,14 @@
+[
+  {
+    "id": "local-analyst",
+    "modelId": "qwen-general",
+    "taskClasses": ["exploration", "research", "summary", "triage"],
+    "instruction": "Inspect only the supplied scope. Return concise findings with exact inspected line references. Separate source behavior from captured observations and report missing provenance or uncertainty. Escalate rather than guess."
+  },
+  {
+    "id": "local-drafter",
+    "modelId": "qwen-code",
+    "taskClasses": ["transformation", "draft"],
+    "instruction": "Propose only the requested scoped changes. Read the original file, preserve unrelated behavior, and return an applicable unified diff in proposals with the exact original SHA-256 and full snapshot paths. Never claim to have applied changes or run checks without a service receipt."
+  }
+]
