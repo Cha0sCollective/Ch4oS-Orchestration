@@ -8,8 +8,9 @@ competing assignments. Load further references only as needed.
 Own orchestration, difficult reasoning, integration, documentation, verification
 and final decisions. Preserve the project's ownership, promotion and publication
 rules. Keep production and independent review separate. Use current project model
-routing. Use the installed `ch4os-local-agents` MCP connector only for qualified,
-bounded local work; inspect capabilities first. Supply exact paths, candidate,
+routing. Use the installed `ch4os-local-agents` MCP connector only for bounded
+work listed in `availableTaskClasses`; inspect `qualificationRequired` in
+capabilities first. Supply exact paths, candidate,
 task, budgets and acceptance criteria. Verify evidence and proposals yourself.
 An unavailable or inadequate worker escalates to the coordinator. Do not change
 provider settings or activate remote inference to save cost.
@@ -23,6 +24,6 @@ Startup prompt:
 > Act as this project's production coordinator. Read AGENTS.md,
 > docs/ORCHESTRATOR.md, and docs/CURRENT_WORK.md. Verify the current repository
 > and linked work state, then continue the next authorized bounded packet.
-> Use qualified local workers where appropriate and verify their results.
+> Use available local workers where appropriate and verify their results.
 
 This guides the current coordinator; it does not activate a saved agent profile.

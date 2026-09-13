@@ -769,3 +769,65 @@ test('remote qualification accepts no expiry or a later explicit expiry and adve
     } finally { await service.close(); }
   }
 });
+
+
+test('Nemotron works without qualification in either mode and after rejected feedback', async () => {
+  const initial = await fixture(new ScriptedProvider(async () => '{}'));
+  await initial.service.close();
+  const model = await configureRemote(initial.config);
+  model.model = 'nvidia/nemotron-3-ultra-550b-a55b:free';
+  initial.config.allowQualification = false;
+  const provider = new RemoteScriptedProvider(async () => JSON.stringify({ action: 'finish', answer: {
+    outcome: 'answered', summary: 'done', findings: [], limitations: [], proposals: [],
+  } }));
+  const request = { ...initial.request, remoteDataConsent: true };
+  for (const state of ['missing', 'stale', 'expired', 'withdrawn'] as const) {
+    const profile = initial.config.profiles[0]!;
+    delete profile.qualification;
+    if (state !== 'missing') profile.qualification = {
+      fingerprint: state === 'stale' ? 'f'.repeat(64) : await qualificationFingerprint(initial.config, profile, model),
+      taskClasses: [], evidence: ['test'], expiresAt: '2000-01-01T00:00:00.000Z',
+    };
+    if (state === 'withdrawn') {
+      const dir = path.join(initial.config.dataDir, 'withdrawn-qualifications');
+      await mkdir(dir, { recursive: true });
+      await writeFile(path.join(dir, profile.qualification!.fingerprint + '.json'), '{}');
+    }
+    const service = await WorkerService.create(initial.config, provider);
+    try {
+      const caps = await service.capabilities();
+      assert.equal(caps.profiles[0]?.qualificationRequired, false);
+      assert.deepEqual(caps.profiles[0]?.availableTaskClasses, ['exploration']);
+      assert.deepEqual(caps.profiles[0]?.qualifiedTaskClasses, []);
+      assert.equal(caps.profiles[0]?.reason, undefined);
+      for (const mode of ['work', 'qualification'] as const) {
+        const job = await waitForTerminal(service, (await service.startTask({ ...request, mode, requestKey: state + mode })).id);
+        assert.equal(job.state, 'completed', JSON.stringify(job.error));
+        await service.recordFeedback({ jobId: job.id, verdict: 'rejected', evidence: ['test rejection'], correctionCount: 1, verificationMs: 1 });
+      }
+      await assert.rejects(service.startTask({ ...request, requestKey: state + 'consent', remoteDataConsent: false }),
+        error => error instanceof WorkerError && error.code === 'remote_consent_required');
+      await assert.rejects(service.startTask({ ...request, requestKey: state + 'class', taskClass: 'draft' }),
+        error => error instanceof WorkerError && error.code === 'unsupported_task_class');
+      await assert.rejects(service.startTask({ ...request, requestKey: state + 'limit', limits: { rounds: 99 } }),
+        error => error instanceof WorkerError && error.code === 'invalid_request');
+    } finally { await service.close(); }
+  }
+});
+
+test('other remote models still require qualification when trials are disabled', async () => {
+  const initial = await fixture(new ScriptedProvider(async () => '{}'));
+  await initial.service.close();
+  await configureRemote(initial.config);
+  initial.config.allowQualification = false;
+  delete initial.config.profiles[0]!.qualification;
+  const service = await WorkerService.create(initial.config, new RemoteScriptedProvider(async () => '{}'));
+  try {
+    assert.equal((await service.capabilities()).profiles[0]?.qualificationRequired, true);
+    assert.deepEqual((await service.capabilities()).profiles[0]?.availableTaskClasses, []);
+    for (const mode of ['work', 'qualification'] as const) {
+      await assert.rejects(service.startTask({ ...initial.request, requestKey: mode, mode, remoteDataConsent: true }),
+        error => error instanceof WorkerError && error.code === (mode === 'work' ? 'profile_not_qualified' : 'qualification_disabled'));
+    }
+  } finally { await service.close(); }
+});

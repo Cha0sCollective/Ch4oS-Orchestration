@@ -301,3 +301,14 @@ from 0.1.3. The reviewed aggregate is
 The current installation has a different fingerprint, so ordinary eligibility
 remains disabled until a matching rerun. No supervised production pilot or target
 adoption refresh is claimed complete.
+
+Current update: worker service 0.1.6 supersedes that 0.1.4 installation state and
+passes 95/95 focused tests. The exact
+`nvidia/nemotron-3-ultra-550b-a55b:free` route now requires neither qualification
+nor a 24-hour job/result lifetime. Missing, stale, expired and withdrawn
+qualification records do not gate it, and its jobs/results have no age-based
+expiry. Count and storage-size bounds remain. Other models retain qualification
+and the 24-hour lifetime. Free-only endpoint pinning, repository scope, explicit
+remote consent, limits, Codex verification and disabled commands/search remain
+unchanged. The earlier results above remain historical evidence from their stated
+versions and do not establish new model quality.

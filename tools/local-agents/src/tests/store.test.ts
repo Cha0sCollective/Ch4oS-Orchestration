@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile } from 'node:fs/promises';
+import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { JobStore, hashRequest } from '../store.js';
@@ -102,5 +102,46 @@ test('compacts metrics by age and maximum bytes', async () => {
   assert.doesNotMatch(metrics, /"event":"old"/);
   assert.ok(Buffer.byteLength(metrics) <= 220);
   assert.match(metrics, /"event":"new-7"/);
+  await store.close();
+});
+
+
+test('Nemotron results have no TTL across updates and restarts while other models still expire', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'nemotron-retention-'));
+  let now = new Date('2026-01-01T00:00:00Z');
+  const options = { ttlMs: 1000, now: () => now, maxJobs: 3 };
+  const remote = { ...metadata, modelProvider: 'openrouter' as const,
+    routing: { locality: 'remote' as const, model: 'nvidia/nemotron-3-ultra-550b-a55b:free' } };
+  let store = new JobStore(directory, options);
+  await store.init();
+  await store.create({ ...queuedJob('ultra'), state: 'completed' }, 'a'.repeat(64), 'owner', remote);
+  await store.create(queuedJob('abandoned'), 'b'.repeat(64), 'old-owner', remote);
+  await store.create({ ...queuedJob('local'), state: 'completed' }, 'c'.repeat(64), 'owner', metadata);
+  await store.update({ ...queuedJob('ultra'), state: 'completed' });
+  await store.close();
+  // A previous installation wrote a finite expiry; upgrade it on load too.
+  const filename = path.join(directory, 'jobs.json');
+  const saved = JSON.parse(await readFile(filename, 'utf8'));
+  saved.jobs.find((item: any) => item.job.id === 'ultra').expiresAt = '2026-01-01T00:00:01Z';
+  await writeFile(filename, JSON.stringify(saved));
+  now = new Date('2027-01-01T00:00:00Z');
+  store = new JobStore(directory, options);
+  await store.init();
+  assert.equal(store.get('ultra')?.state, 'completed');
+  assert.equal(store.get('local'), undefined);
+  assert.equal(await store.recoverAbandoned('new-owner'), 1);
+  assert.equal(store.get('abandoned')?.state, 'interrupted');
+  await store.close();
+  now = new Date('2028-01-01T00:00:00Z');
+  store = new JobStore(directory, options);
+  await store.init();
+  assert.equal(store.get('abandoned')?.state, 'interrupted');
+  assert.equal(store.get('ultra')?.state, 'completed');
+  const records = JSON.parse(await readFile(filename, 'utf8')).jobs;
+  assert.ok(records.every((item: any) => item.expiresAt === null));
+  // Timeless results still obey the existing bounded store policy.
+  for (const id of ['new-1', 'new-2']) await store.create({ ...queuedJob(id), state: 'completed', updatedAt: now.toISOString() }, 'd'.repeat(64), 'owner', remote);
+  assert.ok(store.size <= 3);
+  assert.equal(store.get('ultra'), undefined);
   await store.close();
 });

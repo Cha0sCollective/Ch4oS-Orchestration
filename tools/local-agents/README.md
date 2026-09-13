@@ -4,7 +4,7 @@ Codex owns orchestration, integration, verification and final decisions. This
 Node 24 package adds bounded local research through a transport-independent
 `WorkerService`, with MCP stdio and newline JSON CLI adapters. Local-only is the
 default and admits approved Ollama weights. Explicitly configured OpenRouter
-workers use qualified free endpoints with data consent and no automatic fallback.
+workers use pinned free endpoints with data consent and no automatic fallback.
 
 ## Build and install
 
@@ -18,7 +18,7 @@ npm pack --ignore-scripts
 
 Install the resulting archive into a versioned host-local directory outside this
 checkout. Use `npm install --prefix <version-directory> --ignore-scripts
---omit=dev <archive>`. Keep that version until affected qualification is rerun;
+--omit=dev <archive>`. Keep that version until an affected qualified profile is rerun;
 do not use `npx` to fetch a moving version. The executable is
 `<version-directory>/node_modules/@ch4os/local-agents/dist/cli.js`.
 
@@ -91,15 +91,16 @@ bytes count. Tool excerpts report truncation; tasks escalate on exhausted budget
 Provider token counters are actual returned counters, not estimates.
 
 Host `limits` are ceilings. Each profile can set its own narrower `limits`.
-Qualification assignments can narrow the selected profile further; ordinary work
-requires limits matching its saved qualification. A smaller context can change
-answer quality, so use separately qualified profiles for different operating
-budgets rather than assuming a pass applies to every smaller budget. For example, a host can
+Qualification assignments can narrow a qualification-required profile further;
+ordinary work on such a profile requires limits matching its saved qualification.
+A smaller context can change answer quality, so use separately qualified profiles
+for different operating budgets rather than assuming a pass applies to every
+smaller budget. For example, a host can
 allow 262144 context tokens and 131072 input bytes, retain 8192/16384 for local
 profiles, and assign the larger allowance to an appropriate remote profile.
 Capabilities expose the effective limits; changing them requires qualification
-to be rerun. Larger remote limits do not invalidate a local context proof when
-that local profile retains its tested limits.
+to be rerun when the profile requires qualification. Larger remote limits do not
+invalidate a local context proof when that local profile retains its tested limits.
 
 Input bytes include the complete serialized inference request, including schemas,
 instructions, evidence and history. OpenRouter currently reserves one context
@@ -117,11 +118,22 @@ Codex applies them to a new candidate before requesting tests of that candidate.
 
 Profiles describe permitted task classes and behavior; model records describe
 published capabilities; qualification records describe demonstrated adequacy.
-Ordinary work rejects missing/stale qualifications. Only an operator-enabled
-`qualification` request can evaluate an unqualified model. Use the synthetic
+Capabilities expose `availableTaskClasses` as the assignment field and
+`qualificationRequired` as the policy. `qualifiedTaskClasses` remains a factual
+record of evidence and is not the general eligibility field. Ordinary work on a
+qualification-required profile rejects missing or stale qualifications. Only an
+operator-enabled `qualification` request can evaluate such an unqualified model. Use the synthetic
 suite in `fixtures/qualification/` twice per case; review every material claim,
 evidence reference, abstention and proposed diff. Do not automatically approve a
 profile from model completion or command exit status.
+
+Worker service 0.1.6 exempts only the exact
+`nvidia/nemotron-3-ultra-550b-a55b:free` model from qualification. Profiles bound
+to that model report `qualificationRequired: false`; the core admits their
+configured task classes in either task mode even when qualification is missing,
+stale, expired or withdrawn. Use ordinary `work` mode for assignments and select
+task classes from `availableTaskClasses`.
+Every other model keeps the existing qualification behavior.
 
 `fingerprint --profile-id <id>` prints the exact code/model/settings/profile/runtime
 fingerprint. Record accepted task classes and review evidence in host config.
@@ -133,12 +145,14 @@ terminal jobs accept feedback even without an answer. `get_task` preserves their
 partial `statistics` and bounded `error.details`; a failed job is never promoted
 to a successful result merely because some counters exist.
 
-Jobs/results expire after 24 hours. Compact metrics expire after 30 days and are
-capped at 100MB across service sessions. Routine prompts/source excerpts are not
-persisted; transient results may contain proposed source changes. Keep runtime
-storage private and ignored. Deliberately retain only reviewed synthetic/sanitized
-evidence outside the temporary job store. Commit aggregate findings and regression
-cases, not routine task transcripts.
+Jobs/results for the exact Nemotron Ultra model have no age-based expiry. Other
+models retain the 24-hour lifetime. All jobs remain bounded by the store's maximum
+job count and byte size, so older records can still be evicted. Compact metrics
+expire after 30 days and are capped at 100MB across service sessions. Routine
+prompts/source excerpts are not persisted; retained results may contain proposed
+source changes. Keep runtime storage private and ignored. Deliberately retain only
+reviewed synthetic/sanitized evidence outside the job store. Commit aggregate
+findings and regression cases, not routine task transcripts.
 
 ## Opt-in OpenRouter evaluation
 
@@ -171,16 +185,17 @@ The adapter checks exact endpoint identity, supported parameters and all adverti
 prices before inference. Requests pin one provider with fallback disabled and zero
 price ceilings. Returned usage and a generation receipt must establish zero cost
 and the selected model/provider. Unknown pricing, missing proof or unavailable
-routes fail; there is no paid or alternative-model fallback. Qualification is
-change-triggered: the exact model, endpoint, profile, settings and implementation
-fingerprint must still match. Optional `expiresAt` is enforced for every provider;
-there is no mandatory daily requalification. Material quality failures withdraw
-eligibility pending review and affected reruns. Endpoint health/pricing checks
-still run on each request.
+routes fail; there is no paid or alternative-model fallback. For profiles that
+require qualification, the exact model, endpoint, profile, settings and
+implementation fingerprint must still match. Optional `expiresAt` remains
+supported for those profiles; there is no mandatory daily requalification.
+Material quality failures withdraw their eligibility pending review and affected
+reruns. Nemotron Ultra ignores those qualification gates, while endpoint
+health/pricing checks still run on every request.
 
 `record_feedback` with verdict `rejected`, or `invalidatesQualification: true`
 for a material correction, writes a durable withdrawal marker under host data
-`withdrawn-qualifications/<fingerprint>.json`. Capabilities and ordinary admission
+`withdrawn-qualifications/<fingerprint>.json`. Qualification-required profiles
 check this across sessions, including queued work before inference. Qualification
 runs remain possible but never clear withdrawal automatically. After independent
 review accepts rerun evidence, the operator may remove that exact marker and save

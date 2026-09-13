@@ -21,9 +21,14 @@ appearing in the shared catalog.
 The current coordinator owns scope, difficult reasoning, integration, verification
 and final decisions. Preserve the existing Astra coordinator and independent
 Sol review lane. Use the installed `ch4os-local-agents` MCP connector only when
-its capabilities report a qualified profile for the bounded task. Supply explicit
+its capabilities list the bounded task in `availableTaskClasses`. Inspect
+`qualificationRequired`; `qualifiedTaskClasses` is evidence only. Supply explicit
 paths, snapshot/candidate identity, budgets and acceptance criteria. Verify every
-worker result. Missing capability escalates to Codex. OpenRouter also requires current endpoint terms suitable for the assignment, an approved free endpoint, host data permission and per-task consent. Qualification does not override service terms or authorize private data transmission.
+worker result. Missing capability escalates to Codex. The exact NVIDIA Nemotron 3
+Ultra free route requires no qualification; use ordinary `work` mode. OpenRouter
+still requires current endpoint terms suitable for the assignment, an approved
+free endpoint, host data permission and per-task consent. Qualification status
+does not override service terms or authorize private data transmission.
 The connector refers to a versioned host installation, not a sibling checkout.
 See [Local tools](LOCAL_TOOLS.md) for the installed host capabilities and their
 current access limits.
@@ -38,6 +43,6 @@ Use this startup prompt in a fresh chat:
 > Act as this project's production coordinator. Read AGENTS.md,
 > docs/ORCHESTRATOR.md, and docs/CURRENT_WORK.md. Verify the current repository
 > and linked work state, then continue the next authorized bounded packet.
-> Use qualified local workers where appropriate and verify their results.
+> Use available local workers where appropriate and verify their results.
 
 This guide does not claim activation of a saved subagent profile.

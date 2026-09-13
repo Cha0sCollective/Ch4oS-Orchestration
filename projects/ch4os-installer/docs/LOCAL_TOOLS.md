@@ -1,10 +1,15 @@
 # Local tools
 
 The host has optional local text and image tools. The `ch4os-local-agents` MCP
-connector runs worker service 0.1.4. No worker profile is currently qualified, and
-host qualification and commands are disabled. Do not assign ordinary work
-automatically. An earlier local Gemma summary run scored 6/6; that is historical
-evidence, not a new qualification for the installed service.
+connector runs worker service 0.1.6. Host qualification and commands are disabled.
+The exact NVIDIA Nemotron 3 Ultra free profiles need no qualification:
+`remote-analyst` handles summaries and `remote-comparison` handles research in
+ordinary `work` mode when those task classes appear in `availableTaskClasses`.
+Remote repository scope, explicit data consent, free-only pinning, limits and Codex
+verification remain required. Nemotron Ultra jobs/results have no age-based expiry
+but retain count and storage-size bounds. Other profiles still require qualification
+and keep the 24-hour job/result lifetime. An
+earlier local Gemma summary run scored 6/6; that is historical evidence only.
 
 Cherry Studio 2.0.14 provides manual chat without Codex. Its initial selectors use
 `gemma4:12b` by default and `qwen3.5:9b` for Quick Assistant and translation through

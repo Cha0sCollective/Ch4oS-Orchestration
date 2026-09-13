@@ -5,14 +5,19 @@
 **Quality and correctness come first. Efficiency is secondary.**
 
 The local-worker directory is [agents/orchestrators/routing](../agents/orchestrators/routing/README.md).
-Published capabilities guide candidate selection; exact model/runtime/profile
-qualification determines which bounded tasks may be assigned. Inspect connector
-capabilities before use and verify every pilot result. Missing adequacy escalates
-to the existing cloud production route. Local workers are not final reviewers.
+Published capabilities guide candidate selection. Use the task classes in
+`availableTaskClasses` for assignment and inspect `qualificationRequired` before
+interpreting `qualifiedTaskClasses`, which remains evidence rather than the general
+eligibility field. Inspect connector capabilities before use and verify every
+result. Missing adequacy escalates to the existing cloud production route. Local
+workers are not final reviewers.
 Local-only inference remains the default. The owner has authorized OpenRouter
-implementation for free models. Remote work additionally requires a registered
-zero-price endpoint, current qualification, host data permission and explicit
-per-task consent; paid inference and automatic provider fallback remain disabled.
+implementation for free models. The exact
+`nvidia/nemotron-3-ultra-550b-a55b:free` route does not require qualification;
+other model profiles retain their qualification requirements. Remote work still
+requires a registered zero-price endpoint, current suitable service terms, host
+data permission and explicit per-task consent; paid inference and automatic
+provider fallback remain disabled.
 The separately authorized web-search capability uses a distinct key and a $5
 non-resetting budget. It does not authorize paid model inference, GUI auxiliary
 requests or unrestricted worker browsing.

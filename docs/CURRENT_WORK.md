@@ -12,11 +12,16 @@ Branch: `codex/local-agent-service`; implementation base:
 `b10631b4a0351baac318ed3ae2704051287aef3e`. Verify actual HEAD and dirty state before
 continuing; no merge or publication is authorized by this pointer.
 
-Worker service 0.1.4 is installed and registered. Qualification mode is now disabled
-in host configuration. No profile is enabled for ordinary assignments. Local Gemma
-passed earlier summary cases, but qualification did not transfer to the new runtime.
-Command execution remains disabled. Minecraft sources are approved nonconfidential
-within configured scope; Codex still verifies worker claims and controls integration.
+Worker service 0.1.6 is installed and registered. Host qualification mode is
+disabled. The exact NVIDIA Nemotron 3 Ultra free route requires no qualification:
+`remote-analyst` is available for summaries and `remote-comparison` for research in
+ordinary `work` mode. Use `availableTaskClasses`, require explicit remote consent
+and configured repository scope, and verify every result. Missing, stale, expired
+or withdrawn qualification records do not gate these two profiles. Other profiles
+remain unavailable without qualification. Free-only endpoint pinning, limits and
+provider checks remain enforced. Nemotron Ultra jobs and results have no
+age-based expiry, while count and storage-size bounds remain. Other models retain
+the 24-hour lifetime. Command execution remains disabled.
 
 Cherry Studio 2.0.14 and ComfyUI 0.35.0 with FLUX.2 Klein 4B FP8 are installed.
 The owner is configuring Cherry manually: default Gemma4 12B, quick/translate Qwen3.5

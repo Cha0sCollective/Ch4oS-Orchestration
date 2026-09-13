@@ -1,6 +1,7 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { mkdir, open, readFile, rename, stat, unlink, writeFile, appendFile } from 'node:fs/promises';
 import path from 'node:path';
+import { isNemotronUltra } from './types.js';
 import type { FailureDetails, Feedback, Job, ModelRouting, RegisteredModel, TaskClass } from './types.js';
 
 const DAY_MS = 24 * 60 * 60 * 1_000;
@@ -29,7 +30,7 @@ interface StoredJob {
   job: Job;
   requestHash: string;
   ownerId: string;
-  expiresAt: string;
+  expiresAt: string | null;
   metadata?: JobMetadata;
 }
 
@@ -213,7 +214,7 @@ export class JobStore {
           progress: 'interrupted during service restart',
           error: { code: 'interrupted', message: 'The owning worker stopped before this job finished.' },
         };
-        record.expiresAt = new Date(this.#now().getTime() + this.#ttlMs).toISOString();
+        record.expiresAt = this.#expiry(record.metadata);
         recovered += 1;
       }
     }
@@ -226,7 +227,7 @@ export class JobStore {
     if (this.#records.has(job.id)) throw new Error(`job already exists: ${job.id}`);
     this.#records.set(job.id, {
       job: clone(job), requestHash, ownerId,
-      expiresAt: new Date(this.#now().getTime() + this.#ttlMs).toISOString(), metadata: metadata ? clone(metadata) : undefined,
+      expiresAt: this.#expiry(metadata), metadata: metadata ? clone(metadata) : undefined,
     });
     this.#enforceJobBounds();
     await this.#persist();
@@ -238,7 +239,7 @@ export class JobStore {
     if (!record) throw new Error(`unknown job: ${job.id}`);
     record.job = clone(job);
     if (metadata && record.metadata) record.metadata = { ...record.metadata, ...clone(metadata) };
-    record.expiresAt = new Date(this.#now().getTime() + this.#ttlMs).toISOString();
+    record.expiresAt = this.#expiry(record.metadata);
     this.#enforceJobBounds();
     await this.#persist();
   }
@@ -338,11 +339,21 @@ export class JobStore {
     if (!this.#initialized) throw new Error('job store is not initialized');
   }
 
+  #expiry(metadata?: JobMetadata): string | null {
+    return metadata && isNemotronUltra({ provider: metadata.modelProvider, model: metadata.routing.model ?? '' })
+      ? null : new Date(this.#now().getTime() + this.#ttlMs).toISOString();
+  }
+
   #purgeExpired(): boolean {
     const nowMs = this.#now().getTime();
     let changed = false;
     for (const [id, record] of this.#records) {
-      if (Date.parse(record.expiresAt) <= nowMs) {
+      // Upgrade surviving older Nemotron records before checking their previous TTL.
+      if (this.#expiry(record.metadata) === null) {
+        if (record.expiresAt !== null) { record.expiresAt = null; changed = true; }
+        continue;
+      }
+      if (record.expiresAt === null || Date.parse(record.expiresAt) <= nowMs) {
         this.#records.delete(id);
         changed = true;
       }

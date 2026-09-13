@@ -156,10 +156,18 @@ Existing merge, publication and live acceptance gates remain unchanged.
 
 ## Current closeout boundary
 
-The owner paused further trials on 2026-09-12. Finish documentation and prepared
-adoption handoffs; do not resume model qualification, supervised pilots, image
-trials, paid searches or sandbox experiments automatically. Manual use of installed
-Cherry Studio and ComfyUI remains available. See
+The owner removed the qualification requirement for the exact
+`nvidia/nemotron-3-ultra-550b-a55b:free` route in worker service 0.1.6. Its configured
+task classes are available in ordinary `work` mode regardless of missing, stale,
+expired or withdrawn qualification records. This exception does not weaken
+free-endpoint pinning, repository scope, per-task data consent, limits, result
+verification or service-term checks, and it does not apply to another model.
+Nemotron Ultra jobs and results also have no age-based expiry; count and
+storage-size bounds still apply. Other models retain the 24-hour lifetime.
+
+Further trials remain paused. Do not resume qualification for other models,
+supervised pilots, image trials, paid searches or sandbox experiments
+automatically. Manual use of installed Cherry Studio and ComfyUI remains available. See
 [installed capabilities](INSTALLED_CAPABILITIES.md) and [local images](LOCAL_IMAGES.md).
 The separately authorized $5 search integration remains disabled after provider
-failures. No paused evaluation implies permission to enable an unqualified worker.
+failures. Commands remain disabled.

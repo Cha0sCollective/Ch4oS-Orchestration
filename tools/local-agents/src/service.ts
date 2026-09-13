@@ -8,7 +8,7 @@ import { captureSnapshot, listFiles, readLines, searchSnapshot } from './snapsho
 import { hashRequest, JobStore, type JobMetadata } from './store.js';
 import {
   DEFAULT_LIMITS, PROMPT_VERSION, SERVICE_VERSION, WorkerError,
-  modelIdentity,
+  modelIdentity, requiresQualification,
   type CommandReceipt, type CommandRunner, type Feedback, type GenerateRequest,
   type HostConfig, type Job, type JobResult, type Limits, type ModelRouting,
   type Message, type ModelProvider, type Profile, type ProviderStats, type RegisteredModel,
@@ -48,7 +48,7 @@ export interface WorkerCapabilities {
   }[];
   profiles: {
     id: string; modelId: string; limits: Limits;
-    taskClasses: string[]; qualifiedTaskClasses: string[]; reason?: string;
+    taskClasses: string[]; qualifiedTaskClasses: string[]; availableTaskClasses: string[]; qualificationRequired: boolean; reason?: string;
   }[];
   checks: { available: boolean; ids: string[]; reason?: string };
 }
@@ -524,15 +524,20 @@ export class WorkerService {
         attachedHealth.set(model.id, statuses);
       }
       const expected = model ? await qualificationFingerprint(this.config, profile, model, this.#runtimeDigest) : undefined;
+      const required = !model || requiresQualification(model);
       const withdrawn = expected ? await this.#qualificationWithdrawn(expected) : false;
       const current = Boolean(!withdrawn && available && expected && profile.qualification?.fingerprint === expected
         && model && this.#qualificationExpiryIsCurrent(model, profile.qualification?.expiresAt));
       profiles.push({
         id: profile.id, modelId: profile.modelId, limits,
         taskClasses: [...profile.taskClasses],
+        qualificationRequired: required,
+        availableTaskClasses: available && !required ? [...profile.taskClasses]
+          : current ? profile.qualification!.taskClasses.filter((taskClass) => profile.taskClasses.includes(taskClass)) : [],
         qualifiedTaskClasses: current ? profile.qualification!.taskClasses.filter((taskClass) => profile.taskClasses.includes(taskClass)) : [],
         ...(!model ? { reason: 'profile model is not configured' }
           : !available ? { reason: reason ?? 'profile model is unavailable' }
+          : !required ? {}
           : withdrawn ? { reason: 'qualification withdrawn after verified feedback; reviewed rerun required' }
           : !current ? { reason: !this.#qualificationExpiryIsCurrent(model, profile.qualification?.expiresAt)
             ? 'qualification has explicitly expired'
@@ -737,7 +742,7 @@ export class WorkerService {
     }, limits.taskTimeoutMs);
     try {
       const { repository, profile, model, provider, fingerprint } = entry.context;
-      if (entry.request.mode === 'work' && await this.#qualificationWithdrawn(fingerprint)) {
+      if (requiresQualification(model) && entry.request.mode === 'work' && await this.#qualificationWithdrawn(fingerprint)) {
         throw new WorkerError('profile_not_qualified', 'Qualification was withdrawn before execution.');
       }
       const snapshotRepository = {
@@ -756,7 +761,7 @@ export class WorkerService {
       const releaseInference = await this.#acquireInferenceLease(controller.signal);
       let result: JobResult;
       try {
-        if (entry.request.mode === 'work' && await this.#qualificationWithdrawn(fingerprint)) {
+        if (requiresQualification(model) && entry.request.mode === 'work' && await this.#qualificationWithdrawn(fingerprint)) {
           throw new WorkerError('profile_not_qualified', 'Qualification was withdrawn while waiting for inference.');
         }
         this.#verifyContextProof(model, limits);
@@ -1052,7 +1057,9 @@ export class WorkerService {
     const provider = this.#providerFor(model);
     this.#assertRouteAuthorization(request, model);
     const fingerprint = await qualificationFingerprint(this.config, profile, model, this.#runtimeDigest || undefined, limits);
-    if (request.mode === 'qualification') {
+    if (!requiresQualification(model)) {
+      // Nemotron admission is independent of qualification state and task mode.
+    } else if (request.mode === 'qualification') {
       if (!this.config.allowQualification) throw new WorkerError('qualification_disabled', 'This host does not allow qualification runs.');
     } else {
       const qualification = profile.qualification;

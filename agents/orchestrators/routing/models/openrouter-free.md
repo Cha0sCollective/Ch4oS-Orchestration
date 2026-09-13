@@ -1,7 +1,8 @@
 # OpenRouter free endpoints
 
-Implementation authorized 2026-09-12; no endpoint is qualified by this record.
-The owner-selected candidate is `nvidia/nemotron-3-ultra-550b-a55b:free`.
+Implementation authorized 2026-09-12. This record provides source and routing
+context rather than qualification. Worker service 0.1.6 admits the exact
+owner-selected `nvidia/nemotron-3-ultra-550b-a55b:free` model without qualification.
 NVIDIA describes 550 billion total parameters, 55 billion active parameters,
 one-million-token context and the OpenMDW-1.1 license. The published release is
 2026-06-04. These are upstream capabilities, not demonstrated task adequacy.
@@ -25,13 +26,19 @@ not establish suitability for production service use, even if synthetic cases pa
 
 Inspect the exact model's endpoints, supported parameters, context, pricing,
 provider data policy and upstream license before registration. Do not select
-`openrouter/free`, automatic aliases or fallback lists: changing models invalidates
-the meaning of a qualification. A selected endpoint must support the worker's
-structured action protocol and zero-price routing constraints.
+`openrouter/free`, automatic aliases or fallback lists: changing models leaves the
+exact Ultra exemption and selects a qualification-required model. A selected
+endpoint must support the worker's structured action protocol and zero-price
+routing constraints.
 
-Remote qualification records include the model slug, endpoint/provider identity,
-catalog fingerprint, complete settings, data policy, reviewed cases and optional expiration.
-Eligibility is change-triggered, with no mandatory daily renewal.
+For models that require qualification, records include the model slug,
+endpoint/provider identity, catalog fingerprint, complete settings, data policy,
+reviewed cases and optional expiration. Nemotron Ultra eligibility instead comes
+from its exact configured identity and `qualificationRequired: false`; stale,
+expired or withdrawn qualification evidence does not gate it. Zero-price pinning,
+scope, consent, limits, current endpoint checks and Codex verification still apply.
+Its jobs and results have no age-based expiry but remain subject to count and
+storage-size bounds. Other models retain the 24-hour lifetime.
 An API model is not a content-addressed local weight artifact; an unchanged slug
 or catalog fingerprint cannot guarantee unchanged remote weights.
 

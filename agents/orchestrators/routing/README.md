@@ -19,8 +19,10 @@ Local candidates:
 
 The reusable [profile definitions](../../../tools/local-agents/catalog/profiles.json)
 declare task classes and output responsibilities. Host-local configuration binds
-them to approved installed model identities and limits. Empty qualification means
-evaluation only; it does not permit ordinary work.
+them to approved installed model identities and limits. Capabilities report
+`availableTaskClasses` for assignment and `qualificationRequired` for policy;
+`qualifiedTaskClasses` is evidence only. Empty qualification prevents ordinary
+work when qualification is required.
 
 | Record | Proposed use | State |
 | --- | --- | --- |
@@ -33,10 +35,11 @@ task classes. The [trial report](../../../docs/LOCAL_AGENTS_TRIAL.md) explains
 the material failures. Completion counts are not correctness counts.
 The [reviewed NVIDIA summary evaluation](qualifications/2026-09-12-nvidia.json)
 records two correct results out of six trials, including provider failures and
-one evidence error. It grants no eligibility.
+one evidence error. It granted no qualification under the policy then in force.
 The [0.1.2 summary rerun](qualifications/2026-09-12-summary-v012.json) records
 the larger remote budget and numbered evidence. Both candidates still miss the
-summary acceptance requirement; neither is eligible for ordinary work.
+summary acceptance requirement. That remains historical evidence; worker service
+0.1.6 now admits the exact Nemotron Ultra route without qualification.
 
 No local candidate may replace the cloud coordinator or independent reviewer on
 the strength of a vendor card or one successful task. Qualification must name the
@@ -44,11 +47,15 @@ exact tag and digest, quantization, Ollama/runtime version, prompt/task class,
 context settings, hardware-relevant limits, tests, reviewer and observed failures.
 
 The owner authorized OpenRouter implementation on 2026-09-12 for free models.
-Local-only remains the default. Remote qualification identifies the exact model,
-underlying endpoint, catalog fingerprint and fallback policy. Require zero-price
-routing, host data permission and per-task consent; credentials stay host-local.
-No random free router or silent fallback is accepted. Remote model contents cannot
-be pinned like local weight digests, so changed endpoint identity or settings
-require renewed qualification. Optional explicit expiry remains supported.
+Local-only remains the default. Worker service 0.1.6 exempts only
+`nvidia/nemotron-3-ultra-550b-a55b:free` from qualification; missing, stale,
+expired or withdrawn qualification does not gate its configured task classes.
+Other models retain qualification. Require exact endpoint and catalog identity,
+zero-price routing, host data permission and per-task consent; credentials stay
+host-local. No random free router or silent fallback is accepted. Remote model
+contents cannot be pinned like local weight digests, so inspect current endpoint
+health and terms and verify every result.
+Nemotron Ultra jobs and results have no age-based expiry, though count and
+storage-size bounds still apply. Other models retain the 24-hour lifetime.
 See [the OpenRouter record](models/openrouter-free.md) and the
 [additional trial candidates](models/additional-candidates.md).
