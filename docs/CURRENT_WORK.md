@@ -1,5 +1,10 @@
 # Current work
 
+The latest bounded assignment is Nemotron access and usage documentation; all
+other work remains paused. The installed CLI completed a real, source-verified
+Ultra summary with the existing host credential. [NEMOTRON.md](NEMOTRON.md) gives
+the tested invocation, sandbox/host credential distinction and run evidence.
+
 The owner paused further model trials on 2026-09-12 and requested closeout plus a
 short installed-tools guide. Do not automatically resume qualification, supervised
 pilots, paid searches, sandbox setup or installation experiments.

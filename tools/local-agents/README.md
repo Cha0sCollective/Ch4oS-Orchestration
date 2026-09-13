@@ -156,6 +156,11 @@ findings and regression cases, not routine task transcripts.
 
 ## Opt-in OpenRouter evaluation
 
+For the current installed Nemotron profiles and a tested Windows CLI invocation,
+see [Use Nemotron](../../docs/NEMOTRON.md). The normal host and the restricted
+Windows process can see different user environment storage; diagnose credential
+presence on the host before replacing a key.
+
 Local-only remains the shipped default. Enabling OpenRouter requires
 `inferencePolicy: "approved-free-providers"` and an explicit `openrouter` block:
 

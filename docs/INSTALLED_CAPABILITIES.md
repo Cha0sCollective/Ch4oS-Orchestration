@@ -44,6 +44,9 @@ Use NVIDIA only when you explicitly select its OpenRouter chat preset.
 
 ## Using the workers from Codex
 
+For tested Nemotron commands, credential loading, a runnable task and failure
+diagnosis, see **[Use Nemotron](NEMOTRON.md)**.
+
 Ask Codex to inspect `ch4os-local-agents` capabilities before delegation. Its five
 operations are **capabilities**, **start_task**, **get_task**, **cancel_task**, and
 **record_feedback**. Codex supplies scope and budgets, checks evidence, and decides
