@@ -24,12 +24,12 @@ before starting the service. It does not change the coordinator's model.
 ## From a normal Windows PowerShell terminal
 
 Run this from the **Ch4oS-Orchestration repository root**. The current installation
-is service 0.1.6 in the sibling `.ch4os-tools` directory. Paths and credentials stay
+is service 0.1.7 in the sibling `.ch4os-tools` directory. Paths and credentials stay
 outside the repository.
 
 ```powershell
 $hostTools = Join-Path (Split-Path (Get-Location).Path -Parent) '.ch4os-tools'
-$workerCli = Join-Path $hostTools 'local-agents/0.1.6/node_modules/@ch4os/local-agents/dist/cli.js'
+$workerCli = Join-Path $hostTools 'local-agents/0.1.7/node_modules/@ch4os/local-agents/dist/cli.js'
 $hostConfig = Join-Path $hostTools 'state/host.json'
 $keyName = (Get-Content -LiteralPath $hostConfig -Raw | ConvertFrom-Json).openrouter.apiKeyEnv
 if (-not [Environment]::GetEnvironmentVariable($keyName, 'Process')) {

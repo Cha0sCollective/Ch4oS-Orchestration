@@ -1,5 +1,5 @@
 /** Transport-neutral contracts. No provider SDK or MCP types belong here. */
-export const SERVICE_VERSION = '0.1.6';
+export const SERVICE_VERSION = '0.1.7';
 export const PROMPT_VERSION = '5';
 export const TASK_CLASSES = ['exploration', 'research', 'summary', 'triage', 'transformation', 'draft', 'check-monitor'] as const;
 export type TaskClass = typeof TASK_CLASSES[number];
@@ -28,9 +28,15 @@ export interface OpenRouterModel {
   outputMode: 'json-schema' | 'tool-call'; temperature: number; contextTokens: number;
 }
 export type RegisteredModel = LocalModel | OpenRouterModel;
-/** Nemotron Ultra assignments require no qualification; provider and scope checks still apply. */
+/** Installed models are available at operator discretion; provider and scope checks still apply. */
 export function requiresQualification(model: RegisteredModel): boolean {
-  return !isNemotronUltra(model);
+  return !isDiscretionaryModel(model);
+}
+export function isDiscretionaryModel(model: Pick<RegisteredModel, 'provider' | 'model'>): boolean {
+  const models = model.provider === 'ollama'
+    ? ['qwen3.5:9b', 'qwen2.5-coder:14b', 'gemma4:12b', 'gpt-oss:20b']
+    : ['nvidia/nemotron-3-ultra-550b-a55b:free', 'nvidia/nemotron-3.5-lightning:free', 'google/gemma-4-31b-it:free'];
+  return models.includes(model.model);
 }
 export function isNemotronUltra(model: Pick<RegisteredModel, 'provider' | 'model'>): boolean {
   return model.provider === 'openrouter' && model.model === 'nvidia/nemotron-3-ultra-550b-a55b:free';

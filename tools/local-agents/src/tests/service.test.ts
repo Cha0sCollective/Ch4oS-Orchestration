@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { hostConfigSchema } from '../config.js';
@@ -830,4 +830,30 @@ test('other remote models still require qualification when trials are disabled',
         error => error instanceof WorkerError && error.code === (mode === 'work' ? 'profile_not_qualified' : 'qualification_disabled'));
     }
   } finally { await service.close(); }
+});
+
+
+test('installed local and remote alternatives accept work without qualification or context proofs', async () => {
+  for (const name of ['qwen3.5:9b', 'qwen2.5-coder:14b', 'gemma4:12b', 'gpt-oss:20b', 'nvidia/nemotron-3.5-lightning:free', 'google/gemma-4-31b-it:free']) {
+    const initial = await fixture(new ScriptedProvider(async () => '{}'));
+    await initial.service.close();
+    const remote = name.includes('/');
+    const model = remote ? await configureRemote(initial.config) : initial.config.models[0]!;
+    model.model = name;
+    if (model.provider === 'ollama') { delete model.contextProof; if (name.startsWith('gpt-oss')) model.think = 'medium'; }
+    delete initial.config.profiles[0]!.qualification;
+    initial.config.allowQualification = false;
+    const answer = async () => JSON.stringify({ action: 'finish', answer: { outcome: 'answered', summary: 'done', findings: [], limitations: [], proposals: [] } });
+    const service = await WorkerService.create(initial.config, remote ? new RemoteScriptedProvider(answer) : new ScriptedProvider(answer));
+    try {
+      const caps = await service.capabilities();
+      assert.equal(caps.profiles[0]?.qualificationRequired, false, name);
+      assert.deepEqual(caps.profiles[0]?.availableTaskClasses, ['exploration']);
+      const job = await waitForTerminal(service, (await service.startTask({ ...initial.request, remoteDataConsent: remote })).id);
+      assert.equal(job.state, 'completed', JSON.stringify(job.error));
+      const sessions = path.join(initial.config.dataDir, 'sessions');
+      const records = (await Promise.all((await readdir(sessions)).map(async dir => JSON.parse(await readFile(path.join(sessions, dir, 'jobs.json'), 'utf8').catch(error => { if (error.code === 'ENOENT') return '{"jobs":[]}'; throw error; })).jobs))).flat();
+      assert.equal(records.find((item: any) => item.job.id === job.id).expiresAt, null, name);
+    } finally { await service.close(); }
+  }
 });

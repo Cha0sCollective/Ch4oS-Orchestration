@@ -50,3 +50,13 @@ test('preserves boolean and named reasoning settings in Ollama requests', async 
   }
   await assert.rejects(new OllamaProvider('http://127.0.0.1', fake()).inspect({ ...model, model: 'gpt-oss:20b', think: false }), /requires a low/);
 });
+
+
+test('installed models need no stored context proof but retain local identity checks', async () => {
+ for (const name of ['qwen3.5:9b','qwen2.5-coder:14b','gemma4:12b','gpt-oss:20b']) {
+  const selected: LocalModel = { ...model, model: name, think: name.startsWith('gpt-oss') ? 'medium' : false };
+  const tags = { models: [{ name, digest: model.digest, size: 123 }] };
+  assert.equal((await new OllamaProvider('http://127.0.0.1',fake({'/api/tags':tags})).verify(selected,DEFAULT_LIMITS,AbortSignal.timeout(1000))).available,true);
+  assert.equal((await new OllamaProvider('http://127.0.0.1',fake({'/api/tags':tags,'/api/status':{cloud:{disabled:false}}})).verify(selected,DEFAULT_LIMITS,AbortSignal.timeout(1000))).available,false);
+ }
+});

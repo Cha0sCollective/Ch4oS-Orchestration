@@ -1,4 +1,4 @@
-import { WorkerError, type ContextProof, type GenerateRequest, type Limits, type LocalModel, type RegisteredModel, type ModelProvider, type ProviderHealth } from './types.js';
+import { WorkerError, requiresQualification, type ContextProof, type GenerateRequest, type Limits, type LocalModel, type RegisteredModel, type ModelProvider, type ProviderHealth } from './types.js';
 
 type Json = Record<string, any>;
 export class OllamaProvider implements ModelProvider {
@@ -66,6 +66,7 @@ export class OllamaProvider implements ModelProvider {
     if (model.provider !== 'ollama') return { available: false, reason: 'Ollama only accepts local model registrations' };
     try {
       const installed = await this.inspect(model, signal);
+      if (!requiresQualification(model)) return { available: true, version: installed.version };
       const proof = model.contextProof;
       if (!proof || proof.ollamaVersion !== installed.version || proof.digest.replace(/^sha256:/, '') !== installed.digest.replace(/^sha256:/, '') ||
           proof.contextTokens !== limits.contextTokens || proof.outputTokens !== limits.outputTokens ||

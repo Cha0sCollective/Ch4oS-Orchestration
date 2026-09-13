@@ -1,5 +1,13 @@
 # Local workers
 
+Current installed-model policy (service 0.1.7): Qwen3.5 9B, Qwen2.5-Coder 14B,
+Gemma4 12B, GPT-OSS 20B, Nemotron Ultra/Lightning free and Gemma4 31B free require
+no qualification and their job results have no age-based expiry. Stored local
+context-probe records are not required. This supersedes older qualification/expiry
+requirements below for these models. Provider identity, free-only routing, scope,
+request limits and result validation remain. See docs/INSTALLED_CAPABILITIES.md
+in the orchestration repository for profile names and usage.
+
 Codex owns orchestration, integration, verification and final decisions. This
 Node 24 package adds bounded local research through a transport-independent
 `WorkerService`, with MCP stdio and newline JSON CLI adapters. Local-only is the

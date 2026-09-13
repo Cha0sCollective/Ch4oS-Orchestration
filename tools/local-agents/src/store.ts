@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { mkdir, open, readFile, rename, stat, unlink, writeFile, appendFile } from 'node:fs/promises';
 import path from 'node:path';
-import { isNemotronUltra } from './types.js';
+import { isDiscretionaryModel } from './types.js';
 import type { FailureDetails, Feedback, Job, ModelRouting, RegisteredModel, TaskClass } from './types.js';
 
 const DAY_MS = 24 * 60 * 60 * 1_000;
@@ -340,7 +340,7 @@ export class JobStore {
   }
 
   #expiry(metadata?: JobMetadata): string | null {
-    return metadata && isNemotronUltra({ provider: metadata.modelProvider, model: metadata.routing.model ?? '' })
+    return metadata && isDiscretionaryModel({ provider: metadata.modelProvider, model: metadata.routing.model ?? '' })
       ? null : new Date(this.#now().getTime() + this.#ttlMs).toISOString();
   }
 
@@ -348,7 +348,7 @@ export class JobStore {
     const nowMs = this.#now().getTime();
     let changed = false;
     for (const [id, record] of this.#records) {
-      // Upgrade surviving older Nemotron records before checking their previous TTL.
+      // Upgrade surviving older discretionary-model records before checking their previous TTL.
       if (this.#expiry(record.metadata) === null) {
         if (record.expiresAt !== null) { record.expiresAt = null; changed = true; }
         continue;

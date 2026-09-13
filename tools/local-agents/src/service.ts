@@ -1058,7 +1058,7 @@ export class WorkerService {
     this.#assertRouteAuthorization(request, model);
     const fingerprint = await qualificationFingerprint(this.config, profile, model, this.#runtimeDigest || undefined, limits);
     if (!requiresQualification(model)) {
-      // Nemotron admission is independent of qualification state and task mode.
+      // Discretionary-model admission is independent of qualification state and task mode.
     } else if (request.mode === 'qualification') {
       if (!this.config.allowQualification) throw new WorkerError('qualification_disabled', 'This host does not allow qualification runs.');
     } else {
@@ -1114,6 +1114,7 @@ export class WorkerService {
       }
       return;
     }
+    if (!requiresQualification(model)) return;
     const proof = model.contextProof;
     if (!proof || proof.digest !== model.digest || proof.contextTokens < limits.contextTokens || proof.outputTokens < limits.outputTokens
       || !proof.singleOverflowRejected || !proof.historyOverflowRejected) {
