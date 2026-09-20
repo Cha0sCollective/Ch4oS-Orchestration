@@ -19,3 +19,8 @@ Work is on codex/local-agent-service; check actual Git state before continuing.
 Create-Ch4oS and Installer adoption changes remain prepared, not merged. No
 merge, publication or live-operation authority is granted here. Ultra delegation
 requires explicit owner approval. No new assignment follows this packet automatically.
+
+The host relocation is complete: the repository, tools, model weights and Cherry/
+Ollama user data share the new tools drive. Legacy directories are compatibility
+junctions. MCP launch paths, model storage and Git worktree links were updated.
+No further migration or model trial is pending.

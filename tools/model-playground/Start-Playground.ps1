@@ -8,6 +8,11 @@ $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'Assert-InstallPath.ps1')
 
 $root = [System.IO.Path]::GetFullPath($InstallRoot)
+# Resolve the explicitly selected root when a relocation left a compatibility junction.
+$rootEntry = Get-Item -LiteralPath $root -Force -ErrorAction SilentlyContinue
+if ($rootEntry -and $rootEntry.LinkType -eq 'Junction') {
+    $root = [System.IO.Path]::GetFullPath(@($rootEntry.Target)[0])
+}
 Assert-InstallPath $root
 if (-not (Test-Path -LiteralPath $root -PathType Container)) {
     throw 'InstallRoot does not exist. Run the pinned installer first.'
