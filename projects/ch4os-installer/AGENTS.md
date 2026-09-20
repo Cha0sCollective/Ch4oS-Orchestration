@@ -1,9 +1,6 @@
 # Ch4oS Installer agent guidance
 
-Read README.md, docs/ARCHITECTURE.md, docs/PACKAGE-CONTRACT.md,
-docs/CONTRIBUTING.md and docs/STATUS.md before implementation. For server changes
-also read install/SERVER.md. Reuse the revision-specific evidence; do not restart
-the AOCA reconstruction or broad pack gameplay testing.
+Start with this file and `docs/CURRENT_WORK.md` if it exists and you are continuing work. Verify repository, branch, revision, dirty files and linked work state. Read README.md, docs/ARCHITECTURE.md, docs/PACKAGE-CONTRACT.md, docs/CONTRIBUTING.md and docs/STATUS.md as relevant to the task; consult install/SERVER.md for server changes. Reuse revision-specific evidence; do not restart the AOCA reconstruction or broad pack gameplay testing.
 
 ## Ownership
 
@@ -25,48 +22,13 @@ and production operations need separate authorization.
 
 ## Shared development process
 
-The user-facing Desktop production coordinator receives owner input and owns scope,
-integration, appropriate checks, affected documentation and the final handoff. It
-may assign implementation to bounded production workers and need not make every
-change itself. Use the named `repo-explorer` for
-bounded fact gathering and a fresh `independent-reviewer` for consequential
-completed candidates. The normal starting points are Astra/medium for coordination,
-Sol at suitable effort for implementation, Terra/medium for exploration and Sol/high
-for review; route by task suitability and escalate when uncertainty warrants it.
-Verify a production worker's actual model, effort and scoped write access; it is a
-task-scoped assignment, not a saved named profile. Delegate other useful separable work by task needs. Shared agents are
-available across projects; these starting roles are not an allowlist or a required
-standing team. The shared experiment specialist remains a design reference until
-an executable profile is available.
+The coordinator uses the user-selected **Astra Low or Sol High** and can implement directly. It owns scope, integration, appropriate checks, affected documentation and delivery. Delegate only a bounded task that materially benefits from a separate agent; supply only relevant context, permissions, expected output and acceptance criteria. No mandatory explorer or worker chain. Set delegated model and effort deliberately; Ultra requires explicit owner approval.
 
-When Desktop cannot select saved native role names, coordinate retained CLI
-parents using the [shared workflow](https://github.com/Cha0sCollective/Ch4oS-Orchestration/blob/main/docs/RETAINED_CLI_WORKFLOW.md).
-Verify profile discovery, selected model/effort and effective permissions on the
-host. Native name selection is required to claim profile activation; pasted
-instructions do not establish it. Ephemeral sessions are outside the selected
-workflow. Receive results, address bounded follow-ups to the returned child
-identity and confirm completion or interruption before delivery.
+Require one fresh, read-only independent **Sol High** review for substantive behavior changes, security-sensitive changes and changes to operating rules. Routine documentation and mechanical edits need focused coordinator checks. Give review the base, exact candidate (or base plus stable working diff), scope and relevant evidence. Production does not independently review its own work. Add specialists only for an identified risk. Review fixes as deltas and affected behavior, reusing valid unchanged coverage without claiming a new execution.
 
-Start independent review under a read-only parent with fresh context, exact base
-and candidate revisions, bounded scope and durable evidence. Do not edit reviewed
-source. Run validation requiring writes in a separate new disposable workspace
-under scoped workspace-write permissions; supply the exact installer and pack
-revisions, commands, results and limitations to review. A role's read-only TOML
-default does not prove its effective permissions. Diagnose runtime, cache and
-sandbox failures separately rather than expanding reviewer access.
+Verify actual permissions; a profile alone does not prove enforcement. Run validation needing writes separately in a disposable workspace. Review does not authorize merge, publication or unperformed live acceptance. Custom local and OpenRouter workers are outside normal routing; use them only when explicitly requested. Installed manual tools remain available.
 
-Review follow-ups as deltas and inspect affected behavior. Reuse valid unchanged
-coverage without calling it a new execution; an ancestor's success does not prove
-the candidate was tested. Distinguish missing validation from a source defect.
-Routine low-impact edits need no separate review lane. Review does not authorize
-owner-only actions or establish unperformed live acceptance. When review is needed,
-use a fresh separate reviewer; a production worker does not review or accept its own
-changes.
-
-Reusable orchestration policy comes from Ch4oS-Orchestration. Effective local
-files are adopted through reviewed manual copying with the source revision
-recorded. Do not depend on sibling checkout paths or silently reverse-sync local
-configuration changes.
+Shared instructions come from Ch4oS-Orchestration through authorized manual updates. Preserve project-specific requirements; do not depend on a sibling checkout. Read other sources only when the task needs them.
 
 ## Implementation and evidence
 
@@ -92,18 +54,3 @@ describe the current system. Keep task instructions and approval boundaries here
 implementation discussion in PRs, and dated validation in docs/STATUS.md. Preserve
 useful evidence and known limits without repeating agent handoffs or conversation
 history in README and usage guides.
-
-## Fresh coordinator sessions and local workers
-
-Read `docs/ORCHESTRATOR.md` and `docs/CURRENT_WORK.md` at startup, then verify
-actual Git and linked work state. Refresh the short current-work pointer at
-packet boundaries and before ending a session. Keep detailed evidence in its
-authoritative records. Use the installed `ch4os-local-agents` MCP connector only
-for task classes listed in `availableTaskClasses`, and inspect
-`qualificationRequired` for the profile. Give bounded paths and
-budgets, verify every answer and integrate proposals yourself. Local workers do
-not replace the coordinator or independent review. The exact NVIDIA Nemotron 3
-Ultra free route requires no qualification; use ordinary `work` mode. OpenRouter
-still requires current endpoint terms suitable for the assignment, an approved
-free endpoint, host data permission and per-task consent. Qualification status
-does not authorize private data transmission. Existing project authority still applies.

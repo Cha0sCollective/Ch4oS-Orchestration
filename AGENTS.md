@@ -1,9 +1,6 @@
 # Instructions for Codex
 
-For a fresh coordinator session, also read `docs/ORCHESTRATOR.md` and
-`docs/CURRENT_WORK.md`, verify actual repository/work state, and continue only
-the next authorized bounded packet. Refresh the short current-work pointer at
-packet boundaries and before ending the session.
+Start with this file and `docs/CURRENT_WORK.md` when continuing existing work. Verify the actual repository, branch, revision and dirty files before acting. Read other documents only when relevant to the task. Keep the current-work pointer short and replace obsolete content at handoff.
 
 You are working on the system that shapes how other Cha0sCollective agents work. Treat changes here with the same care you would give production code, but don't turn the repo into a rulebook for its own sake.
 
@@ -59,7 +56,7 @@ See `standards/EXPERIMENTAL_ASSURANCE.md`.
 
 ## Stay inside this repo's job
 
-This repo owns orchestration policy, reusable agent designs, project overlays, validation, and config-distribution tooling.
+This repo holds our working principles, concise agent guidance and canonical project instructions. Tool development, evaluations and routine run artifacts belong outside this workspace.
 
 Do not modify target repositories from here unless the owner explicitly asks for a deployment or synchronization action. A design in this repo is not automatically deployed anywhere.
 
@@ -99,7 +96,7 @@ When changing reusable agent behavior, explain what problem the change solves, w
 
 Use reviewed manual copying for initial adoption. Automatic distribution and drift tooling are deferred until repeated work justifies them.
 
-The production parent owns affected documentation. Start with an explorer and fresh independent reviewer; delegate other useful separable work as bounded assignments, without requiring a standing role fleet.
+The coordinator can implement directly, using the user-selected Astra Low or Sol High. Delegate only bounded work that materially benefits from a separate agent, with only the context it needs. No mandatory explorer or worker chain. Require one fresh, read-only Sol High review for substantive behavior changes, security-sensitive changes or changes to operating rules; routine documentation and mechanical edits need focused coordinator checks. Review follow-ups cover the delta and its effects. Add specialists only for an identified risk. Ultra requires explicit owner approval. Do not route ordinary work through custom local or OpenRouter workers; they remain available for manual use when requested.
 
 Archive retired work with plausible future organizational value under `standards/TOOL_RETIREMENT.md`.
 
@@ -119,4 +116,4 @@ The owner keeps authority over:
 - publishing new categories of internal material to a public repo;
 - committing a project to a materially heavier experimental/verification architecture, portable experiment format, or long-lived infrastructure layer when that changes the project's maintenance/resources significantly.
 
-Read `standards/OPERATING_MODEL.md`, `standards/MODEL_ROUTING.md`, `standards/REVIEW_PROTOCOL.md`, `standards/CONTEXT_AND_DOCUMENTATION.md`, `standards/EXPERIMENTAL_ASSURANCE.md`, and `standards/PUBLICATION_BOUNDARY.md` before making structural changes.
+Consult the relevant standard when a task touches its subject; do not load every standard at startup. Model and review details are in `standards/MODEL_ROUTING.md` and `standards/REVIEW_PROTOCOL.md`.

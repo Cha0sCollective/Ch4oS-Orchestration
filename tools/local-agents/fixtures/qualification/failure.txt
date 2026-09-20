@@ -1,5 +1,0 @@
-RUN fixture-tests at candidate fixture-B
-PASS empty list totals zero
-FAIL enabled string value: expected false, received true
-Test process exit code: 1
-The previous fixture-A run passed. It does not establish fixture-B success.

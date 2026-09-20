@@ -2,7 +2,4 @@
 
 No active packet.
 
-When a packet is authorized, replace this with its durable reference, scope,
-issue/PR, branch/base/candidate, evidence, unresolved findings, recorded
-authorization, remaining owner gates and next bounded action. Verify live state
-before relying on the pointer. Do not copy a transcript here.
+When work is active, replace this with a short pointer to the assignment, branch/base/candidate or issue/PR, unresolved findings, recorded authorization and next bounded action. Verify these against actual repository state. Keep detailed history elsewhere and remove obsolete instructions.

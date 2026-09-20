@@ -1,17 +1,18 @@
 # Working on Contraption Lab
 
-Contraption Lab is a Minecraft test and validation tool. Follow the unified implementation order and exit criteria in `docs/ROADMAP.md`. Keep `docs/status/CURRENT_WORK.md` concise and truthful as work changes.
+Contraption Lab is a Minecraft test and validation tool. Start with this file and `docs/status/CURRENT_WORK.md` when continuing work; verify repository, branch, revision, dirty files and linked work state. Consult `docs/ROADMAP.md` for the active package and its exit criteria, rather than reading the whole roadmap at startup. Keep the current-work pointer concise and truthful as work changes.
 
 ## Development
 
-The user-facing Desktop production coordinator receives owner input and owns scope, integration, suitable tests, affected documentation and delivery. It may assign implementation to bounded production workers and need not make every change itself. Work in bounded changes on `codex/` branches. Preserve unrelated work. Continue through authorized roadmap packages once their dependencies and exit criteria are met; seek input only for a new decision or a real blocker outside that authorization.
+Work in bounded changes on `codex/` branches. Preserve unrelated work. Continue through authorized roadmap packages once dependencies and exit criteria are met; seek input only for a new decision or a real blocker outside that authorization.
 
-Use the reusable `repo-explorer` for useful independent fact gathering and a fresh `independent-reviewer` for consequential completed candidates. The coordinator normally uses Astra/medium, a production worker uses Sol or another model suited to the task, the explorer uses Terra/medium and the reviewer uses Sol/high; escalate difficult reasoning. Verify each production worker's actual host model, effort and scoped write access without claiming it is a saved named profile. Ordinary edits need no standing agent team or documentation approval lane. Consult an experiment specialist when methodology warrants it.
+The coordinator uses the user-selected **Astra Low or Sol High** and can implement directly. It owns scope, integration, appropriate checks, affected documentation and delivery. Delegate only a bounded task that materially benefits from a separate agent; supply only relevant context, permissions, expected output and acceptance criteria. No mandatory explorer or worker chain. Set delegated model and effort deliberately; Ultra requires explicit owner approval.
 
-Use retained CLI sessions coordinated from Desktop when its direct delegation interface cannot select saved native roles. Verify project profile discovery, selected model/effort and effective permissions on the host. If native selection is unavailable, report the compatibility limitation; a pasted role prompt does not count as profile activation. Ephemeral sessions are outside the selected workflow. Shared agents remain available according to task needs.
+Require one fresh, read-only independent **Sol High** review for substantive behavior changes, security-sensitive changes and changes to operating rules. Routine documentation and mechanical edits need focused coordinator checks. Give review the base, exact candidate (or base plus stable working diff), scope and relevant evidence. Production does not independently review its own work. Add specialists only for an identified risk. Review fixes as deltas and affected behavior, reusing valid unchanged coverage without claiming a new execution.
 
-Initial independent review uses a read-only parent, fresh context and a named candidate. Do not edit reviewed source. Run checks requiring writes in a separate disposable workspace under scoped workspace-write permissions and supply their exact revision, command and results to review. Diagnose build and cache permission failures separately; do not expand reviewer access. Review follow-ups as deltas, expanding only for affected behavior or changed assumptions. Reuse valid checks for unchanged behavior without claiming a new execution. Routine low-impact edits need no separate review lane. Report actual permission limitations.
-When review is needed, keep it separate from implementation; a production worker does not review or accept its own changes.
+Verify actual permissions; a profile alone does not prove enforcement. Run validation needing writes separately in a disposable workspace. Review does not authorize merge, publication or unperformed live acceptance. Custom local and OpenRouter workers are outside normal routing; use them only when explicitly requested. Installed manual tools remain available.
+
+Shared instructions come from Ch4oS-Orchestration through authorized manual updates. Preserve project-specific requirements; do not depend on a sibling checkout. Read other sources only when the task needs them.
 
 ## Tests and evidence
 

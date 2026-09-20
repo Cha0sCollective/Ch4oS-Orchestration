@@ -55,7 +55,7 @@ queued
   -> experimental workstream when needed
   -> exact candidate revision
   -> production handoff
-  -> ready for independent review
+  -> independent review when required, otherwise focused coordinator checks
 ```
 
 If the packet hits something only the owner can do, stop at the owner gate instead of expanding into unrelated work.

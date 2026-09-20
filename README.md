@@ -2,9 +2,6 @@
 
 This repo is where Cha0sCollective designs and maintains the Codex setup we use across projects.
 
-For installed models, applications, access instructions and current availability,
-see the [installed capabilities quick guide](docs/INSTALLED_CAPABILITIES.md).
-
 The goal is not to build a giant policy system. It is to give our agents the same kind of clear working environment we would want for a strong developer joining the team: enough context to do good work, clear boundaries where mistakes are expensive, and a clean way to hand work off without depending on a giant chat history.
 
 ## How we want this to feel
@@ -31,63 +28,30 @@ That does not mean being casual about correctness. Exact revisions, evidence bou
 - **Context is not content.** Something said in a chat to help an agent understand the work does not automatically belong in the repo.
 - **Git is project memory. Chats are working memory.** Durable decisions, accepted architecture, code, tests, issues, PRs, and evidence survive. Conversation history does not need to.
 - **Private continuity and public presentation are different concerns.** A private development repo may preserve useful internal project memory; a public repo is a deliberate publication surface, not a reason to sanitize the workspace continuously.
-- **Production and review are separate lanes.** A write-capable production session does not approve its own candidate. Review starts fresh at an exact revision.
+- **Production and review are separate lanes.** Consequential changes get one fresh independent review; routine edits get focused coordinator checks.
 - **Build the feature and build the proof as different engineering problems.** Product code, game QA, and scientific experiment design may collaborate, but they do not silently collapse into one responsibility.
 - **Be rigorous about the experiment, practical about the game.** Numerical/experimental claims may need controlled scientific methodology. Screenshots and video do not become forensic evidence unless the actual claim requires that level of proof.
 - **Design seams before systems.** Leave room for an experiment specialist to become a team and for experiments to become portable artifacts later, but do not build that machinery before real work earns it.
 - **Work in bounded packets.** A roadmap can be huge. A production assignment should not be.
-- **A review belongs to one exact revision.** Change the candidate and the old review becomes history.
+- **A review belongs to one exact revision.** Review subsequent changes as deltas and reuse valid unchanged coverage.
 - **Subagents are specialists, not personalities.** Give them a narrow job, the tools they need, and a clear way to escalate when the task outgrows them.
 - **Model routing is quality-first.** Use cheaper models when they are good enough, not because cheaper is automatically better.
 - **Call out expensive decisions.** If a change materially alters the development path, maintenance cost, validation burden, compatibility surface, operating burden, or implementation resources, say so before we quietly build around it.
 - **Human authority stays explicit.** Some decisions still belong to the project owner.
 - **Canonical config lives here; effective config lives with the project that uses it.** Distribution is deliberate, not magical.
 
-## Repository layout
+## Where things belong
 
-```text
-AGENTS.md                         how Codex should work in this repo
-standards/
-  OPERATING_MODEL.md              production, review, handoffs, owner gates
-  MODEL_ROUTING.md                how we choose models and reasoning effort
-  WORK_PACKET_PROTOCOL.md         how production work stays bounded
-  REVIEW_PROTOCOL.md              how independent review works
-  CONTEXT_AND_DOCUMENTATION.md    what belongs in project memory and what does not
-  EXPERIMENTAL_ASSURANCE.md       scientific experiment rigor without over-proving the game
-  PUBLICATION_BOUNDARY.md         private development vs public publication repos
-  CONFIG_DISTRIBUTION.md          reviewed manual distribution to target projects
-  TOOL_RETIREMENT.md              curate retired work with future organizational value
-agents/
-  README.md                       reusable agent catalog conventions
-  documentation-steward.md        dedicated documentation role design
-  experiment-specialist.md        expandable experimental-assurance role design
-  publication-steward.md          private-to-public publication role design
-projects/
-  README.md                       project overlay conventions
-  contraption-lab/
-    README.md                     Contraption Lab adoption and repository topology
-    AGENTS.md                     canonical project instructions for copying
-docs/
-  ROADMAP.md                      rollout plan
-```
+- [AGENTS.md](AGENTS.md): startup and working instructions for this repository.
+- [standards/](standards/): working principles; consult only the standard relevant to the task.
+- [projects/](projects/README.md): canonical instructions for Create-Ch4oS, Ch4oS-Installer and Contraption Lab.
+- [agents/](agents/README.md): optional shared profiles and specialist designs.
+- [docs/CURRENT_WORK.md](docs/CURRENT_WORK.md): short pointer for unfinished work.
 
-## Current phase
+Tool source, evaluations and raw run artifacts are maintained outside this workspace. Installed tools are not part of the normal agent workflow.
 
-The initial architecture is approved and adoption is underway. The first roster is a production parent, a repository explorer and a fresh independent reviewer. The parent owns documentation. Experiment methodology receives specialist help when needed; other roles remain optional designs.
+## Starting a session
 
-Follow `docs/ROADMAP.md` for the adoption sequence. Contraption Lab's unified roadmap owns the complete application work, including modernization, organization migration and the laboratory features. Retired work with plausible future organizational value is copied to Bits-of-Ch4oS before active removal; ordinary one-off material stays in Git history.
+> Read AGENTS.md and the current-work pointer if continuing existing work. Verify the repository and work state, then carry out the next authorized action. Read other sources only as needed.
 
-Nothing in this repo is considered deployed to another project until that project gets an explicit config change.
-
-## Local workflow
-
-For a fresh coordinator session, start with [docs/ORCHESTRATOR.md](docs/ORCHESTRATOR.md)
-and [docs/CURRENT_WORK.md](docs/CURRENT_WORK.md). The [worker package](tools/local-agents/README.md)
-provides the shared core, MCP/CLI adapters and operator setup. The
-[model directory](agents/orchestrators/routing/README.md) separates published
-capabilities from demonstrated qualification; [rollout evidence](docs/LOCAL_AGENTS_TRIAL.md)
-records actual results and remaining limits.
-
-The expected working environment is Codex Desktop on Windows with local Git checkouts and worktrees where they make sense. This repo should eventually manage its own agent catalog and project overlays using the same orchestration system it defines.
-
-Start with `standards/OPERATING_MODEL.md`, `standards/CONTEXT_AND_DOCUMENTATION.md`, `standards/EXPERIMENTAL_ASSURANCE.md`, and `standards/PUBLICATION_BOUNDARY.md`.
+Use the user-selected Astra Low or Sol High coordinator. Delegate only when useful; no mandatory agent chain. Effective project instruction changes require deliberate deployment, and merge/publication authority remains with the owner.
